@@ -10,7 +10,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BinMaster C-100 Guide</title>
+    <title>BinMaster C-100 Guide (readable build)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
@@ -170,6 +170,10 @@
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
+            text-align: center;
+            line-height: 1.35;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .device-btn:hover {
@@ -193,8 +197,8 @@
             width: 100%;
         }
 
-        /* Portrait mobile: stacked layout in CSS. Landscape mobile: zoom via fitC100ConsoleScale(). */
-        .c100-console-viewport {
+        /* Portrait mobile: stacked layout in CSS. Landscape mobile: zoom via fitConsoleScale(). */
+        .emulator-console-viewport {
             width: 100%;
             max-width: 480px;
             margin-left: auto;
@@ -204,7 +208,7 @@
             /* Do NOT use line-height: 0 here — it inherits into .brand and collapses .smartbob / .model text */
             line-height: normal;
         }
-        .c100-console-scaled {
+        .emulator-console-scaled {
             display: block;
             line-height: normal;
         }
@@ -485,23 +489,23 @@
         }
 
         /* C100-R only: hide SmartBob line; “Model C-100” sits in that slot (typography matched below per breakpoint) */
-        body.c100-r-device .screen-and-brand .smartbob {
+        body.device-variant-radar .screen-and-brand .smartbob {
             display: none !important;
         }
 
         /* --- Tutorial complete: BinDisc-style celebration (rings + sparkles + bouncy device) --- */
-        @keyframes c100-tc-badge-pop {
+        @keyframes tc-badge-pop {
             0% { opacity: 0; transform: scale(0.4); }
             55% { opacity: 1; transform: scale(1.12); }
             75% { transform: scale(0.96); }
             100% { opacity: 1; transform: scale(1); }
         }
-        @keyframes c100-tc-check-in {
+        @keyframes tc-check-in {
             0% { opacity: 0; transform: scale(0.35) rotate(-18deg); }
             70% { opacity: 1; transform: scale(1.15) rotate(4deg); }
             100% { opacity: 1; transform: scale(1) rotate(0deg); }
         }
-        @keyframes c100-tc-pulse-ring {
+        @keyframes tc-pulse-ring {
             0% {
                 transform: scale(0.55);
                 opacity: 0.85;
@@ -511,11 +515,11 @@
                 opacity: 0;
             }
         }
-        @keyframes c100-tc-headline-in {
+        @keyframes tc-headline-in {
             0% { opacity: 0; transform: translateY(18px) scale(0.96); }
             100% { opacity: 1; transform: translateY(0) scale(1); }
         }
-        @keyframes c100-tc-preview-fade {
+        @keyframes tc-preview-fade {
             0% {
                 opacity: 0;
             }
@@ -523,7 +527,7 @@
                 opacity: 1;
             }
         }
-        @keyframes c100-tc-device-bindisc {
+        @keyframes tc-device-bindisc {
             0% {
                 opacity: 0;
                 transform: translateY(36px) scale(0.82);
@@ -545,7 +549,7 @@
                 filter: blur(0);
             }
         }
-        @keyframes c100-tc-sparkle {
+        @keyframes tc-sparkle {
             0% {
                 opacity: 0;
                 transform: scale(0) rotate(0deg);
@@ -559,7 +563,7 @@
                 transform: scale(0.4) rotate(260deg);
             }
         }
-        @keyframes c100-tc-slide-up {
+        @keyframes tc-slide-up {
             from {
                 transform: translateY(22px);
                 opacity: 0;
@@ -569,7 +573,7 @@
                 opacity: 1;
             }
         }
-        @keyframes c100-tc-btn-glow {
+        @keyframes tc-btn-glow {
             0%,
             100% {
                 box-shadow:
@@ -586,7 +590,7 @@
         }
 
         /* Wider viewports: stronger motion + longer reads (mobile keeps tighter timings above) */
-        @keyframes c100-tc-badge-pop-lg {
+        @keyframes tc-badge-pop-lg {
             0% {
                 opacity: 0;
                 transform: scale(0.28);
@@ -603,7 +607,7 @@
                 transform: scale(1);
             }
         }
-        @keyframes c100-tc-check-in-lg {
+        @keyframes tc-check-in-lg {
             0% {
                 opacity: 0;
                 transform: scale(0.28) rotate(-22deg);
@@ -617,7 +621,7 @@
                 transform: scale(1) rotate(0deg);
             }
         }
-        @keyframes c100-tc-pulse-ring-lg {
+        @keyframes tc-pulse-ring-lg {
             0% {
                 transform: scale(0.5);
                 opacity: 0.88;
@@ -627,7 +631,7 @@
                 opacity: 0;
             }
         }
-        @keyframes c100-tc-headline-in-lg {
+        @keyframes tc-headline-in-lg {
             0% {
                 opacity: 0;
                 transform: translateY(32px) scale(0.9);
@@ -637,7 +641,7 @@
                 transform: translateY(0) scale(1);
             }
         }
-        @keyframes c100-tc-preview-fade-lg {
+        @keyframes tc-preview-fade-lg {
             0% {
                 opacity: 0;
                 transform: translateY(10px);
@@ -647,7 +651,7 @@
                 transform: translateY(0);
             }
         }
-        @keyframes c100-tc-device-bindisc-lg {
+        @keyframes tc-device-bindisc-lg {
             0% {
                 opacity: 0;
                 transform: translateY(64px) scale(0.66);
@@ -669,7 +673,7 @@
                 filter: blur(0);
             }
         }
-        @keyframes c100-tc-sparkle-lg {
+        @keyframes tc-sparkle-lg {
             0% {
                 opacity: 0;
                 transform: scale(0) rotate(0deg);
@@ -683,7 +687,7 @@
                 transform: scale(0.45) rotate(260deg);
             }
         }
-        @keyframes c100-tc-slide-up-lg {
+        @keyframes tc-slide-up-lg {
             from {
                 transform: translateY(36px);
                 opacity: 0;
@@ -698,7 +702,7 @@
          * Important: do NOT fade the overlay with opacity — it multiplies with child animations
          * and makes the entrance look like an instant “jump.” Visibility = display only.
          */
-        .c100-tutorial-complete {
+        .tutorial-complete {
             position: fixed;
             inset: 0;
             z-index: 10050;
@@ -724,13 +728,13 @@
             box-sizing: border-box;
             scrollbar-gutter: stable;
         }
-        .c100-tutorial-complete.c100-tutorial-complete--visible {
+        .tutorial-complete.tutorial-complete--visible {
             display: flex;
             align-items: center;
             justify-content: center;
             pointer-events: auto;
         }
-        .c100-tutorial-complete__inner {
+        .tutorial-complete__inner {
             position: relative;
             z-index: 1;
             text-align: center;
@@ -745,7 +749,7 @@
             margin-inline: auto;
             min-width: 0;
         }
-        .c100-tutorial-complete__success-mark {
+        .tutorial-complete__success-mark {
             display: flex;
             justify-content: center;
             align-items: center;
@@ -754,7 +758,7 @@
             min-height: 76px;
             width: 100%;
         }
-        .c100-tutorial-complete__pulse-rings {
+        .tutorial-complete__pulse-rings {
             position: absolute;
             left: 50%;
             top: 50%;
@@ -764,7 +768,7 @@
             pointer-events: none;
             z-index: 0;
         }
-        .c100-tutorial-complete__pulse-ring {
+        .tutorial-complete__pulse-ring {
             position: absolute;
             inset: 0;
             border-radius: 50%;
@@ -773,7 +777,7 @@
             opacity: 0;
             will-change: transform, opacity;
         }
-        .c100-tutorial-complete__check-badge {
+        .tutorial-complete__check-badge {
             width: 76px;
             height: 76px;
             border-radius: 50%;
@@ -790,7 +794,7 @@
             position: relative;
             z-index: 1;
         }
-        .c100-tutorial-complete__check-svg {
+        .tutorial-complete__check-svg {
             width: 40px;
             height: 40px;
             flex-shrink: 0;
@@ -799,10 +803,10 @@
             opacity: 0;
             transform-origin: center center;
         }
-        .c100-tutorial-complete__check-path {
+        .tutorial-complete__check-path {
             fill: currentColor;
         }
-        .c100-tutorial-complete__title {
+        .tutorial-complete__title {
             font-family: "Outfit", "DM Sans", system-ui, sans-serif;
             font-size: clamp(26px, 5vw, 36px);
             font-weight: 700;
@@ -814,7 +818,7 @@
             width: 100%;
             text-align: center;
         }
-        .c100-tutorial-complete__subcopy {
+        .tutorial-complete__subcopy {
             font-size: clamp(15px, 3.2vw, 17px);
             font-weight: 500;
             color: rgba(226, 232, 240, 0.88);
@@ -824,18 +828,18 @@
             width: 100%;
             text-align: center;
         }
-        .c100-tutorial-complete__subcopy-line {
+        .tutorial-complete__subcopy-line {
             margin: 0 0 8px;
         }
-        .c100-tutorial-complete__subcopy-line:last-child {
+        .tutorial-complete__subcopy-line:last-child {
             margin-bottom: 0;
         }
         /*
          * Completion overlay: same markup + classes as #console-root so global C-100 CSS applies 1:1.
-         * Does not change #console-root. Uses .c100-tutorial-complete__mini-viewport (not .c100-console-viewport)
-         * so body:has(.c100-console-viewport:not(.hidden)) is unaffected when the overlay is open.
+         * Does not change #console-root. Uses .tutorial-complete__mini-viewport (not .emulator-console-viewport)
+         * so body:has(.emulator-console-viewport:not(.hidden)) is unaffected when the overlay is open.
          */
-        .c100-tutorial-complete__console-preview {
+        .tutorial-complete__console-preview {
             opacity: 0;
             margin: 0 auto clamp(22px, 4vh, 32px);
             width: 100%;
@@ -847,7 +851,7 @@
         }
         /* Desktop: center the scaled C-100 mockup horizontally */
         @media (min-width: 541px) {
-            .c100-tutorial-complete__console-preview {
+            .tutorial-complete__console-preview {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
@@ -855,17 +859,17 @@
                 max-width: 100%;
                 flex-shrink: 0;
             }
-            .c100-tutorial-complete__mini-scale-wrap {
+            .tutorial-complete__mini-scale-wrap {
                 flex-shrink: 0;
-                --c100-mini-scale: 0.44;
+                --mini-console-scale: 0.44;
             }
-            .c100-tutorial-complete__mini-viewport {
+            .tutorial-complete__mini-viewport {
                 display: flex;
                 justify-content: center;
                 width: 100%;
             }
         }
-        .c100-tutorial-complete__sparkles {
+        .tutorial-complete__sparkles {
             position: absolute;
             left: 50%;
             top: 42%;
@@ -874,7 +878,7 @@
             pointer-events: none;
             z-index: 2;
         }
-        .c100-tutorial-complete__sparkles span {
+        .tutorial-complete__sparkles span {
             position: absolute;
             width: 7px;
             height: 7px;
@@ -885,27 +889,27 @@
             opacity: 0;
             will-change: transform, opacity;
         }
-        .c100-tutorial-complete__sparkles span:nth-child(1) {
+        .tutorial-complete__sparkles span:nth-child(1) {
             left: -62px;
             top: -18px;
         }
-        .c100-tutorial-complete__sparkles span:nth-child(2) {
+        .tutorial-complete__sparkles span:nth-child(2) {
             left: 58px;
             top: -28px;
         }
-        .c100-tutorial-complete__sparkles span:nth-child(3) {
+        .tutorial-complete__sparkles span:nth-child(3) {
             left: -48px;
             top: 32px;
         }
-        .c100-tutorial-complete__sparkles span:nth-child(4) {
+        .tutorial-complete__sparkles span:nth-child(4) {
             left: 52px;
             top: 38px;
         }
-        .c100-tutorial-complete__sparkles span:nth-child(5) {
+        .tutorial-complete__sparkles span:nth-child(5) {
             left: 0;
             top: -52px;
         }
-        .c100-tutorial-complete__mini-viewport {
+        .tutorial-complete__mini-viewport {
             width: 100%;
             max-width: 480px;
             margin-left: auto;
@@ -915,39 +919,39 @@
             line-height: normal;
         }
         @media (max-width: 540px) {
-            .c100-tutorial-complete__mini-viewport {
+            .tutorial-complete__mini-viewport {
                 max-width: min(320px, calc(100vw - 24px));
             }
         }
-        .c100-tutorial-complete__live-replica {
+        .tutorial-complete__live-replica {
             pointer-events: none;
             user-select: none;
             -webkit-user-select: none;
         }
-        .c100-tutorial-complete__live-replica .key {
+        .tutorial-complete__live-replica .key {
             cursor: default;
         }
-        .c100-tutorial-complete__mini-scale-wrap {
-            --c100-mini-scale: 0.36;
-            width: calc(480px * var(--c100-mini-scale));
+        .tutorial-complete__mini-scale-wrap {
+            --mini-console-scale: 0.36;
+            width: calc(480px * var(--mini-console-scale));
             margin: 0 auto;
             position: relative;
             overflow: visible;
             z-index: 1;
             opacity: 0;
         }
-        .c100-tutorial-complete__mini-scale-inner {
+        .tutorial-complete__mini-scale-inner {
             position: absolute;
             left: 50%;
             top: 0;
             width: 480px;
             margin-left: -240px;
-            transform: scale(var(--c100-mini-scale));
+            transform: scale(var(--mini-console-scale));
             transform-origin: top center;
             pointer-events: none;
             -webkit-font-smoothing: antialiased;
         }
-        .c100-tutorial-complete__actions {
+        .tutorial-complete__actions {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -960,7 +964,7 @@
             opacity: 0;
             transform: translateY(22px);
         }
-        .c100-tutorial-complete__recap-btn {
+        .tutorial-complete__recap-btn {
             opacity: 1;
             width: 100%;
             box-sizing: border-box;
@@ -975,15 +979,15 @@
             cursor: pointer;
             transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
         }
-        .c100-tutorial-complete__recap-btn:hover {
+        .tutorial-complete__recap-btn:hover {
             background: rgba(51, 65, 85, 0.95);
             border-color: rgba(165, 180, 252, 0.55);
             transform: translateY(-1px);
         }
-        .c100-tutorial-complete__recap-btn:active {
+        .tutorial-complete__recap-btn:active {
             transform: translateY(0);
         }
-        .c100-tutorial-complete__dismiss {
+        .tutorial-complete__dismiss {
             opacity: 1;
             margin-top: 0;
             width: 100%;
@@ -1005,7 +1009,7 @@
                 0 2px 6px rgba(0, 0, 0, 0.2);
             transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
         }
-        .c100-tutorial-complete__dismiss:hover {
+        .tutorial-complete__dismiss:hover {
             transform: translateY(-2px);
             filter: brightness(1.05);
             box-shadow:
@@ -1013,13 +1017,13 @@
                 0 12px 32px rgba(79, 70, 229, 0.55),
                 0 4px 10px rgba(0, 0, 0, 0.25);
         }
-        .c100-tutorial-complete__dismiss:active {
+        .tutorial-complete__dismiss:active {
             transform: translateY(0);
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }
 
         /* Full-page training recap — scrollable middle (bounded height so overflow works) */
-        .c100-tutorial-recap-page {
+        .tutorial-recap-page {
             position: fixed;
             inset: 0;
             z-index: 10060;
@@ -1041,10 +1045,10 @@
             box-sizing: border-box;
             scrollbar-gutter: stable;
         }
-        .c100-tutorial-recap-page.c100-tutorial-recap-page--visible {
+        .tutorial-recap-page.tutorial-recap-page--visible {
             display: flex;
         }
-        .c100-tutorial-recap-page__inner {
+        .tutorial-recap-page__inner {
             flex: 1 1 auto;
             min-height: 0;
             display: flex;
@@ -1055,25 +1059,25 @@
             box-sizing: border-box;
             padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
         }
-        .c100-tutorial-recap-page__header {
+        .tutorial-recap-page__header {
             flex-shrink: 0;
             text-align: center;
             padding-bottom: 12px;
         }
-        .c100-tutorial-recap-page__title {
+        .tutorial-recap-page__title {
             font-family: "Outfit", "DM Sans", system-ui, sans-serif;
             font-size: clamp(1.35rem, 4vw, 1.75rem);
             font-weight: 700;
             color: #f8fafc;
             margin: 0 0 8px;
         }
-        .c100-tutorial-recap-page__lede {
+        .tutorial-recap-page__lede {
             margin: 0;
             font-size: 0.9rem;
             line-height: 1.45;
             color: #94a3b8;
         }
-        .c100-tutorial-recap-page__body {
+        .tutorial-recap-page__body {
             flex: 1 1 auto;
             min-height: 0;
             overflow-y: auto;
@@ -1084,37 +1088,37 @@
             font-size: 0.875rem;
             line-height: 1.5;
         }
-        .c100-recap-head {
+        .recap-head {
             font-family: "Outfit", "DM Sans", system-ui, sans-serif;
             font-size: 1rem;
             font-weight: 600;
             color: #f1f5f9;
             margin: 0 0 12px;
         }
-        .c100-recap-note {
+        .recap-note {
             margin: 0 0 16px;
             font-size: 0.85rem;
             color: #94a3b8;
         }
-        .c100-recap-list {
+        .recap-list {
             margin: 0;
             padding-left: 1.2rem;
         }
-        .c100-recap-item {
+        .recap-item {
             margin-bottom: 1rem;
         }
-        .c100-recap-item strong {
+        .recap-item strong {
             display: block;
             color: #a5b4fc;
             font-weight: 600;
             margin-bottom: 0.3rem;
         }
-        .c100-recap-item p {
+        .recap-item p {
             margin: 0;
             color: #cbd5e1;
             font-weight: 400;
         }
-        .c100-tutorial-recap-page__footer {
+        .tutorial-recap-page__footer {
             flex-shrink: 0;
             margin-top: auto;
             padding-top: 12px;
@@ -1122,7 +1126,7 @@
             border-top: 1px solid rgba(148, 163, 184, 0.2);
             background: linear-gradient(180deg, transparent 0%, rgba(15, 23, 42, 0.92) 40%);
         }
-        .c100-tutorial-recap-page__complete {
+        .tutorial-recap-page__complete {
             width: 100%;
             max-width: 320px;
             margin: 0 auto;
@@ -1142,44 +1146,44 @@
                 0 8px 24px rgba(79, 70, 229, 0.45),
                 0 2px 6px rgba(0, 0, 0, 0.2);
         }
-        .c100-tutorial-recap-page__complete:hover {
+        .tutorial-recap-page__complete:hover {
             filter: brightness(1.05);
         }
-        .c100-tutorial-recap-page__complete:active {
+        .tutorial-recap-page__complete:active {
             filter: brightness(0.98);
         }
 
         @media (prefers-reduced-motion: reduce) {
-            .c100-tutorial-complete__actions {
+            .tutorial-complete__actions {
                 opacity: 1 !important;
                 transform: none !important;
             }
-            .c100-tutorial-complete__check-badge,
-            .c100-tutorial-complete__check-svg,
-            .c100-tutorial-complete__title,
-            .c100-tutorial-complete__subcopy,
-            .c100-tutorial-complete__console-preview,
-            .c100-tutorial-complete__mini-scale-wrap,
-            .c100-tutorial-complete__dismiss,
-            .c100-tutorial-complete__recap-btn,
-            .c100-tutorial-complete__pulse-ring,
-            .c100-tutorial-complete__sparkles span {
+            .tutorial-complete__check-badge,
+            .tutorial-complete__check-svg,
+            .tutorial-complete__title,
+            .tutorial-complete__subcopy,
+            .tutorial-complete__console-preview,
+            .tutorial-complete__mini-scale-wrap,
+            .tutorial-complete__dismiss,
+            .tutorial-complete__recap-btn,
+            .tutorial-complete__pulse-ring,
+            .tutorial-complete__sparkles span {
                 animation: none !important;
                 opacity: 1 !important;
                 transform: none !important;
                 filter: none !important;
             }
-            .c100-tutorial-complete__pulse-ring,
-            .c100-tutorial-complete__sparkles span {
+            .tutorial-complete__pulse-ring,
+            .tutorial-complete__sparkles span {
                 opacity: 0 !important;
             }
-            .c100-tutorial-complete__dismiss {
+            .tutorial-complete__dismiss {
                 box-shadow:
                     0 1px 0 rgba(255, 255, 255, 0.15) inset,
                     0 8px 24px rgba(79, 70, 229, 0.45),
                     0 2px 6px rgba(0, 0, 0, 0.2) !important;
             }
-            .c100-tutorial-complete__recap-btn {
+            .tutorial-complete__recap-btn {
                 border-color: rgba(148, 163, 184, 0.45) !important;
             }
         }
@@ -1197,7 +1201,7 @@
                 display: none !important;
             }
             /* C100-R: show “Model C-100” in the SmartBob / C-100 subtitle slot (same look as that line) */
-            body.c100-r-device .screen-and-brand .model {
+            body.device-variant-radar .screen-and-brand .model {
                 display: inline !important;
                 margin: 0 !important;
                 padding: 0 !important;
@@ -1260,7 +1264,7 @@
              * Mobile: optically centered above the fixed guide (tuned bottom padding).
              * Nintendo DS–style D-pad: ↑ / ← → / ↓ (one cell each), tight gaps, ✕ ✓ below.
              */
-            body:has(.c100-console-viewport:not(.hidden)) {
+            body:has(.emulator-console-viewport:not(.hidden)) {
                 justify-content: center;
                 align-items: center;
                 width: 100%;
@@ -1282,7 +1286,7 @@
                 padding: 8px 10px 10px;
                 box-sizing: border-box;
             }
-            .c100-console-viewport {
+            .emulator-console-viewport {
                 margin-left: auto;
                 margin-right: auto;
                 width: 100%;
@@ -1441,7 +1445,7 @@
                 transform: translateY(2px) !important;
             }
 
-            .c100-console-viewport:not(.hidden) {
+            .emulator-console-viewport:not(.hidden) {
                 transform: none;
             }
 
@@ -1462,13 +1466,13 @@
             }
 
             /* Setup complete overlay: scroll from top but keep column centered horizontally */
-            .c100-tutorial-complete.c100-tutorial-complete--visible {
+            .tutorial-complete.tutorial-complete--visible {
                 align-items: flex-start;
                 justify-content: center;
                 padding-top: max(4px, env(safe-area-inset-top));
                 padding-bottom: max(4px, env(safe-area-inset-bottom));
             }
-            .c100-tutorial-complete__inner {
+            .tutorial-complete__inner {
                 max-width: 100%;
                 width: 100%;
                 box-sizing: border-box;
@@ -1476,22 +1480,22 @@
                 flex-shrink: 0;
                 margin-inline: auto;
             }
-            .c100-tutorial-complete__check-badge {
+            .tutorial-complete__check-badge {
                 width: clamp(64px, 18vw, 76px);
                 height: clamp(64px, 18vw, 76px);
             }
-            .c100-tutorial-complete__check-svg {
+            .tutorial-complete__check-svg {
                 width: clamp(32px, 9vw, 40px);
                 height: clamp(32px, 9vw, 40px);
             }
-            .c100-tutorial-complete__console-preview {
+            .tutorial-complete__console-preview {
                 max-width: 100%;
             }
             /* Slightly smaller scaled clone on phones */
-            .c100-tutorial-complete__mini-scale-wrap {
-                --c100-mini-scale: 0.33;
+            .tutorial-complete__mini-scale-wrap {
+                --mini-console-scale: 0.33;
             }
-            .c100-tutorial-complete__actions {
+            .tutorial-complete__actions {
                 max-width: 100%;
             }
         }
@@ -1571,7 +1575,7 @@
                 color: #333 !important;
             }
             /* C100-R: Model C-100 replaces the SmartBob line — match former .smartbob styling */
-            body.c100-r-device .screen-and-brand .model {
+            body.device-variant-radar .screen-and-brand .model {
                 font-size: 12px !important;
                 font-weight: 600 !important;
                 letter-spacing: normal !important;
@@ -1635,7 +1639,7 @@
             .keypad .key.down:active {
                 transform: translateY(2px) !important;
             }
-            .c100-console-viewport:not(.hidden) {
+            .emulator-console-viewport:not(.hidden) {
                 transform: none;
                 max-width: 480px;
             }
@@ -1650,14 +1654,14 @@
         <h1>BinMaster C-100 Guide</h1>
         <p>Select the type of C-100 device you want to emulate.</p>
         <div class="device-type-selection">
-            <button class="device-btn" onclick="selectC100Device('C100-SB')">C100-SB</button>
-            <button class="device-btn" onclick="selectC100Device('C100-R')">C100-R</button>
+            <button class="device-btn" onclick="selectDevice('C100-SB')">C-100-SB (Smartbob Console)</button>
+            <button class="device-btn" onclick="selectDevice('C100-R')">C-100-R (Radar)</button>
         </div>
     </div>
 </div>
 
-<div id="c100-console-viewport" class="c100-console-viewport hidden">
-    <div id="c100-console-scaled" class="c100-console-scaled">
+<div id="emulator-console-viewport" class="emulator-console-viewport hidden">
+    <div id="emulator-console-scaled" class="emulator-console-scaled">
 <!-- Interactive tutorial emulator (live screen + keys). Completion screen uses separate markup below. -->
 <div id="console-root" class="console-container hidden">
     <div class="screw-bottom-left"></div>
@@ -1691,41 +1695,41 @@
     <h3 id="tutorial-title"></h3>
     <p id="tutorial-message"></p>
     <div class="tutorial-actions">
-        <button id="tutorial-skip" type="button">Skip Guide</button>
+        <button id="tutorial-exit" type="button">Exit</button>
     </div>
 </div>
 <div id="tutorial-pointer" class="tutorial-pointer tutorial-hidden">👉</div>
 <div id="tutorial-pointer-circle" class="tutorial-pointer-circle tutorial-hidden"></div>
 
 <!-- Tutorial COMPLETION: scaled clone of #console-root markup (same classes as live device) -->
-<div id="c100-tutorial-complete-overlay" class="c100-tutorial-complete" aria-hidden="true">
-    <div class="c100-tutorial-complete__inner">
-        <div class="c100-tutorial-complete__success-mark">
-            <div class="c100-tutorial-complete__pulse-rings" aria-hidden="true">
-                <span class="c100-tutorial-complete__pulse-ring"></span>
-                <span class="c100-tutorial-complete__pulse-ring"></span>
-                <span class="c100-tutorial-complete__pulse-ring"></span>
+<div id="tutorial-complete-overlay" class="tutorial-complete" aria-hidden="true">
+    <div class="tutorial-complete__inner">
+        <div class="tutorial-complete__success-mark">
+            <div class="tutorial-complete__pulse-rings" aria-hidden="true">
+                <span class="tutorial-complete__pulse-ring"></span>
+                <span class="tutorial-complete__pulse-ring"></span>
+                <span class="tutorial-complete__pulse-ring"></span>
             </div>
-            <div class="c100-tutorial-complete__check-badge">
-                <svg class="c100-tutorial-complete__check-svg" viewBox="0 0 24 24" aria-hidden="true">
-                    <path class="c100-tutorial-complete__check-path" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            <div class="tutorial-complete__check-badge">
+                <svg class="tutorial-complete__check-svg" viewBox="0 0 24 24" aria-hidden="true">
+                    <path class="tutorial-complete__check-path" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
                 </svg>
             </div>
         </div>
-        <h1 class="c100-tutorial-complete__title" id="c100-tutorial-complete-title"></h1>
-        <div class="c100-tutorial-complete__subcopy" id="c100-tutorial-complete-subcopy">
-            <p class="c100-tutorial-complete__subcopy-line" id="c100-tutorial-complete-line1"></p>
-            <p class="c100-tutorial-complete__subcopy-line" id="c100-tutorial-complete-line2"></p>
+        <h1 class="tutorial-complete__title" id="tutorial-complete-title"></h1>
+        <div class="tutorial-complete__subcopy" id="tutorial-complete-subcopy">
+            <p class="tutorial-complete__subcopy-line" id="tutorial-complete-line1"></p>
+            <p class="tutorial-complete__subcopy-line" id="tutorial-complete-line2"></p>
         </div>
-        <div class="c100-tutorial-complete__console-preview" id="c100-tutorial-complete-console-preview">
-            <div class="c100-tutorial-complete__sparkles" aria-hidden="true">
+        <div class="tutorial-complete__console-preview" id="tutorial-complete-console-preview">
+            <div class="tutorial-complete__sparkles" aria-hidden="true">
                 <span></span><span></span><span></span><span></span><span></span>
             </div>
-            <div class="c100-tutorial-complete__mini-scale-wrap" id="c100-tutorial-complete-mini-scale-wrap" aria-hidden="true">
-                <div class="c100-tutorial-complete__mini-scale-inner">
-                    <div class="c100-tutorial-complete__mini-viewport">
-                        <div class="c100-console-scaled">
-                            <div class="console-container c100-tutorial-complete__live-replica">
+            <div class="tutorial-complete__mini-scale-wrap" id="tutorial-complete-mini-scale-wrap" aria-hidden="true">
+                <div class="tutorial-complete__mini-scale-inner">
+                    <div class="tutorial-complete__mini-viewport">
+                        <div class="emulator-console-scaled">
+                            <div class="console-container tutorial-complete__live-replica">
                                 <div class="screw-bottom-left"></div>
                                 <div class="screw-bottom-right"></div>
                                 <div class="display-area">
@@ -1754,47 +1758,47 @@
                 </div>
             </div>
         </div>
-        <div class="c100-tutorial-complete__actions" id="c100-tutorial-complete-actions">
-            <button type="button" class="c100-tutorial-complete__recap-btn" id="c100-tutorial-open-recap">View training recap</button>
-            <button type="button" class="c100-tutorial-complete__dismiss" id="c100-tutorial-complete-dismiss">Complete</button>
+        <div class="tutorial-complete__actions" id="tutorial-complete-actions">
+            <button type="button" class="tutorial-complete__recap-btn" id="tutorial-open-recap">View training recap</button>
+            <button type="button" class="tutorial-complete__dismiss" id="tutorial-complete-dismiss">Complete</button>
         </div>
     </div>
 </div>
 
 <!-- Separate full-page training recap (CNCR-style: own scroll, then Complete → home) -->
-<div id="c100-tutorial-recap-page" class="c100-tutorial-recap-page" aria-hidden="true">
-    <div class="c100-tutorial-recap-page__inner">
-        <header class="c100-tutorial-recap-page__header">
-            <h1 class="c100-tutorial-recap-page__title">Training Recap:</h1>
-            <p class="c100-tutorial-recap-page__lede" id="c100-tutorial-recap-lede"></p>
+<div id="tutorial-recap-page" class="tutorial-recap-page" aria-hidden="true">
+    <div class="tutorial-recap-page__inner">
+        <header class="tutorial-recap-page__header">
+            <h1 class="tutorial-recap-page__title">Training Recap:</h1>
+            <p class="tutorial-recap-page__lede" id="tutorial-recap-lede"></p>
         </header>
-        <div class="c100-tutorial-recap-page__body" id="c100-tutorial-recap-body"></div>
-        <footer class="c100-tutorial-recap-page__footer">
-            <button type="button" class="c100-tutorial-recap-page__complete" id="c100-tutorial-recap-complete">Complete</button>
+        <div class="tutorial-recap-page__body" id="tutorial-recap-body"></div>
+        <footer class="tutorial-recap-page__footer">
+            <button type="button" class="tutorial-recap-page__complete" id="tutorial-recap-complete">Complete</button>
         </footer>
     </div>
 </div>
 
 <script>
     // --- FRONT-PAGE DEVICE TYPE SELECTION ---
-    let selectedC100Device = null;
+    let selectedDevice = null;
 
     /** C100-R uses Modbus (247 addresses); C100-SB uses SmartBob addressing (120). */
     function getAutoAddRemoveScanLimit() {
-        return selectedC100Device === 'C100-R' ? 247 : 120;
+        return selectedDevice === 'C100-R' ? 247 : 120;
     }
     /** C100-R scans more addresses — use a shorter interval so the full sweep stays fast. */
     function getAutoAddRemoveScanIntervalMs() {
-        return selectedC100Device === 'C100-R' ? 22 : 80;
+        return selectedDevice === 'C100-R' ? 22 : 80;
     }
 
-    function selectC100Device(deviceType) {
-        selectedC100Device = deviceType;
-        document.body.classList.toggle('c100-r-device', deviceType === 'C100-R');
+    function selectDevice(deviceType) {
+        selectedDevice = deviceType;
+        document.body.classList.toggle('device-variant-radar', deviceType === 'C100-R');
 
         const homePage = document.getElementById('home-page');
         const mainContent = document.querySelector('.main-content');
-        const consoleViewport = document.getElementById('c100-console-viewport');
+        const consoleViewport = document.getElementById('emulator-console-viewport');
         const consoleRoot = document.getElementById('console-root');
 
         if (homePage) homePage.classList.add('hidden');
@@ -1803,11 +1807,11 @@
         if (consoleRoot) consoleRoot.classList.remove('hidden');
 
         requestAnimationFrame(() => {
-            requestAnimationFrame(() => fitC100ConsoleScale());
+            requestAnimationFrame(() => fitConsoleScale());
         });
 
         if (!tutorialActive) {
-            setTimeout(() => startC100Tutorial(), 100);
+            setTimeout(() => startTutorial(), 100);
         }
     }
 
@@ -1824,7 +1828,7 @@
             items: function welcomeItems() {
                 const line2 = isMobileBrandingViewport()
                     ? 'C-100'
-                    : selectedC100Device === 'C100-R'
+                    : selectedDevice === 'C100-R'
                       ? 'C-100'
                       : 'SmartBob Console';
                 return ['BinMaster C-100', line2, 'v2.00 Apr 21 2016', 'Press any key...'];
@@ -1957,7 +1961,7 @@
         'SETUP': { 
             type: 'nav', 
             items: function() {
-                if (selectedC100Device === 'C100-R') {
+                if (selectedDevice === 'C100-R') {
                     // C-100-R specific menu
                     return [
                         'Sensor Type',
@@ -2097,7 +2101,7 @@
         // --- VESSEL CONFIGURATION SCREENS --- (Simplified flow starting from Set All/001 selection)
         'VESSEL_CONFIG_START': { type: 'nav', items: function() {
             const base = ['VESSEL SHAPE', 'BODY HEIGHT', 'BODY RADIUS', 'HOPPER PRESENT', 'SENSOR OFFSET'];
-            if (selectedC100Device === 'C100-R') return base;
+            if (selectedDevice === 'C100-R') return base;
             return base.concat(['SMARTBOB MAX DROP']);
         } },
 
@@ -2424,7 +2428,7 @@
         const MS_PENDING = 600;
         const MS_MEASURING = 1400;
         const MS_RETRACTED = 320;
-        const skipRetracted = selectedC100Device === 'C100-R';
+        const skipRetracted = selectedDevice === 'C100-R';
 
         measureAllInProgress = true;
         measureAllPhase = 'pending';
@@ -2805,17 +2809,17 @@
         // could skip Wait immediately or leave the guide out of sync with Measure All.
         maybeAutoAdvanceTutorial();
 
-        requestAnimationFrame(() => fitC100ConsoleScale());
+        requestAnimationFrame(() => fitConsoleScale());
     }
 
     /** Portrait (narrow): CSS stacks the face — no zoom. Landscape (narrow): zoom fits horizontal bar. */
-    const C100_MOBILE_SCALE_MAX_W = 540;
-    const C100_DESIGN_W = 480;
-    const C100_SCALE_SIDE_PAD = 16;
+    const MOBILE_SCALE_MAX_WIDTH = 540;
+    const CONSOLE_DESIGN_WIDTH = 480;
+    const SCALE_SIDE_PADDING = 16;
 
-    function fitC100ConsoleScale() {
-        const vp = document.getElementById('c100-console-viewport');
-        const scaled = document.getElementById('c100-console-scaled');
+    function fitConsoleScale() {
+        const vp = document.getElementById('emulator-console-viewport');
+        const scaled = document.getElementById('emulator-console-scaled');
         const root = document.getElementById('console-root');
         if (!vp || !scaled || !root) return;
         if (root.classList.contains('hidden')) {
@@ -2828,7 +2832,7 @@
             return;
         }
         const vw = window.innerWidth;
-        if (vw > C100_MOBILE_SCALE_MAX_W) {
+        if (vw > MOBILE_SCALE_MAX_WIDTH) {
             scaled.style.zoom = '';
             scaled.style.removeProperty('transform');
             scaled.style.removeProperty('transform-origin');
@@ -2847,7 +2851,7 @@
             vp.style.height = '';
             return;
         }
-        const s = Math.min(1, (vw - C100_SCALE_SIDE_PAD) / C100_DESIGN_W);
+        const s = Math.min(1, (vw - SCALE_SIDE_PADDING) / CONSOLE_DESIGN_WIDTH);
         scaled.style.zoom = String(s);
         scaled.style.removeProperty('transform');
         scaled.style.removeProperty('transform-origin');
@@ -2857,8 +2861,24 @@
     }
 
     // --- TUTORIAL SYSTEM ---
-    const C100_TUTORIAL_STEPS = [
-        { state: 'WELCOME', title: 'Welcome to the C-100 Guide', message: 'Press any key to begin the guided setup.', action: 'any', target: '#screen' },
+    function getTutorialStepTitle(step) {
+        if (!step) return '';
+        if (typeof step.title === 'function') return step.title();
+        return step.title || '';
+    }
+
+    const tutorialSteps = [
+        {
+            state: 'WELCOME',
+            title: function tutorialWelcomeTitle() {
+                if (selectedDevice === 'C100-R') return 'Welcome to the C-100-R Guide';
+                if (selectedDevice === 'C100-SB') return 'Welcome to the C-100-SB Guide';
+                return 'Welcome to the C-100 Guide';
+            },
+            message: 'Press any key to begin the guided setup.',
+            action: 'any',
+            target: '#screen'
+        },
         { state: 'MAIN_MENU', title: 'Move to Setup', message: 'Press the down arrow to highlight "Setup".', action: 'down', targetIndex: 1 },
         { state: 'MAIN_MENU', title: 'Open Setup', message: 'Press ✓ to enter Setup.', action: 'select', targetIndex: 1 },
         { state: 'SETUP', title: 'Move to Auto Add/Remove', message: 'Press the down arrow to highlight the next option.', action: 'down', targetIndex: 1 },
@@ -2885,9 +2905,9 @@
         { state: 'CONFIG_OUTLET_RADIUS', title: 'Outlet Radius', message: 'Enter the outlet radius at the hopper discharge, then press ✓.', action: 'select', selector: '.input-value' },
         { state: 'CONFIG_SENSOR_OFFSET', title: 'Sensor Offset', message: 'The sensor offset is typically 0. However, if the sensor is raised by extensions or mounted inside the silo, it may be positive/negative in feet. Example 2 feet positive. Adding 2 feet to distance. Press ✓ to continue.', action: 'select', selector: '.input-value' },
         { state: 'CONFIG_PRODUCT_DENSITY', title: 'Product Density', message: 'Enter product density for weight calculations, then press ✓.', action: 'select', selector: '.input-value' },
-        { state: 'CONFIG_SMARTBOB_MAX_DROP', title: 'SmartBob Max Drop', message: 'This is the distance in feet your Smartbob is allowed to drop. Usually set to vessel height or top of cone. Press the up arrow to select "Enabled".', action: 'up', targetIndex: 0, skipWhen: () => selectedC100Device === 'C100-R' },
-        { state: 'CONFIG_SMARTBOB_MAX_DROP', title: 'SmartBob Max Drop', message: 'Press ✓ to confirm Enabled.', action: 'select', targetIndex: 0, skipWhen: () => selectedC100Device === 'C100-R' },
-        { state: 'CONFIG_SMARTBOB_MAX_DROP_INPUT', title: 'Max Drop Value', message: 'This is the distance in feet your Smartbob is allowed to drop. Usually set to vessel height or top of cone. Enter the value, then press ✓.', action: 'select', selector: '.input-value', skipWhen: () => selectedC100Device === 'C100-R' },
+        { state: 'CONFIG_SMARTBOB_MAX_DROP', title: 'SmartBob Max Drop', message: 'This is the distance in feet your Smartbob is allowed to drop. Usually set to vessel height or top of cone. Press the up arrow to select "Enabled".', action: 'up', targetIndex: 0, skipWhen: () => selectedDevice === 'C100-R' },
+        { state: 'CONFIG_SMARTBOB_MAX_DROP', title: 'SmartBob Max Drop', message: 'Press ✓ to confirm Enabled.', action: 'select', targetIndex: 0, skipWhen: () => selectedDevice === 'C100-R' },
+        { state: 'CONFIG_SMARTBOB_MAX_DROP_INPUT', title: 'Max Drop Value', message: 'This is the distance in feet your Smartbob is allowed to drop. Usually set to vessel height or top of cone. Enter the value, then press ✓.', action: 'select', selector: '.input-value', skipWhen: () => selectedDevice === 'C100-R' },
         { state: 'SETUP_VESSEL_SETUP', title: 'Return to Setup', message: 'Press X to return to the Setup menu.', action: 'back', target: '#screen' },
         { state: 'SETUP', title: 'Return to Main Menu', message: 'Press X to return to the Main Menu.', action: 'back', target: '#screen' },
         { state: 'MAIN_MENU', title: 'Move to Measure/View', message: 'Press the up arrow to highlight "Measure/View".', action: 'up', targetIndex: 0 },
@@ -2912,19 +2932,19 @@
     }
 
     /** Text recap (CNCR-style): all guide steps as title + message; honors C100-R skipWhen. */
-    function buildC100TutorialRecapHtml(skipped) {
+    function buildTutorialRecapHtml(skipped) {
         const parts = [];
         if (skipped) {
-            parts.push('<p class="c100-recap-note">You skipped the interactive guide. Below is the full text walkthrough of every topic.</p>');
+            parts.push('<p class="recap-note">You skipped the interactive guide. Below is the full text walkthrough of every topic.</p>');
         } else {
-            parts.push('<p class="c100-recap-note">Everything below is what you walked through, in order.</p>');
+            parts.push('<p class="recap-note">Everything below is what you walked through, in order.</p>');
         }
-        parts.push('<ol class="c100-recap-list">');
-        C100_TUTORIAL_STEPS.forEach((step) => {
+        parts.push('<ol class="recap-list">');
+        tutorialSteps.forEach((step) => {
             if (step.skipWhen && step.skipWhen()) return;
             parts.push(
-                '<li class="c100-recap-item"><strong>' +
-                escapeHtmlForRecap(step.title || 'Step') +
+                '<li class="recap-item"><strong>' +
+                escapeHtmlForRecap(getTutorialStepTitle(step) || 'Step') +
                 '</strong><p>' +
                 escapeHtmlForRecap(step.message || '') +
                 '</p></li>'
@@ -2945,12 +2965,12 @@
     const tutorialStepCount = document.getElementById('tutorial-step-count');
     const tutorialTitle = document.getElementById('tutorial-title');
     const tutorialMessage = document.getElementById('tutorial-message');
-    const tutorialSkipButton = document.getElementById('tutorial-skip');
+    const tutorialExitButton = document.getElementById('tutorial-exit');
     const tutorialPointer = document.getElementById('tutorial-pointer');
     const tutorialPointerCircle = document.getElementById('tutorial-pointer-circle');
 
     function getTutorialStep() {
-        return tutorialActive ? C100_TUTORIAL_STEPS[currentTutorialStep] : null;
+        return tutorialActive ? tutorialSteps[currentTutorialStep] : null;
     }
 
     function getMenuIndexByLabel(state, label) {
@@ -3118,8 +3138,8 @@
             return;
         }
 
-        tutorialStepCount.textContent = `Step ${currentTutorialStep + 1} of ${C100_TUTORIAL_STEPS.length}`;
-        tutorialTitle.textContent = step.title || '';
+        tutorialStepCount.textContent = `Step ${currentTutorialStep + 1} of ${tutorialSteps.length}`;
+        tutorialTitle.textContent = getTutorialStepTitle(step);
         tutorialMessage.textContent = step.message || '';
         tutorialTooltip.classList.remove('tutorial-hidden');
 
@@ -3150,16 +3170,16 @@
     function onLayoutResizeOrRotate() {
         clearTimeout(layoutResizeDebounce);
         layoutResizeDebounce = setTimeout(() => {
-            fitC100ConsoleScale();
+            fitConsoleScale();
             if (typeof tutorialActive !== 'undefined' && tutorialActive) {
                 updateTutorialUI();
             }
             if (typeof currentState !== 'undefined' && currentState === 'WELCOME') {
                 renderScreen();
             }
-            const tcOverlay = document.getElementById('c100-tutorial-complete-overlay');
-            if (tcOverlay && tcOverlay.classList.contains('c100-tutorial-complete--visible')) {
-                resizeC100TutorialCompleteMiniWrap();
+            const tcOverlay = document.getElementById('tutorial-complete-overlay');
+            if (tcOverlay && tcOverlay.classList.contains('tutorial-complete--visible')) {
+                resizeTutorialCompleteMiniWrap();
             }
         }, 100);
     }
@@ -3183,22 +3203,22 @@
         });
     })();
 
-    (function initC100ConsoleResizeObserver() {
+    (function initConsoleResizeObserver() {
         const root = document.getElementById('console-root');
         if (!root || typeof ResizeObserver === 'undefined') return;
-        const ro = new ResizeObserver(() => fitC100ConsoleScale());
+        const ro = new ResizeObserver(() => fitConsoleScale());
         ro.observe(root);
     })();
 
     function showTutorialStep(stepIndex) {
         if (!tutorialActive) return;
-        while (stepIndex < C100_TUTORIAL_STEPS.length) {
-            const s = C100_TUTORIAL_STEPS[stepIndex];
+        while (stepIndex < tutorialSteps.length) {
+            const s = tutorialSteps[stepIndex];
             if (!s.skipWhen || !s.skipWhen()) break;
             stepIndex++;
         }
-        if (stepIndex >= C100_TUTORIAL_STEPS.length) {
-            endC100Tutorial(false);
+        if (stepIndex >= tutorialSteps.length) {
+            endTutorial(false);
             return;
         }
 
@@ -3211,7 +3231,7 @@
 
         updateTutorialUI();
 
-        const step = C100_TUTORIAL_STEPS[stepIndex];
+        const step = tutorialSteps[stepIndex];
         if (step && step.action === 'auto') {
             const delay = step.advanceDelay || 1500;
             tutorialAdvanceTimer = setTimeout(() => nextTutorialStep(), delay);
@@ -3222,34 +3242,34 @@
         showTutorialStep(currentTutorialStep + 1);
     }
 
-    function resizeC100TutorialCompleteMiniWrap() {
-        const wrap = document.querySelector('#c100-tutorial-complete-overlay .c100-tutorial-complete__mini-scale-wrap');
-        const inner = document.querySelector('#c100-tutorial-complete-overlay .c100-tutorial-complete__mini-scale-inner');
+    function resizeTutorialCompleteMiniWrap() {
+        const wrap = document.querySelector('#tutorial-complete-overlay .tutorial-complete__mini-scale-wrap');
+        const inner = document.querySelector('#tutorial-complete-overlay .tutorial-complete__mini-scale-inner');
         if (!wrap || !inner) return;
-        const scaleStr = getComputedStyle(wrap).getPropertyValue('--c100-mini-scale').trim();
+        const scaleStr = getComputedStyle(wrap).getPropertyValue('--mini-console-scale').trim();
         const scale = parseFloat(scaleStr) || 0.36;
         const h = inner.offsetHeight;
         wrap.style.height = Math.max(1, Math.ceil(h * scale)) + 'px';
     }
 
-    function isC100TutorialCompleteDesktopMotion() {
+    function isTutorialCompleteDesktopMotion() {
         return typeof window.matchMedia === 'function' && window.matchMedia('(min-width: 541px)').matches;
     }
 
-    function resetC100TutorialCompleteAnimations() {
-        const overlay = document.getElementById('c100-tutorial-complete-overlay');
+    function resetTutorialCompleteAnimations() {
+        const overlay = document.getElementById('tutorial-complete-overlay');
         if (!overlay) return;
-        const desktopMo = isC100TutorialCompleteDesktopMotion();
-        const badge = overlay.querySelector('.c100-tutorial-complete__check-badge');
-        const checkSvg = overlay.querySelector('.c100-tutorial-complete__check-svg');
-        const title = document.getElementById('c100-tutorial-complete-title');
-        const subcopy = document.getElementById('c100-tutorial-complete-subcopy');
-        const preview = document.getElementById('c100-tutorial-complete-console-preview');
-        const miniWrap = document.getElementById('c100-tutorial-complete-mini-scale-wrap');
-        const actionsEl = document.getElementById('c100-tutorial-complete-actions');
-        const btn = document.getElementById('c100-tutorial-complete-dismiss');
-        const pulseRings = overlay.querySelectorAll('.c100-tutorial-complete__pulse-ring');
-        const sparkles = overlay.querySelectorAll('.c100-tutorial-complete__sparkles span');
+        const desktopMo = isTutorialCompleteDesktopMotion();
+        const badge = overlay.querySelector('.tutorial-complete__check-badge');
+        const checkSvg = overlay.querySelector('.tutorial-complete__check-svg');
+        const title = document.getElementById('tutorial-complete-title');
+        const subcopy = document.getElementById('tutorial-complete-subcopy');
+        const preview = document.getElementById('tutorial-complete-console-preview');
+        const miniWrap = document.getElementById('tutorial-complete-mini-scale-wrap');
+        const actionsEl = document.getElementById('tutorial-complete-actions');
+        const btn = document.getElementById('tutorial-complete-dismiss');
+        const pulseRings = overlay.querySelectorAll('.tutorial-complete__pulse-ring');
+        const sparkles = overlay.querySelectorAll('.tutorial-complete__sparkles span');
         [badge, checkSvg, title, subcopy, preview, miniWrap, actionsEl].forEach((el) => {
             if (el) el.style.animation = 'none';
         });
@@ -3262,62 +3282,62 @@
         });
         void overlay.offsetWidth;
         if (desktopMo) {
-            if (badge) badge.style.animation = 'c100-tc-badge-pop-lg 0.76s cubic-bezier(0.34, 1.55, 0.64, 1) forwards';
-            if (checkSvg) checkSvg.style.animation = 'c100-tc-check-in-lg 0.54s cubic-bezier(0.34, 1.2, 0.64, 1) 0.14s forwards';
+            if (badge) badge.style.animation = 'tc-badge-pop-lg 0.76s cubic-bezier(0.34, 1.55, 0.64, 1) forwards';
+            if (checkSvg) checkSvg.style.animation = 'tc-check-in-lg 0.54s cubic-bezier(0.34, 1.2, 0.64, 1) 0.14s forwards';
             pulseRings.forEach((el, i) => {
-                el.style.animation = `c100-tc-pulse-ring-lg 1.18s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${i * 0.12}s forwards`;
+                el.style.animation = `tc-pulse-ring-lg 1.18s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${i * 0.12}s forwards`;
             });
-            if (title) title.style.animation = 'c100-tc-headline-in-lg 0.64s cubic-bezier(0.22, 1, 0.36, 1) 0.48s forwards';
-            if (subcopy) subcopy.style.animation = 'c100-tc-headline-in-lg 0.58s cubic-bezier(0.22, 1, 0.36, 1) 0.72s forwards';
-            if (preview) preview.style.animation = 'c100-tc-preview-fade-lg 0.52s cubic-bezier(0.22, 1, 0.36, 1) 0.22s forwards';
+            if (title) title.style.animation = 'tc-headline-in-lg 0.64s cubic-bezier(0.22, 1, 0.36, 1) 0.48s forwards';
+            if (subcopy) subcopy.style.animation = 'tc-headline-in-lg 0.58s cubic-bezier(0.22, 1, 0.36, 1) 0.72s forwards';
+            if (preview) preview.style.animation = 'tc-preview-fade-lg 0.52s cubic-bezier(0.22, 1, 0.36, 1) 0.22s forwards';
             if (miniWrap) {
-                miniWrap.style.animation = 'c100-tc-device-bindisc-lg 1.45s cubic-bezier(0.34, 1.15, 0.64, 1) 0.28s forwards';
+                miniWrap.style.animation = 'tc-device-bindisc-lg 1.45s cubic-bezier(0.34, 1.15, 0.64, 1) 0.28s forwards';
             }
             sparkles.forEach((el, i) => {
-                el.style.animation = `c100-tc-sparkle-lg 0.95s cubic-bezier(0.34, 1.1, 0.64, 1) ${0.4 + i * 0.065}s forwards`;
+                el.style.animation = `tc-sparkle-lg 0.95s cubic-bezier(0.34, 1.1, 0.64, 1) ${0.4 + i * 0.065}s forwards`;
             });
             if (actionsEl) {
-                actionsEl.style.animation = 'c100-tc-slide-up-lg 0.72s cubic-bezier(0.22, 1, 0.36, 1) 1.08s forwards';
+                actionsEl.style.animation = 'tc-slide-up-lg 0.72s cubic-bezier(0.22, 1, 0.36, 1) 1.08s forwards';
             }
             if (btn) {
-                btn.style.animation = 'c100-tc-btn-glow 2.65s ease-in-out 1.92s 2 alternate';
+                btn.style.animation = 'tc-btn-glow 2.65s ease-in-out 1.92s 2 alternate';
             }
         } else {
-            if (badge) badge.style.animation = 'c100-tc-badge-pop 0.62s cubic-bezier(0.34, 1.55, 0.64, 1) forwards';
-            if (checkSvg) checkSvg.style.animation = 'c100-tc-check-in 0.48s cubic-bezier(0.34, 1.2, 0.64, 1) 0.12s forwards';
+            if (badge) badge.style.animation = 'tc-badge-pop 0.62s cubic-bezier(0.34, 1.55, 0.64, 1) forwards';
+            if (checkSvg) checkSvg.style.animation = 'tc-check-in 0.48s cubic-bezier(0.34, 1.2, 0.64, 1) 0.12s forwards';
             pulseRings.forEach((el, i) => {
-                el.style.animation = `c100-tc-pulse-ring 1.05s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${i * 0.11}s forwards`;
+                el.style.animation = `tc-pulse-ring 1.05s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${i * 0.11}s forwards`;
             });
-            if (title) title.style.animation = 'c100-tc-headline-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.42s forwards';
-            if (subcopy) subcopy.style.animation = 'c100-tc-headline-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.58s forwards';
-            if (preview) preview.style.animation = 'c100-tc-preview-fade 0.36s ease-out 0.18s forwards';
+            if (title) title.style.animation = 'tc-headline-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.42s forwards';
+            if (subcopy) subcopy.style.animation = 'tc-headline-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.58s forwards';
+            if (preview) preview.style.animation = 'tc-preview-fade 0.36s ease-out 0.18s forwards';
             if (miniWrap) {
-                miniWrap.style.animation = 'c100-tc-device-bindisc 1.12s cubic-bezier(0.34, 1.15, 0.64, 1) 0.22s forwards';
+                miniWrap.style.animation = 'tc-device-bindisc 1.12s cubic-bezier(0.34, 1.15, 0.64, 1) 0.22s forwards';
             }
             sparkles.forEach((el, i) => {
-                el.style.animation = `c100-tc-sparkle 0.78s cubic-bezier(0.34, 1.1, 0.64, 1) ${0.34 + i * 0.055}s forwards`;
+                el.style.animation = `tc-sparkle 0.78s cubic-bezier(0.34, 1.1, 0.64, 1) ${0.34 + i * 0.055}s forwards`;
             });
             if (actionsEl) {
-                actionsEl.style.animation = 'c100-tc-slide-up 0.58s cubic-bezier(0.22, 1, 0.36, 1) 0.96s forwards';
+                actionsEl.style.animation = 'tc-slide-up 0.58s cubic-bezier(0.22, 1, 0.36, 1) 0.96s forwards';
             }
             if (btn) {
-                btn.style.animation = 'c100-tc-btn-glow 2.2s ease-in-out 1.54s 2 alternate';
+                btn.style.animation = 'tc-btn-glow 2.2s ease-in-out 1.54s 2 alternate';
             }
         }
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
-                resizeC100TutorialCompleteMiniWrap();
+                resizeTutorialCompleteMiniWrap();
             });
         });
     }
 
-    function showC100TutorialCompleteOverlay(skipped) {
-        window._c100TutorialCompleteSkipped = !!skipped;
-        const overlay = document.getElementById('c100-tutorial-complete-overlay');
-        const titleEl = document.getElementById('c100-tutorial-complete-title');
-        const line1 = document.getElementById('c100-tutorial-complete-line1');
-        const line2 = document.getElementById('c100-tutorial-complete-line2');
-        const previewWrap = document.getElementById('c100-tutorial-complete-console-preview');
+    function showTutorialCompleteOverlay(skipped) {
+        window.tutorialCompleteWasSkipped = !!skipped;
+        const overlay = document.getElementById('tutorial-complete-overlay');
+        const titleEl = document.getElementById('tutorial-complete-title');
+        const line1 = document.getElementById('tutorial-complete-line1');
+        const line2 = document.getElementById('tutorial-complete-line2');
+        const previewWrap = document.getElementById('tutorial-complete-console-preview');
         if (!overlay || !titleEl || !line1 || !line2) return;
         if (skipped) {
             titleEl.textContent = 'Guide closed.';
@@ -3336,52 +3356,52 @@
         overlay.setAttribute('aria-hidden', 'false');
         /* Defer animations: display:none→flex in the same frame skips CSS animations in many browsers. */
         requestAnimationFrame(() => {
-            overlay.classList.add('c100-tutorial-complete--visible');
+            overlay.classList.add('tutorial-complete--visible');
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                     /* Extra tick + microtask so layout (display→flex, mini wrap height) is ready before keyframes run */
-                    setTimeout(() => resetC100TutorialCompleteAnimations(), 0);
+                    setTimeout(() => resetTutorialCompleteAnimations(), 0);
                 });
             });
         });
     }
 
-    function hideC100TutorialCompleteOverlay() {
-        const overlay = document.getElementById('c100-tutorial-complete-overlay');
+    function hideTutorialCompleteOverlay() {
+        const overlay = document.getElementById('tutorial-complete-overlay');
         if (!overlay) return;
-        overlay.classList.remove('c100-tutorial-complete--visible');
+        overlay.classList.remove('tutorial-complete--visible');
         overlay.setAttribute('aria-hidden', 'true');
         setTimeout(() => {
-            if (!overlay.classList.contains('c100-tutorial-complete--visible')) {
+            if (!overlay.classList.contains('tutorial-complete--visible')) {
                 overlay.style.display = 'none';
             }
         }, 600);
     }
 
     /** Full-screen text recap (CNCR-style); hides celebration overlay until Complete → home. */
-    function openC100TutorialRecapPage() {
-        const skipped = !!window._c100TutorialCompleteSkipped;
-        const body = document.getElementById('c100-tutorial-recap-body');
-        const lede = document.getElementById('c100-tutorial-recap-lede');
-        if (body) body.innerHTML = buildC100TutorialRecapHtml(skipped);
+    function openTutorialRecapPage() {
+        const skipped = !!window.tutorialCompleteWasSkipped;
+        const body = document.getElementById('tutorial-recap-body');
+        const lede = document.getElementById('tutorial-recap-lede');
+        if (body) body.innerHTML = buildTutorialRecapHtml(skipped);
         if (lede) {
             lede.textContent = skipped
                 ? 'You skipped the guided steps — here is the full text summary. Press Complete when you are done.'
                 : 'Full text summary of the walkthrough. Press Complete when you are done to return home.';
         }
-        const completeOverlay = document.getElementById('c100-tutorial-complete-overlay');
+        const completeOverlay = document.getElementById('tutorial-complete-overlay');
         if (completeOverlay) {
-            completeOverlay.classList.remove('c100-tutorial-complete--visible');
+            completeOverlay.classList.remove('tutorial-complete--visible');
             completeOverlay.style.display = 'none';
             completeOverlay.setAttribute('aria-hidden', 'true');
         }
-        const recapPage = document.getElementById('c100-tutorial-recap-page');
+        const recapPage = document.getElementById('tutorial-recap-page');
         if (recapPage) {
             recapPage.style.display = 'flex';
-            recapPage.classList.add('c100-tutorial-recap-page--visible');
+            recapPage.classList.add('tutorial-recap-page--visible');
             recapPage.setAttribute('aria-hidden', 'false');
             recapPage.scrollTop = 0;
-            const scrollBody = document.getElementById('c100-tutorial-recap-body');
+            const scrollBody = document.getElementById('tutorial-recap-body');
             if (scrollBody) scrollBody.scrollTop = 0;
         }
         window.scrollTo(0, 0);
@@ -3390,7 +3410,7 @@
     /**
      * Full session reset: default emulator state + tutorial off + return to device (SB/R) home.
      */
-    function resetC100EmulatorSessionToHome() {
+    function resetSessionToHome() {
         stopAutoAddRemoveScanning();
         clearMeasureAllTimers();
         if (measurementTimeout) {
@@ -3448,8 +3468,8 @@
         autoAddRemoveFoundCount = 0;
         autoAddRemoveLastFound = null;
 
-        selectedC100Device = null;
-        document.body.classList.remove('c100-r-device');
+        selectedDevice = null;
+        document.body.classList.remove('device-variant-radar');
 
         menuData['SETUP_INTERVAL_TIMER_TIME'].value = '04:00';
         menuData['SETUP_PRODUCT_DENSITY'].value = '038.00';
@@ -3479,28 +3499,28 @@
 
         const homePage = document.getElementById('home-page');
         const mainContent = document.querySelector('.main-content');
-        const consoleViewport = document.getElementById('c100-console-viewport');
+        const consoleViewport = document.getElementById('emulator-console-viewport');
         const consoleRoot = document.getElementById('console-root');
         if (homePage) homePage.classList.remove('hidden');
         if (mainContent) mainContent.classList.remove('hidden');
         if (consoleViewport) consoleViewport.classList.add('hidden');
         if (consoleRoot) consoleRoot.classList.add('hidden');
 
-        const tcOverlay = document.getElementById('c100-tutorial-complete-overlay');
+        const tcOverlay = document.getElementById('tutorial-complete-overlay');
         if (tcOverlay) {
-            tcOverlay.classList.remove('c100-tutorial-complete--visible');
+            tcOverlay.classList.remove('tutorial-complete--visible');
             tcOverlay.setAttribute('aria-hidden', 'true');
             tcOverlay.style.display = 'none';
         }
-        const recapPage = document.getElementById('c100-tutorial-recap-page');
+        const recapPage = document.getElementById('tutorial-recap-page');
         if (recapPage) {
-            recapPage.classList.remove('c100-tutorial-recap-page--visible');
+            recapPage.classList.remove('tutorial-recap-page--visible');
             recapPage.style.display = 'none';
             recapPage.setAttribute('aria-hidden', 'true');
         }
-        const recapBody = document.getElementById('c100-tutorial-recap-body');
+        const recapBody = document.getElementById('tutorial-recap-body');
         if (recapBody) recapBody.innerHTML = '';
-        const recapLede = document.getElementById('c100-tutorial-recap-lede');
+        const recapLede = document.getElementById('tutorial-recap-lede');
         if (recapLede) recapLede.textContent = '';
 
         if (tutorialTooltip) tutorialTooltip.classList.add('tutorial-hidden');
@@ -3510,17 +3530,17 @@
         renderScreen();
     }
 
-    function endC100Tutorial(skipped) {
+    function endTutorial(skipped) {
         tutorialActive = false;
         if (tutorialAdvanceTimer) {
             clearTimeout(tutorialAdvanceTimer);
             tutorialAdvanceTimer = null;
         }
         updateTutorialUI();
-        showC100TutorialCompleteOverlay(!!skipped);
+        showTutorialCompleteOverlay(!!skipped);
     }
 
-    function startC100Tutorial() {
+    function startTutorial() {
         tutorialActive = true;
         currentTutorialStep = 0;
         showTutorialStep(0);
@@ -3697,21 +3717,21 @@
         }
     }
 
-    if (tutorialSkipButton) {
-        tutorialSkipButton.addEventListener('click', () => endC100Tutorial(true));
+    if (tutorialExitButton) {
+        tutorialExitButton.addEventListener('click', () => resetSessionToHome());
     }
 
-    const c100TutorialCompleteDismiss = document.getElementById('c100-tutorial-complete-dismiss');
-    if (c100TutorialCompleteDismiss) {
-        c100TutorialCompleteDismiss.addEventListener('click', () => resetC100EmulatorSessionToHome());
+    const tutorialCompleteDismissBtn = document.getElementById('tutorial-complete-dismiss');
+    if (tutorialCompleteDismissBtn) {
+        tutorialCompleteDismissBtn.addEventListener('click', () => resetSessionToHome());
     }
-    const c100TutorialOpenRecap = document.getElementById('c100-tutorial-open-recap');
-    if (c100TutorialOpenRecap) {
-        c100TutorialOpenRecap.addEventListener('click', () => openC100TutorialRecapPage());
+    const tutorialOpenRecapBtn = document.getElementById('tutorial-open-recap');
+    if (tutorialOpenRecapBtn) {
+        tutorialOpenRecapBtn.addEventListener('click', () => openTutorialRecapPage());
     }
-    const c100TutorialRecapComplete = document.getElementById('c100-tutorial-recap-complete');
-    if (c100TutorialRecapComplete) {
-        c100TutorialRecapComplete.addEventListener('click', () => resetC100EmulatorSessionToHome());
+    const tutorialRecapCompleteBtn = document.getElementById('tutorial-recap-complete');
+    if (tutorialRecapCompleteBtn) {
+        tutorialRecapCompleteBtn.addEventListener('click', () => resetSessionToHome());
     }
 
     // --- NAVIGATION HANDLERS ---
@@ -4206,7 +4226,7 @@
                  
                  // Finalize input and move to the next step
                  let nextState = menu.next;
-                 if (currentState === 'CONFIG_PRODUCT_DENSITY' && selectedC100Device === 'C100-R') {
+                 if (currentState === 'CONFIG_PRODUCT_DENSITY' && selectedDevice === 'C100-R') {
                      nextState = 'SETUP_VESSEL_SETUP';
                  }
                  if (nextState) {
@@ -4380,10 +4400,10 @@
 
     // Keyboard controls for easier testing
     document.addEventListener('keydown', (e) => {
-        const tcOverlay = document.getElementById('c100-tutorial-complete-overlay');
-        if (tcOverlay && tcOverlay.classList.contains('c100-tutorial-complete--visible')) {
+        const tcOverlay = document.getElementById('tutorial-complete-overlay');
+        if (tcOverlay && tcOverlay.classList.contains('tutorial-complete--visible')) {
             if (e.key === 'Escape' || e.key === 'Enter') {
-                hideC100TutorialCompleteOverlay();
+                hideTutorialCompleteOverlay();
                 e.preventDefault();
             }
             return;
