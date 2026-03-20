@@ -484,6 +484,11 @@
             color: #333;
         }
 
+        /* C100-R only: hide SmartBob line; “Model C-100” sits in that slot (typography matched below per breakpoint) */
+        body.c100-r-device .screen-and-brand .smartbob {
+            display: none !important;
+        }
+
         /* --- Tutorial complete: BinDisc-style celebration (rings + sparkles + bouncy device) --- */
         @keyframes c100-tc-badge-pop {
             0% { opacity: 0; transform: scale(0.4); }
@@ -580,6 +585,115 @@
             }
         }
 
+        /* Wider viewports: stronger motion + longer reads (mobile keeps tighter timings above) */
+        @keyframes c100-tc-badge-pop-lg {
+            0% {
+                opacity: 0;
+                transform: scale(0.28);
+            }
+            52% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+            74% {
+                transform: scale(0.93);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        @keyframes c100-tc-check-in-lg {
+            0% {
+                opacity: 0;
+                transform: scale(0.28) rotate(-22deg);
+            }
+            68% {
+                opacity: 1;
+                transform: scale(1.2) rotate(5deg);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+            }
+        }
+        @keyframes c100-tc-pulse-ring-lg {
+            0% {
+                transform: scale(0.5);
+                opacity: 0.88;
+            }
+            100% {
+                transform: scale(2.65);
+                opacity: 0;
+            }
+        }
+        @keyframes c100-tc-headline-in-lg {
+            0% {
+                opacity: 0;
+                transform: translateY(32px) scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        @keyframes c100-tc-preview-fade-lg {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes c100-tc-device-bindisc-lg {
+            0% {
+                opacity: 0;
+                transform: translateY(64px) scale(0.66);
+                filter: blur(10px);
+            }
+            48% {
+                opacity: 1;
+                filter: blur(0);
+            }
+            64% {
+                transform: translateY(-16px) scale(1.09);
+            }
+            80% {
+                transform: translateY(8px) scale(0.97);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                filter: blur(0);
+            }
+        }
+        @keyframes c100-tc-sparkle-lg {
+            0% {
+                opacity: 0;
+                transform: scale(0) rotate(0deg);
+            }
+            38% {
+                opacity: 1;
+                transform: scale(1.35) rotate(120deg);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.45) rotate(260deg);
+            }
+        }
+        @keyframes c100-tc-slide-up-lg {
+            from {
+                transform: translateY(36px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
         /*
          * Important: do NOT fade the overlay with opacity — it multiplies with child animations
          * and makes the entrance look like an instant “jump.” Visibility = display only.
@@ -600,6 +714,15 @@
             box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.35);
             opacity: 1;
             pointer-events: none;
+            /*
+             * Body is display:flex; flex-direction:column; align-items:center.
+             * Fixed-position children are still flex items — without stretch they shrink to max-content
+             * width (~420px), so the overlay looks like a narrow strip with page background on the sides.
+             */
+            align-self: stretch;
+            width: 100%;
+            box-sizing: border-box;
+            scrollbar-gutter: stable;
         }
         .c100-tutorial-complete.c100-tutorial-complete--visible {
             display: flex;
@@ -615,6 +738,12 @@
             max-width: min(420px, 100%);
             width: 100%;
             box-sizing: border-box;
+            /* Whole column (icon + title + copy + device + buttons) shares one horizontal center */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-inline: auto;
+            min-width: 0;
         }
         .c100-tutorial-complete__success-mark {
             display: flex;
@@ -623,6 +752,7 @@
             position: relative;
             margin-bottom: clamp(18px, 3.5vh, 26px);
             min-height: 76px;
+            width: 100%;
         }
         .c100-tutorial-complete__pulse-rings {
             position: absolute;
@@ -681,6 +811,8 @@
             letter-spacing: -0.02em;
             line-height: 1.15;
             opacity: 0;
+            width: 100%;
+            text-align: center;
         }
         .c100-tutorial-complete__subcopy {
             font-size: clamp(15px, 3.2vw, 17px);
@@ -689,6 +821,8 @@
             margin: 0 0 clamp(22px, 4vh, 30px);
             line-height: 1.6;
             opacity: 0;
+            width: 100%;
+            text-align: center;
         }
         .c100-tutorial-complete__subcopy-line {
             margin: 0 0 8px;
@@ -709,6 +843,7 @@
             box-sizing: border-box;
             line-height: normal;
             position: relative;
+            align-self: center;
         }
         /* Desktop: center the scaled C-100 mockup horizontally */
         @media (min-width: 541px) {
@@ -722,6 +857,7 @@
             }
             .c100-tutorial-complete__mini-scale-wrap {
                 flex-shrink: 0;
+                --c100-mini-scale: 0.44;
             }
             .c100-tutorial-complete__mini-viewport {
                 display: flex;
@@ -815,6 +951,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            align-self: center;
             gap: 12px;
             width: 100%;
             max-width: 320px;
@@ -899,6 +1036,10 @@
                 linear-gradient(168deg, #0f172a 0%, #1e1b4b 38%, #172554 72%, #0c1222 100%);
             color: #e2e8f0;
             -webkit-overflow-scrolling: touch;
+            align-self: stretch;
+            width: 100%;
+            box-sizing: border-box;
+            scrollbar-gutter: stable;
         }
         .c100-tutorial-recap-page.c100-tutorial-recap-page--visible {
             display: flex;
@@ -1054,6 +1195,17 @@
             /* Single C-100 line under logo — hide duplicate “Model C-100” row */
             .screen-and-brand .model {
                 display: none !important;
+            }
+            /* C100-R: show “Model C-100” in the SmartBob / C-100 subtitle slot (same look as that line) */
+            body.c100-r-device .screen-and-brand .model {
+                display: inline !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+                font-size: clamp(10px, 2.8vw, 12px) !important;
+                font-weight: 700 !important;
+                letter-spacing: 0.14em !important;
+                color: #222 !important;
             }
             /*
              * Mobile: lock document scroll so the page doesn’t rubber-band / scroll vertically
@@ -1309,10 +1461,10 @@
                 box-shadow: 0 0 0 clamp(1px, 0.45vw, 2px) rgba(216, 42, 39, 0.3);
             }
 
-            /* Setup complete overlay: scroll instead of vertical center clip */
+            /* Setup complete overlay: scroll from top but keep column centered horizontally */
             .c100-tutorial-complete.c100-tutorial-complete--visible {
                 align-items: flex-start;
-                justify-content: flex-start;
+                justify-content: center;
                 padding-top: max(4px, env(safe-area-inset-top));
                 padding-bottom: max(4px, env(safe-area-inset-bottom));
             }
@@ -1322,6 +1474,7 @@
                 box-sizing: border-box;
                 padding: max(14px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-left)) max(28px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-right));
                 flex-shrink: 0;
+                margin-inline: auto;
             }
             .c100-tutorial-complete__check-badge {
                 width: clamp(64px, 18vw, 76px);
@@ -1416,6 +1569,16 @@
             .screen-and-brand .model {
                 font-size: 11px !important;
                 color: #333 !important;
+            }
+            /* C100-R: Model C-100 replaces the SmartBob line — match former .smartbob styling */
+            body.c100-r-device .screen-and-brand .model {
+                font-size: 12px !important;
+                font-weight: 600 !important;
+                letter-spacing: normal !important;
+                color: #000 !important;
+                margin: 0 0 2px !important;
+                padding: 0 !important;
+                border: none !important;
             }
             .keypad {
                 display: grid !important;
@@ -1627,6 +1790,7 @@
 
     function selectC100Device(deviceType) {
         selectedC100Device = deviceType;
+        document.body.classList.toggle('c100-r-device', deviceType === 'C100-R');
 
         const homePage = document.getElementById('home-page');
         const mainContent = document.querySelector('.main-content');
@@ -1658,7 +1822,11 @@
         'WELCOME': {
             type: 'welcome',
             items: function welcomeItems() {
-                const line2 = isMobileBrandingViewport() ? 'C-100' : 'SmartBob Console';
+                const line2 = isMobileBrandingViewport()
+                    ? 'C-100'
+                    : selectedC100Device === 'C100-R'
+                      ? 'C-100'
+                      : 'SmartBob Console';
                 return ['BinMaster C-100', line2, 'v2.00 Apr 21 2016', 'Press any key...'];
             }
         },
@@ -3064,9 +3232,14 @@
         wrap.style.height = Math.max(1, Math.ceil(h * scale)) + 'px';
     }
 
+    function isC100TutorialCompleteDesktopMotion() {
+        return typeof window.matchMedia === 'function' && window.matchMedia('(min-width: 541px)').matches;
+    }
+
     function resetC100TutorialCompleteAnimations() {
         const overlay = document.getElementById('c100-tutorial-complete-overlay');
         if (!overlay) return;
+        const desktopMo = isC100TutorialCompleteDesktopMotion();
         const badge = overlay.querySelector('.c100-tutorial-complete__check-badge');
         const checkSvg = overlay.querySelector('.c100-tutorial-complete__check-svg');
         const title = document.getElementById('c100-tutorial-complete-title');
@@ -3088,27 +3261,48 @@
             el.style.animation = 'none';
         });
         void overlay.offsetWidth;
-        if (badge) badge.style.animation = 'c100-tc-badge-pop 0.62s cubic-bezier(0.34, 1.55, 0.64, 1) forwards';
-        if (checkSvg) checkSvg.style.animation = 'c100-tc-check-in 0.48s cubic-bezier(0.34, 1.2, 0.64, 1) 0.12s forwards';
-        pulseRings.forEach((el, i) => {
-            el.style.animation = `c100-tc-pulse-ring 1.05s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${i * 0.11}s forwards`;
-        });
-        if (title) title.style.animation = 'c100-tc-headline-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.42s forwards';
-        if (subcopy) subcopy.style.animation = 'c100-tc-headline-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.58s forwards';
-        if (preview) preview.style.animation = 'c100-tc-preview-fade 0.36s ease-out 0.18s forwards';
-        if (miniWrap) {
-            miniWrap.style.animation = 'c100-tc-device-bindisc 1.12s cubic-bezier(0.34, 1.15, 0.64, 1) 0.22s forwards';
-        }
-        sparkles.forEach((el, i) => {
-            el.style.animation = `c100-tc-sparkle 0.78s cubic-bezier(0.34, 1.1, 0.64, 1) ${0.34 + i * 0.055}s forwards`;
-        });
-        /* One slide-up on the actions group (avoids stuck opacity:0 on nested buttons in some browsers) */
-        if (actionsEl) {
-            actionsEl.style.animation = 'c100-tc-slide-up 0.58s cubic-bezier(0.22, 1, 0.36, 1) 0.96s forwards';
-        }
-        /* Glow only on Complete — starts after the group finishes sliding in */
-        if (btn) {
-            btn.style.animation = 'c100-tc-btn-glow 2.2s ease-in-out 1.54s 2 alternate';
+        if (desktopMo) {
+            if (badge) badge.style.animation = 'c100-tc-badge-pop-lg 0.76s cubic-bezier(0.34, 1.55, 0.64, 1) forwards';
+            if (checkSvg) checkSvg.style.animation = 'c100-tc-check-in-lg 0.54s cubic-bezier(0.34, 1.2, 0.64, 1) 0.14s forwards';
+            pulseRings.forEach((el, i) => {
+                el.style.animation = `c100-tc-pulse-ring-lg 1.18s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${i * 0.12}s forwards`;
+            });
+            if (title) title.style.animation = 'c100-tc-headline-in-lg 0.64s cubic-bezier(0.22, 1, 0.36, 1) 0.48s forwards';
+            if (subcopy) subcopy.style.animation = 'c100-tc-headline-in-lg 0.58s cubic-bezier(0.22, 1, 0.36, 1) 0.72s forwards';
+            if (preview) preview.style.animation = 'c100-tc-preview-fade-lg 0.52s cubic-bezier(0.22, 1, 0.36, 1) 0.22s forwards';
+            if (miniWrap) {
+                miniWrap.style.animation = 'c100-tc-device-bindisc-lg 1.45s cubic-bezier(0.34, 1.15, 0.64, 1) 0.28s forwards';
+            }
+            sparkles.forEach((el, i) => {
+                el.style.animation = `c100-tc-sparkle-lg 0.95s cubic-bezier(0.34, 1.1, 0.64, 1) ${0.4 + i * 0.065}s forwards`;
+            });
+            if (actionsEl) {
+                actionsEl.style.animation = 'c100-tc-slide-up-lg 0.72s cubic-bezier(0.22, 1, 0.36, 1) 1.08s forwards';
+            }
+            if (btn) {
+                btn.style.animation = 'c100-tc-btn-glow 2.65s ease-in-out 1.92s 2 alternate';
+            }
+        } else {
+            if (badge) badge.style.animation = 'c100-tc-badge-pop 0.62s cubic-bezier(0.34, 1.55, 0.64, 1) forwards';
+            if (checkSvg) checkSvg.style.animation = 'c100-tc-check-in 0.48s cubic-bezier(0.34, 1.2, 0.64, 1) 0.12s forwards';
+            pulseRings.forEach((el, i) => {
+                el.style.animation = `c100-tc-pulse-ring 1.05s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${i * 0.11}s forwards`;
+            });
+            if (title) title.style.animation = 'c100-tc-headline-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.42s forwards';
+            if (subcopy) subcopy.style.animation = 'c100-tc-headline-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.58s forwards';
+            if (preview) preview.style.animation = 'c100-tc-preview-fade 0.36s ease-out 0.18s forwards';
+            if (miniWrap) {
+                miniWrap.style.animation = 'c100-tc-device-bindisc 1.12s cubic-bezier(0.34, 1.15, 0.64, 1) 0.22s forwards';
+            }
+            sparkles.forEach((el, i) => {
+                el.style.animation = `c100-tc-sparkle 0.78s cubic-bezier(0.34, 1.1, 0.64, 1) ${0.34 + i * 0.055}s forwards`;
+            });
+            if (actionsEl) {
+                actionsEl.style.animation = 'c100-tc-slide-up 0.58s cubic-bezier(0.22, 1, 0.36, 1) 0.96s forwards';
+            }
+            if (btn) {
+                btn.style.animation = 'c100-tc-btn-glow 2.2s ease-in-out 1.54s 2 alternate';
+            }
         }
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
@@ -3255,6 +3449,7 @@
         autoAddRemoveLastFound = null;
 
         selectedC100Device = null;
+        document.body.classList.remove('c100-r-device');
 
         menuData['SETUP_INTERVAL_TIMER_TIME'].value = '04:00';
         menuData['SETUP_PRODUCT_DENSITY'].value = '038.00';
