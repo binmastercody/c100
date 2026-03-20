@@ -710,6 +710,21 @@
             line-height: normal;
             position: relative;
         }
+        /* Desktop: center the scaled C-100 mockup horizontally */
+        @media (min-width: 541px) {
+            .c100-tutorial-complete__console-preview {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                max-width: 100%;
+            }
+            .c100-tutorial-complete__mini-viewport {
+                display: flex;
+                justify-content: center;
+                width: 100%;
+            }
+        }
         .c100-tutorial-complete__sparkles {
             position: absolute;
             left: 50%;
@@ -792,9 +807,44 @@
             pointer-events: none;
             -webkit-font-smoothing: antialiased;
         }
+        .c100-tutorial-complete__actions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            max-width: 320px;
+            margin-top: 6px;
+        }
+        .c100-tutorial-complete__recap-btn {
+            opacity: 0;
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: "DM Sans", system-ui, sans-serif;
+            color: #e2e8f0;
+            background: rgba(30, 41, 59, 0.85);
+            border: 1px solid rgba(148, 163, 184, 0.45);
+            border-radius: 999px;
+            cursor: pointer;
+            transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+        }
+        .c100-tutorial-complete__recap-btn:hover {
+            background: rgba(51, 65, 85, 0.95);
+            border-color: rgba(165, 180, 252, 0.55);
+            transform: translateY(-1px);
+        }
+        .c100-tutorial-complete__recap-btn:active {
+            transform: translateY(0);
+        }
         .c100-tutorial-complete__dismiss {
             opacity: 0;
-            margin-top: 4px;
+            margin-top: 0;
+            width: 100%;
+            max-width: 320px;
+            box-sizing: border-box;
             padding: 14px 32px;
             min-width: 200px;
             font-size: 16px;
@@ -823,6 +873,134 @@
             transform: translateY(0);
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }
+
+        /* Full-page training recap — scrollable middle (bounded height so overflow works) */
+        .c100-tutorial-recap-page {
+            position: fixed;
+            inset: 0;
+            z-index: 10060;
+            display: none;
+            flex-direction: column;
+            height: 100vh;
+            height: 100dvh;
+            max-height: 100dvh;
+            overflow: hidden;
+            font-family: "DM Sans", system-ui, -apple-system, Segoe UI, sans-serif;
+            background:
+                radial-gradient(ellipse 120% 80% at 50% 0%, rgba(99, 102, 241, 0.22) 0%, transparent 55%),
+                radial-gradient(ellipse 90% 60% at 100% 100%, rgba(167, 139, 250, 0.18) 0%, transparent 50%),
+                linear-gradient(168deg, #0f172a 0%, #1e1b4b 38%, #172554 72%, #0c1222 100%);
+            color: #e2e8f0;
+            -webkit-overflow-scrolling: touch;
+        }
+        .c100-tutorial-recap-page.c100-tutorial-recap-page--visible {
+            display: flex;
+        }
+        .c100-tutorial-recap-page__inner {
+            flex: 1 1 auto;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            max-width: 560px;
+            width: 100%;
+            margin: 0 auto;
+            box-sizing: border-box;
+            padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
+        }
+        .c100-tutorial-recap-page__header {
+            flex-shrink: 0;
+            text-align: center;
+            padding-bottom: 12px;
+        }
+        .c100-tutorial-recap-page__title {
+            font-family: "Outfit", "DM Sans", system-ui, sans-serif;
+            font-size: clamp(1.35rem, 4vw, 1.75rem);
+            font-weight: 700;
+            color: #f8fafc;
+            margin: 0 0 8px;
+        }
+        .c100-tutorial-recap-page__lede {
+            margin: 0;
+            font-size: 0.9rem;
+            line-height: 1.45;
+            color: #94a3b8;
+        }
+        .c100-tutorial-recap-page__body {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            overscroll-behavior: contain;
+            text-align: left;
+            padding: 8px 4px 16px;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+        .c100-recap-head {
+            font-family: "Outfit", "DM Sans", system-ui, sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #f1f5f9;
+            margin: 0 0 12px;
+        }
+        .c100-recap-note {
+            margin: 0 0 16px;
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+        .c100-recap-list {
+            margin: 0;
+            padding-left: 1.2rem;
+        }
+        .c100-recap-item {
+            margin-bottom: 1rem;
+        }
+        .c100-recap-item strong {
+            display: block;
+            color: #a5b4fc;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+        .c100-recap-item p {
+            margin: 0;
+            color: #cbd5e1;
+            font-weight: 400;
+        }
+        .c100-tutorial-recap-page__footer {
+            flex-shrink: 0;
+            margin-top: auto;
+            padding-top: 12px;
+            padding-bottom: max(12px, env(safe-area-inset-bottom));
+            border-top: 1px solid rgba(148, 163, 184, 0.2);
+            background: linear-gradient(180deg, transparent 0%, rgba(15, 23, 42, 0.92) 40%);
+        }
+        .c100-tutorial-recap-page__complete {
+            width: 100%;
+            max-width: 320px;
+            margin: 0 auto;
+            display: block;
+            box-sizing: border-box;
+            padding: 14px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: "DM Sans", system-ui, sans-serif;
+            color: #f8fafc;
+            background: linear-gradient(180deg, #6366f1 0%, #4f46e5 45%, #4338ca 100%);
+            border: none;
+            border-radius: 999px;
+            cursor: pointer;
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.15) inset,
+                0 8px 24px rgba(79, 70, 229, 0.45),
+                0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+        .c100-tutorial-recap-page__complete:hover {
+            filter: brightness(1.05);
+        }
+        .c100-tutorial-recap-page__complete:active {
+            filter: brightness(0.98);
+        }
+
         @media (prefers-reduced-motion: reduce) {
             .c100-tutorial-complete__check-badge,
             .c100-tutorial-complete__check-svg,
@@ -831,6 +1009,7 @@
             .c100-tutorial-complete__console-preview,
             .c100-tutorial-complete__mini-scale-wrap,
             .c100-tutorial-complete__dismiss,
+            .c100-tutorial-complete__recap-btn,
             .c100-tutorial-complete__pulse-ring,
             .c100-tutorial-complete__sparkles span {
                 animation: none !important;
@@ -847,6 +1026,9 @@
                     0 1px 0 rgba(255, 255, 255, 0.15) inset,
                     0 8px 24px rgba(79, 70, 229, 0.45),
                     0 2px 6px rgba(0, 0, 0, 0.2) !important;
+            }
+            .c100-tutorial-complete__recap-btn {
+                border-color: rgba(148, 163, 184, 0.45) !important;
             }
         }
 
@@ -1145,10 +1327,8 @@
             .c100-tutorial-complete__mini-scale-wrap {
                 --c100-mini-scale: 0.33;
             }
-            .c100-tutorial-complete__dismiss {
-                width: 100%;
-                max-width: 320px;
-                box-sizing: border-box;
+            .c100-tutorial-complete__actions {
+                max-width: 100%;
             }
         }
 
@@ -1400,13 +1580,39 @@
                 </div>
             </div>
         </div>
-        <button type="button" class="c100-tutorial-complete__dismiss" id="c100-tutorial-complete-dismiss">Continue</button>
+        <div class="c100-tutorial-complete__actions" id="c100-tutorial-complete-actions">
+            <button type="button" class="c100-tutorial-complete__recap-btn" id="c100-tutorial-open-recap">View training recap</button>
+            <button type="button" class="c100-tutorial-complete__dismiss" id="c100-tutorial-complete-dismiss">Complete</button>
+        </div>
+    </div>
+</div>
+
+<!-- Separate full-page training recap (CNCR-style: own scroll, then Complete → home) -->
+<div id="c100-tutorial-recap-page" class="c100-tutorial-recap-page" aria-hidden="true">
+    <div class="c100-tutorial-recap-page__inner">
+        <header class="c100-tutorial-recap-page__header">
+            <h1 class="c100-tutorial-recap-page__title">Training Recap:</h1>
+            <p class="c100-tutorial-recap-page__lede" id="c100-tutorial-recap-lede"></p>
+        </header>
+        <div class="c100-tutorial-recap-page__body" id="c100-tutorial-recap-body"></div>
+        <footer class="c100-tutorial-recap-page__footer">
+            <button type="button" class="c100-tutorial-recap-page__complete" id="c100-tutorial-recap-complete">Complete</button>
+        </footer>
     </div>
 </div>
 
 <script>
     // --- FRONT-PAGE DEVICE TYPE SELECTION ---
     let selectedC100Device = null;
+
+    /** C100-R uses Modbus (247 addresses); C100-SB uses SmartBob addressing (120). */
+    function getAutoAddRemoveScanLimit() {
+        return selectedC100Device === 'C100-R' ? 247 : 120;
+    }
+    /** C100-R scans more addresses — use a shorter interval so the full sweep stays fast. */
+    function getAutoAddRemoveScanIntervalMs() {
+        return selectedC100Device === 'C100-R' ? 22 : 80;
+    }
 
     function selectC100Device(deviceType) {
         selectedC100Device = deviceType;
@@ -1710,7 +1916,11 @@
         'SETUP_INFO_ABOUT': { type: 'info', items: ['INFO/ABOUT', 'BinMaster C-100', 'Smartbob Console', 'v3.03 Feb 14, 2023'] },
 
         // --- VESSEL CONFIGURATION SCREENS --- (Simplified flow starting from Set All/001 selection)
-        'VESSEL_CONFIG_START': { type: 'nav', items: ['VESSEL SHAPE', 'BODY HEIGHT', 'BODY RADIUS', 'HOPPER PRESENT', 'SENSOR OFFSET', 'SMARTBOB MAX DROP'] }, // Added offset/drop
+        'VESSEL_CONFIG_START': { type: 'nav', items: function() {
+            const base = ['VESSEL SHAPE', 'BODY HEIGHT', 'BODY RADIUS', 'HOPPER PRESENT', 'SENSOR OFFSET'];
+            if (selectedC100Device === 'C100-R') return base;
+            return base.concat(['SMARTBOB MAX DROP']);
+        } },
 
         'CONFIG_VESSEL_SHAPE': { type: 'select', items: ['Circular', 'Rectangular'], checked: 0, next: 'CONFIG_BODY_HEIGHT' },
         'CONFIG_BODY_HEIGHT': { type: 'input', label: 'BODY HEIGHT', unit: 'in feet:', value: '020.00', next: 'CONFIG_BODY_RADIUS' },
@@ -2020,7 +2230,8 @@
     }
 
     /**
-     * All enabled sensors share the same phases: Pending... → Measuring... → Retracted (short) → lb readout.
+     * Measure All: Pending → Measuring → (Retracted for C100-SB only) → lb readout.
+     * C100-R (Modbus) has no physical bob retract — skip Retracted phase.
      */
     function performMeasureAll() {
         clearMeasureAllTimers();
@@ -2034,6 +2245,7 @@
         const MS_PENDING = 600;
         const MS_MEASURING = 1400;
         const MS_RETRACTED = 320;
+        const skipRetracted = selectedC100Device === 'C100-R';
 
         measureAllInProgress = true;
         measureAllPhase = 'pending';
@@ -2044,18 +2256,24 @@
             renderScreen();
         }, MS_PENDING);
 
-        scheduleMeasureAllStep(() => {
-            measureAllPhase = 'retracted';
-            renderScreen();
-        }, MS_PENDING + MS_MEASURING);
-
-        scheduleMeasureAllStep(() => {
+        const finishMeasureAll = () => {
             enabledSensors.forEach((s) => applyMeasurementForSensor(s));
             measureAllInProgress = false;
             measureAllPhase = null;
             clearMeasureAllTimers();
             renderScreen();
-        }, MS_PENDING + MS_MEASURING + MS_RETRACTED);
+        };
+
+        if (skipRetracted) {
+            scheduleMeasureAllStep(finishMeasureAll, MS_PENDING + MS_MEASURING);
+        } else {
+            scheduleMeasureAllStep(() => {
+                measureAllPhase = 'retracted';
+                renderScreen();
+            }, MS_PENDING + MS_MEASURING);
+
+            scheduleMeasureAllStep(finishMeasureAll, MS_PENDING + MS_MEASURING + MS_RETRACTED);
+        }
     }
     
     // Auto Add/Remove scanning functions
@@ -2067,20 +2285,18 @@
         // Process first sensor immediately (001)
         processSensorScan();
         
-        // Start scanning with interval - scan each number from 002 to 120
+        const scanLimit = getAutoAddRemoveScanLimit();
+        const intervalMs = getAutoAddRemoveScanIntervalMs();
         autoAddRemoveInterval = setInterval(() => {
-            // Increment to next sensor
             autoAddRemoveCurrentSensor++;
             
-            // Stop at 120
-            if (autoAddRemoveCurrentSensor > 120) {
+            if (autoAddRemoveCurrentSensor > scanLimit) {
                 stopAutoAddRemoveScanning();
                 return;
             }
             
-            // Process this sensor
             processSensorScan();
-        }, 60); // ~7 seconds total for 120 sensors
+        }, intervalMs);
     }
     
     // Helper function to process scanning for current sensor
@@ -2108,9 +2324,9 @@
     // Function to simulate checking if a sensor address exists
     // In real implementation, this would check actual hardware
     function checkSensorAddress(sensorNumber) {
-        // Find sensors 001, 004, and 009 (3 out of 256)
+        // Demo: always find 3 sensors (001, 004, 009) whether scanning 120 or 247 addresses
         if (sensorNumber === 1 || sensorNumber === 4 || sensorNumber === 9) return true;
-        return false; // All other sensors won't be found
+        return false;
     }
     
     function stopAutoAddRemoveScanning() {
@@ -2472,7 +2688,7 @@
         // Require scan to have finished (sensor > 120), not just !scanning — before startAutoAddRemoveScanning(),
         // scanning is still false for one render; the extra maybeAutoAdvanceTutorial() after pending would skip
         // this step early and allow back while the scan is running.
-        { state: 'SETUP_AUTO_ADD_REMOVE', title: 'Scan for Sensors', message: 'Wait for the scan to finish. When it says "Finished," we will continue.', action: 'wait', target: '#screen', advanceWhen: () => currentState === 'SETUP_AUTO_ADD_REMOVE' && !autoAddRemoveScanning && autoAddRemoveCurrentSensor > 120 },
+        { state: 'SETUP_AUTO_ADD_REMOVE', title: 'Scan for Sensors', message: 'Wait for the scan to finish. When it says "Finished," we will continue.', action: 'wait', target: '#screen', advanceWhen: () => currentState === 'SETUP_AUTO_ADD_REMOVE' && !autoAddRemoveScanning && autoAddRemoveCurrentSensor > getAutoAddRemoveScanLimit() },
         { state: 'SETUP_AUTO_ADD_REMOVE', title: 'Return to Setup', message: 'Press X to return to the Setup menu.', action: 'back', target: '#screen' },
         { state: 'SETUP', title: 'Move to Weight Calculations', message: 'Press the down arrow to highlight "Add/Remove".', action: 'down', targetIndex: 3 },
         { state: 'SETUP', title: 'Move to Weight Calculations', message: 'Press the down arrow to highlight "Unit of Measure".', action: 'down', targetIndex: 4 },
@@ -2490,9 +2706,9 @@
         { state: 'CONFIG_OUTLET_RADIUS', title: 'Outlet Radius', message: 'Enter the outlet radius at the hopper discharge, then press ✓.', action: 'select', selector: '.input-value' },
         { state: 'CONFIG_SENSOR_OFFSET', title: 'Sensor Offset', message: 'The sensor offset is typically 0. However, if the sensor is raised by extensions or mounted inside the silo, it may be positive/negative in feet. Example 2 feet positive. Adding 2 feet to distance. Press ✓ to continue.', action: 'select', selector: '.input-value' },
         { state: 'CONFIG_PRODUCT_DENSITY', title: 'Product Density', message: 'Enter product density for weight calculations, then press ✓.', action: 'select', selector: '.input-value' },
-        { state: 'CONFIG_SMARTBOB_MAX_DROP', title: 'SmartBob Max Drop', message: 'This is the distance in feet your Smartbob is allowed to drop. Usually set to vessel height or top of cone. Press the up arrow to select "Enabled".', action: 'up', targetIndex: 0 },
-        { state: 'CONFIG_SMARTBOB_MAX_DROP', title: 'SmartBob Max Drop', message: 'Press ✓ to confirm Enabled.', action: 'select', targetIndex: 0 },
-        { state: 'CONFIG_SMARTBOB_MAX_DROP_INPUT', title: 'Max Drop Value', message: 'This is the distance in feet your Smartbob is allowed to drop. Usually set to vessel height or top of cone. Enter the value, then press ✓.', action: 'select', selector: '.input-value' },
+        { state: 'CONFIG_SMARTBOB_MAX_DROP', title: 'SmartBob Max Drop', message: 'This is the distance in feet your Smartbob is allowed to drop. Usually set to vessel height or top of cone. Press the up arrow to select "Enabled".', action: 'up', targetIndex: 0, skipWhen: () => selectedC100Device === 'C100-R' },
+        { state: 'CONFIG_SMARTBOB_MAX_DROP', title: 'SmartBob Max Drop', message: 'Press ✓ to confirm Enabled.', action: 'select', targetIndex: 0, skipWhen: () => selectedC100Device === 'C100-R' },
+        { state: 'CONFIG_SMARTBOB_MAX_DROP_INPUT', title: 'Max Drop Value', message: 'This is the distance in feet your Smartbob is allowed to drop. Usually set to vessel height or top of cone. Enter the value, then press ✓.', action: 'select', selector: '.input-value', skipWhen: () => selectedC100Device === 'C100-R' },
         { state: 'SETUP_VESSEL_SETUP', title: 'Return to Setup', message: 'Press X to return to the Setup menu.', action: 'back', target: '#screen' },
         { state: 'SETUP', title: 'Return to Main Menu', message: 'Press X to return to the Main Menu.', action: 'back', target: '#screen' },
         { state: 'MAIN_MENU', title: 'Move to Measure/View', message: 'Press the up arrow to highlight "Measure/View".', action: 'up', targetIndex: 0 },
@@ -2506,6 +2722,38 @@
         { state: 'MEASURE_VIEW_HEADROOM_DETAIL', title: 'Headroom Height', message: 'Headroom is the empty space from the sensor down to the product surface. When you are ready, press X to return to the Measure/View list.', action: 'back', target: '#screen' },
         { state: 'MEASURE_VIEW_PROD', title: 'Back to Main Menu', message: 'Press X to return to the Main Menu.', action: 'back', target: '#screen' }
     ];
+
+    function escapeHtmlForRecap(s) {
+        if (s == null) return '';
+        return String(s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    /** Text recap (CNCR-style): all guide steps as title + message; honors C100-R skipWhen. */
+    function buildC100TutorialRecapHtml(skipped) {
+        const parts = [];
+        if (skipped) {
+            parts.push('<p class="c100-recap-note">You skipped the interactive guide. Below is the full text walkthrough of every topic.</p>');
+        } else {
+            parts.push('<p class="c100-recap-note">Everything below is what you walked through, in order.</p>');
+        }
+        parts.push('<ol class="c100-recap-list">');
+        C100_TUTORIAL_STEPS.forEach((step) => {
+            if (step.skipWhen && step.skipWhen()) return;
+            parts.push(
+                '<li class="c100-recap-item"><strong>' +
+                escapeHtmlForRecap(step.title || 'Step') +
+                '</strong><p>' +
+                escapeHtmlForRecap(step.message || '') +
+                '</p></li>'
+            );
+        });
+        parts.push('</ol>');
+        return parts.join('');
+    }
 
     let tutorialActive = false;
     let currentTutorialStep = 0;
@@ -2765,6 +3013,11 @@
 
     function showTutorialStep(stepIndex) {
         if (!tutorialActive) return;
+        while (stepIndex < C100_TUTORIAL_STEPS.length) {
+            const s = C100_TUTORIAL_STEPS[stepIndex];
+            if (!s.skipWhen || !s.skipWhen()) break;
+            stepIndex++;
+        }
         if (stepIndex >= C100_TUTORIAL_STEPS.length) {
             endC100Tutorial(false);
             return;
@@ -2810,9 +3063,10 @@
         const preview = document.getElementById('c100-tutorial-complete-console-preview');
         const miniWrap = document.getElementById('c100-tutorial-complete-mini-scale-wrap');
         const btn = document.getElementById('c100-tutorial-complete-dismiss');
+        const recapBtn = document.getElementById('c100-tutorial-open-recap');
         const pulseRings = overlay.querySelectorAll('.c100-tutorial-complete__pulse-ring');
         const sparkles = overlay.querySelectorAll('.c100-tutorial-complete__sparkles span');
-        [badge, checkSvg, title, subcopy, preview, miniWrap, btn].forEach((el) => {
+        [badge, checkSvg, title, subcopy, preview, miniWrap, btn, recapBtn].forEach((el) => {
             if (el) el.style.animation = 'none';
         });
         pulseRings.forEach((el) => {
@@ -2836,9 +3090,12 @@
         sparkles.forEach((el, i) => {
             el.style.animation = `c100-tc-sparkle 0.78s cubic-bezier(0.34, 1.1, 0.64, 1) ${0.34 + i * 0.055}s forwards`;
         });
+        if (recapBtn) {
+            recapBtn.style.animation = 'c100-tc-slide-up 0.58s cubic-bezier(0.22, 1, 0.36, 1) 0.96s forwards';
+        }
         if (btn) {
             btn.style.animation =
-                'c100-tc-slide-up 0.58s cubic-bezier(0.22, 1, 0.36, 1) 1.02s forwards, c100-tc-btn-glow 2.2s ease-in-out 1.52s 2 alternate';
+                'c100-tc-slide-up 0.58s cubic-bezier(0.22, 1, 0.36, 1) 1.08s forwards, c100-tc-btn-glow 2.2s ease-in-out 1.58s 2 alternate';
         }
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
@@ -2848,6 +3105,7 @@
     }
 
     function showC100TutorialCompleteOverlay(skipped) {
+        window._c100TutorialCompleteSkipped = !!skipped;
         const overlay = document.getElementById('c100-tutorial-complete-overlay');
         const titleEl = document.getElementById('c100-tutorial-complete-title');
         const line1 = document.getElementById('c100-tutorial-complete-line1');
@@ -2856,13 +3114,13 @@
         if (!overlay || !titleEl || !line1 || !line2) return;
         if (skipped) {
             titleEl.textContent = 'Guide closed.';
-            line1.textContent = 'The tutorial is off. You can keep using the C-100 emulator below.';
+            line1.textContent = 'The tutorial was skipped. Use View training recap for the full text summary, or press Complete to return home.';
             line2.textContent = '';
             line2.style.display = 'none';
             if (previewWrap) previewWrap.classList.add('hidden');
         } else {
             titleEl.textContent = 'Setup Complete';
-            line1.textContent = "You've finished the guided walkthrough.";
+            line1.textContent = "You've finished the guided walkthrough. Open the recap for a full text summary, or press Complete to return home.";
             line2.textContent = '';
             line2.style.display = 'none';
             if (previewWrap) previewWrap.classList.remove('hidden');
@@ -2890,6 +3148,157 @@
                 overlay.style.display = 'none';
             }
         }, 600);
+    }
+
+    /** Full-screen text recap (CNCR-style); hides celebration overlay until Complete → home. */
+    function openC100TutorialRecapPage() {
+        const skipped = !!window._c100TutorialCompleteSkipped;
+        const body = document.getElementById('c100-tutorial-recap-body');
+        const lede = document.getElementById('c100-tutorial-recap-lede');
+        if (body) body.innerHTML = buildC100TutorialRecapHtml(skipped);
+        if (lede) {
+            lede.textContent = skipped
+                ? 'You skipped the guided steps — here is the full text summary. Press Complete when you are done.'
+                : 'Full text summary of the walkthrough. Press Complete when you are done to return home.';
+        }
+        const completeOverlay = document.getElementById('c100-tutorial-complete-overlay');
+        if (completeOverlay) {
+            completeOverlay.classList.remove('c100-tutorial-complete--visible');
+            completeOverlay.style.display = 'none';
+            completeOverlay.setAttribute('aria-hidden', 'true');
+        }
+        const recapPage = document.getElementById('c100-tutorial-recap-page');
+        if (recapPage) {
+            recapPage.style.display = 'flex';
+            recapPage.classList.add('c100-tutorial-recap-page--visible');
+            recapPage.setAttribute('aria-hidden', 'false');
+            recapPage.scrollTop = 0;
+            const scrollBody = document.getElementById('c100-tutorial-recap-body');
+            if (scrollBody) scrollBody.scrollTop = 0;
+        }
+        window.scrollTo(0, 0);
+    }
+
+    /**
+     * Full session reset: default emulator state + tutorial off + return to device (SB/R) home.
+     */
+    function resetC100EmulatorSessionToHome() {
+        stopAutoAddRemoveScanning();
+        clearMeasureAllTimers();
+        if (measurementTimeout) {
+            clearTimeout(measurementTimeout);
+            measurementTimeout = null;
+        }
+        if (tutorialAdvanceTimer) {
+            clearTimeout(tutorialAdvanceTimer);
+            tutorialAdvanceTimer = null;
+        }
+        tutorialPendingAdvance = null;
+        tutorialSettingSelection = false;
+        clearTutorialHighlight();
+
+        tutorialActive = false;
+        currentTutorialStep = 0;
+
+        currentState = 'WELCOME';
+        previousState = 'WELCOME';
+        history = [];
+        selectedIndex = 0;
+        previousSelectedIndex = 0;
+        previousViewportOffset = -1;
+        lastListNavDirection = null;
+        inputCursorPos = 0;
+        stateIndexMap = {};
+
+        vesselConfig = {
+            shape: 'Circular',
+            bodyHeight: '020.00',
+            bodyRadius: '15.00',
+            hopperPresent: 'Yes',
+            hopperHeight: '06.00',
+            outletRadius: '01.00',
+            sensorOffset: '+00.00',
+            productDensity: '020.00',
+            smartBobMaxDropEnabled: 'Disabled',
+            smartBobMaxDrop: '02.50'
+        };
+
+        enabledSensors = [];
+        intervalTimerAssignedSensors = [];
+        accessCodeEnabled = false;
+        accessCodeValue = '0000';
+        measurementType = 'Product';
+        measurementData = {};
+        currentDetailSensor = '001';
+        isMeasuring = false;
+        showingMeasuring = false;
+        measureAllInProgress = false;
+        measureAllPhase = null;
+
+        autoAddRemoveScanning = false;
+        autoAddRemoveCurrentSensor = 0;
+        autoAddRemoveFoundCount = 0;
+        autoAddRemoveLastFound = null;
+
+        selectedC100Device = null;
+
+        menuData['SETUP_INTERVAL_TIMER_TIME'].value = '04:00';
+        menuData['SETUP_PRODUCT_DENSITY'].value = '038.00';
+        menuData['SETUP_SMARTBOB_MAX_DROP_INPUT'].value = '02.50';
+        menuData['SETUP_SENSOR_OFFSET'].value = '00.00';
+        menuData['SETUP_ACCESS_CODE_INPUT'].value = '####';
+        menuData['ACCESS_CODE_ENTRY'].value = '####';
+        menuData['CONFIG_BODY_HEIGHT'].value = '020.00';
+        menuData['CONFIG_BODY_RADIUS'].value = '15.00';
+        menuData['CONFIG_HOPPER_HEIGHT'].value = '06.00';
+        menuData['CONFIG_OUTLET_RADIUS'].value = '01.00';
+        menuData['CONFIG_SENSOR_OFFSET'].value = '+00.00';
+        menuData['CONFIG_PRODUCT_DENSITY'].value = '020.00';
+        menuData['CONFIG_SMARTBOB_MAX_DROP_INPUT'].value = '02.50';
+
+        menuData['CONFIG_VESSEL_SHAPE'].checked = 0;
+        menuData['CONFIG_HOPPER_PRESENT'].checked = 0;
+        menuData['CONFIG_SMARTBOB_MAX_DROP'].checked = 1;
+        menuData['SETUP_SENSOR_TYPE'].checked = 0;
+        menuData['SETUP_SB485_PROTOCOL'].checked = 0;
+        menuData['SETUP_SB485_TERMINATION'].checked = 0;
+        menuData['SETUP_INTERVAL_TIMER'].checked = 1;
+        menuData['SETUP_UNIT_OF_MEASURE'].checked = 0;
+        menuData['SETUP_WEIGHT_CALCULATIONS'].checked = 1;
+        menuData['SETUP_SMARTBOB_MAX_DROP'].checked = 1;
+        menuData['SETUP_LANGUAGE'].checked = 0;
+
+        const homePage = document.getElementById('home-page');
+        const mainContent = document.querySelector('.main-content');
+        const consoleViewport = document.getElementById('c100-console-viewport');
+        const consoleRoot = document.getElementById('console-root');
+        if (homePage) homePage.classList.remove('hidden');
+        if (mainContent) mainContent.classList.remove('hidden');
+        if (consoleViewport) consoleViewport.classList.add('hidden');
+        if (consoleRoot) consoleRoot.classList.add('hidden');
+
+        const tcOverlay = document.getElementById('c100-tutorial-complete-overlay');
+        if (tcOverlay) {
+            tcOverlay.classList.remove('c100-tutorial-complete--visible');
+            tcOverlay.setAttribute('aria-hidden', 'true');
+            tcOverlay.style.display = 'none';
+        }
+        const recapPage = document.getElementById('c100-tutorial-recap-page');
+        if (recapPage) {
+            recapPage.classList.remove('c100-tutorial-recap-page--visible');
+            recapPage.style.display = 'none';
+            recapPage.setAttribute('aria-hidden', 'true');
+        }
+        const recapBody = document.getElementById('c100-tutorial-recap-body');
+        if (recapBody) recapBody.innerHTML = '';
+        const recapLede = document.getElementById('c100-tutorial-recap-lede');
+        if (recapLede) recapLede.textContent = '';
+
+        if (tutorialTooltip) tutorialTooltip.classList.add('tutorial-hidden');
+        if (tutorialPointer) tutorialPointer.classList.add('tutorial-hidden');
+        if (tutorialPointerCircle) tutorialPointerCircle.classList.add('tutorial-hidden');
+
+        renderScreen();
     }
 
     function endC100Tutorial(skipped) {
@@ -3085,7 +3494,15 @@
 
     const c100TutorialCompleteDismiss = document.getElementById('c100-tutorial-complete-dismiss');
     if (c100TutorialCompleteDismiss) {
-        c100TutorialCompleteDismiss.addEventListener('click', () => hideC100TutorialCompleteOverlay());
+        c100TutorialCompleteDismiss.addEventListener('click', () => resetC100EmulatorSessionToHome());
+    }
+    const c100TutorialOpenRecap = document.getElementById('c100-tutorial-open-recap');
+    if (c100TutorialOpenRecap) {
+        c100TutorialOpenRecap.addEventListener('click', () => openC100TutorialRecapPage());
+    }
+    const c100TutorialRecapComplete = document.getElementById('c100-tutorial-recap-complete');
+    if (c100TutorialRecapComplete) {
+        c100TutorialRecapComplete.addEventListener('click', () => resetC100EmulatorSessionToHome());
     }
 
     // --- NAVIGATION HANDLERS ---
@@ -3579,7 +3996,10 @@
                  }
                  
                  // Finalize input and move to the next step
-                 const nextState = menu.next;
+                 let nextState = menu.next;
+                 if (currentState === 'CONFIG_PRODUCT_DENSITY' && selectedC100Device === 'C100-R') {
+                     nextState = 'SETUP_VESSEL_SETUP';
+                 }
                  if (nextState) {
                     // If completing access code setup, don't add SETUP_ACCESS_CODE_INPUT to history
                     // This prevents going back to the input screen after the code is saved
