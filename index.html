@@ -718,6 +718,10 @@
                 align-items: center;
                 justify-content: center;
                 max-width: 100%;
+                flex-shrink: 0;
+            }
+            .c100-tutorial-complete__mini-scale-wrap {
+                flex-shrink: 0;
             }
             .c100-tutorial-complete__mini-viewport {
                 display: flex;
@@ -815,9 +819,12 @@
             width: 100%;
             max-width: 320px;
             margin-top: 6px;
+            /* Entrance is animated in JS (one group) — do not leave children at opacity:0 */
+            opacity: 0;
+            transform: translateY(22px);
         }
         .c100-tutorial-complete__recap-btn {
-            opacity: 0;
+            opacity: 1;
             width: 100%;
             box-sizing: border-box;
             padding: 12px 24px;
@@ -840,7 +847,7 @@
             transform: translateY(0);
         }
         .c100-tutorial-complete__dismiss {
-            opacity: 0;
+            opacity: 1;
             margin-top: 0;
             width: 100%;
             max-width: 320px;
@@ -1002,6 +1009,10 @@
         }
 
         @media (prefers-reduced-motion: reduce) {
+            .c100-tutorial-complete__actions {
+                opacity: 1 !important;
+                transform: none !important;
+            }
             .c100-tutorial-complete__check-badge,
             .c100-tutorial-complete__check-svg,
             .c100-tutorial-complete__title,
@@ -3062,13 +3073,14 @@
         const subcopy = document.getElementById('c100-tutorial-complete-subcopy');
         const preview = document.getElementById('c100-tutorial-complete-console-preview');
         const miniWrap = document.getElementById('c100-tutorial-complete-mini-scale-wrap');
+        const actionsEl = document.getElementById('c100-tutorial-complete-actions');
         const btn = document.getElementById('c100-tutorial-complete-dismiss');
-        const recapBtn = document.getElementById('c100-tutorial-open-recap');
         const pulseRings = overlay.querySelectorAll('.c100-tutorial-complete__pulse-ring');
         const sparkles = overlay.querySelectorAll('.c100-tutorial-complete__sparkles span');
-        [badge, checkSvg, title, subcopy, preview, miniWrap, btn, recapBtn].forEach((el) => {
+        [badge, checkSvg, title, subcopy, preview, miniWrap, actionsEl].forEach((el) => {
             if (el) el.style.animation = 'none';
         });
+        if (btn) btn.style.animation = 'none';
         pulseRings.forEach((el) => {
             el.style.animation = 'none';
         });
@@ -3090,12 +3102,13 @@
         sparkles.forEach((el, i) => {
             el.style.animation = `c100-tc-sparkle 0.78s cubic-bezier(0.34, 1.1, 0.64, 1) ${0.34 + i * 0.055}s forwards`;
         });
-        if (recapBtn) {
-            recapBtn.style.animation = 'c100-tc-slide-up 0.58s cubic-bezier(0.22, 1, 0.36, 1) 0.96s forwards';
+        /* One slide-up on the actions group (avoids stuck opacity:0 on nested buttons in some browsers) */
+        if (actionsEl) {
+            actionsEl.style.animation = 'c100-tc-slide-up 0.58s cubic-bezier(0.22, 1, 0.36, 1) 0.96s forwards';
         }
+        /* Glow only on Complete — starts after the group finishes sliding in */
         if (btn) {
-            btn.style.animation =
-                'c100-tc-slide-up 0.58s cubic-bezier(0.22, 1, 0.36, 1) 1.08s forwards, c100-tc-btn-glow 2.2s ease-in-out 1.58s 2 alternate';
+            btn.style.animation = 'c100-tc-btn-glow 2.2s ease-in-out 1.54s 2 alternate';
         }
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
@@ -3132,7 +3145,8 @@
             overlay.classList.add('c100-tutorial-complete--visible');
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
-                    resetC100TutorialCompleteAnimations();
+                    /* Extra tick + microtask so layout (display→flex, mini wrap height) is ready before keyframes run */
+                    setTimeout(() => resetC100TutorialCompleteAnimations(), 0);
                 });
             });
         });
