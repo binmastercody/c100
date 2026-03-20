@@ -1,0 +1,3794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- interactive-widget: Chrome/Android — page resizes with URL bar instead of overlapping content -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+    <!-- Tint browser chrome (Android Chrome, some iOS) — cannot fully hide URL bar in a normal tab -->
+    <meta name="theme-color" content="#667eea" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#312e81" media="(prefers-color-scheme: dark)">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>BinMaster C-100 Guide</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .main-content {
+            width: 100%;
+            max-width: 900px;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            min-height: 100dvh;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 10003; /* Above tutorial overlays so device buttons stay clickable */
+        }
+
+        .home-page {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 460px;
+            width: 100%;
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+            text-align: center;
+        }
+
+        .home-page h1 {
+            color: #764ba2;
+            margin-bottom: 12px;
+            font-size: 28px;
+        }
+
+        .home-page p {
+            color: #555;
+            margin-bottom: 24px;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        .tutorial-tooltip {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(102, 126, 234, 0.98);
+            color: #ffffff;
+            padding: 14px 16px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+            z-index: 10000;
+            width: min(360px, calc(100% - 32px));
+            transition: opacity 0.2s ease;
+            pointer-events: none; /* Never block clicks (e.g. device selection) */
+        }
+
+        .tutorial-tooltip.tutorial-hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .tutorial-tooltip h3 {
+            margin: 0 0 6px;
+            font-size: 15px;
+        }
+
+        .tutorial-tooltip p {
+            margin: 0 0 10px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .tutorial-tooltip .tutorial-step {
+            font-size: 12px;
+            opacity: 0.85;
+            margin-bottom: 6px;
+        }
+
+        .tutorial-tooltip .tutorial-actions {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .tutorial-tooltip button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: #ffffff;
+            padding: 6px 12px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 12px;
+            pointer-events: auto; /* Remain clickable despite parent's pointer-events: none */
+        }
+
+        .tutorial-pointer {
+            position: fixed;
+            font-size: 32px;
+            color: #3b82f6;
+            z-index: 10002;
+            pointer-events: none;
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+        }
+
+        .tutorial-pointer.tutorial-hidden {
+            opacity: 0;
+        }
+
+        .tutorial-pointer-circle {
+            position: fixed;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: 3px solid #d82a27;
+            background: rgba(216, 42, 39, 0.15);
+            z-index: 10001;
+            pointer-events: none;
+            box-shadow: 0 0 0 2px rgba(216, 42, 39, 0.3);
+        }
+
+        .tutorial-pointer-circle.tutorial-hidden {
+            opacity: 0;
+        }
+
+        .tutorial-highlight {
+            outline: 3px solid #3b82f6;
+            outline-offset: 2px;
+            border-radius: 6px;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25);
+        }
+
+        .device-type-selection {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .device-btn {
+            background: linear-gradient(145deg, #667eea, #764ba2);
+            color: #ffffff;
+            border: none;
+            padding: 16px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .device-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+        }
+
+        .device-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .console-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        /* Portrait mobile: stacked layout in CSS. Landscape mobile: zoom via fitC100ConsoleScale(). */
+        .c100-console-viewport {
+            width: 100%;
+            max-width: 480px;
+            margin-left: auto;
+            margin-right: auto;
+            box-sizing: border-box;
+            overflow: visible;
+            /* Do NOT use line-height: 0 here — it inherits into .brand and collapses .smartbob / .model text */
+            line-height: normal;
+        }
+        .c100-console-scaled {
+            display: block;
+            line-height: normal;
+        }
+
+        .console-container {
+            background-color: #d4d4d4; /* Light gray outer casing */
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            display: flex;
+            flex-direction: column;
+            width: 480px;
+            position: relative;
+        }
+
+        /* Screw heads in corners */
+        .console-container::before,
+        .console-container::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #888 0%, #666 50%, #888 100%);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .console-container::before {
+            top: 8px;
+            left: 8px;
+        }
+
+        .console-container::after {
+            top: 8px;
+            right: 8px;
+        }
+
+        .screw-bottom-left,
+        .screw-bottom-right {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #888 0%, #666 50%, #888 100%);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+            bottom: 8px;
+        }
+
+        .screw-bottom-left {
+            left: 8px;
+        }
+
+        .screw-bottom-right {
+            right: 8px;
+        }
+
+        .display-area {
+            background-color: #1a1a1a; /* Deep black recessed panel */
+            border: 2px solid #cc0000; /* Bright red border from image */
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            border-radius: 6px;
+            gap: 16px;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .screen {
+            background-color: #e8e8e8; /* Light gray screen background */
+            color: #000000;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            padding: 6px;
+            height: 112px; /* Exactly fits: 6px padding top + 20px title + 4px margin + 72px (3 items) + 6px padding bottom = 108px content + 4px border = 112px total */
+            width: 260px;
+            border: 2px solid #000;
+            border-radius: 4px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+            line-height: 1.4;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        .menu-title {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 4px;
+            font-size: 14px;
+            text-decoration: underline;
+            flex-shrink: 0;
+            padding-bottom: 2px;
+            border-bottom: 1px solid #000;
+            line-height: 1.2;
+            height: 20px; /* Fixed height for title */
+        }
+
+        .menu-items-container {
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            height: 72px; /* Exactly 3 items * 24px */
+            flex-shrink: 0;
+        }
+
+        .menu-items-viewport {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            transition: transform 0.2s ease;
+        }
+
+        .menu-item {
+            padding: 2px 4px;
+            cursor: default;
+            height: 24px; /* Fixed height per item - exactly 3 fit */
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 24px;
+            box-sizing: border-box;
+        }
+
+        .selected {
+            background-color: #000000;
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .input-value {
+            font-size: 20px;
+            text-align: center;
+            margin: 8px 0;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .input-cursor {
+            background-color: #000000;
+            color: #ffffff;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        /* --- Overall Keypad and Background --- */
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(2, 44px);
+            grid-template-rows: repeat(4, 44px);
+            gap: 8px 6px; /* Slightly more space between rows and columns */
+            width: fit-content;
+            background-color: #f8f8f8; /* Off-white background area */
+            padding: 24px 18px;
+            border-radius: 40px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+            align-items: center;
+            justify-items: center;
+        }
+
+        /* --- Base Key Styling --- */
+        .key {
+            background-color: #222222; 
+            color: #ffffff; 
+            border: none;
+            padding: 0;
+            font-size: 18px; 
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 3px 0 #000, 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: all 0.05s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+        }
+
+        .key:active {
+            box-shadow: 0 1px 0 #000, 0 1px 2px rgba(0, 0, 0, 0.4);
+            transform: translateY(2px);
+        }
+
+        .key:hover {
+            background-color: #333333; 
+        }
+
+        /* --- D-Pad Button Placement --- */
+        .key.up { 
+            grid-area: 1 / 1 / 2 / 3;
+            font-size: 24px;
+        }
+        .key.left { 
+            grid-area: 2 / 1 / 3 / 2;
+            font-size: 24px;
+        }
+        .key.right { 
+            grid-area: 2 / 2 / 3 / 3;
+            font-size: 24px;
+        }
+        .key.down { 
+            grid-area: 3 / 1 / 4 / 3;
+            font-size: 24px;
+        }
+
+        /* --- Function Keys (X and Check) --- */
+        .key.x-mark { 
+            grid-area: 4 / 1 / 5 / 2; 
+            font-size: 22px;
+            margin-top: 14px; /* Maintain the group separation */
+        }
+        .key.check-mark { 
+            grid-area: 4 / 2 / 5 / 3;
+            font-size: 22px;
+            margin-top: 14px; /* Maintain the group separation */
+        }
+
+        .screen-and-brand {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .brand {
+            background-color: #e8e8e8; /* Light gray branding area */
+            padding: 10px 12px;
+            border-radius: 4px;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .binmaster {
+            color: #cc0000;
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: 0px;
+            font-family: Arial, sans-serif;
+            line-height: 1.2;
+            margin-bottom: 4px;
+        }
+
+        .binmaster .bin {
+            font-size: 22px;
+            letter-spacing: -1px;
+        }
+
+        .binmaster .master {
+            font-size: 20px;
+            letter-spacing: 0px;
+        }
+
+        .binmaster .registered {
+            font-size: 10px;
+            vertical-align: super;
+            margin-left: 2px;
+        }
+
+        .smartbob {
+            font-size: 12px;
+            font-weight: 600;
+            color: #000;
+            margin-bottom: 2px;
+        }
+        .smartbob-short {
+            display: none;
+        }
+
+        .model {
+            font-size: 11px;
+            color: #333;
+        }
+
+        /* --- Tutorial complete: BinDisc-style celebration (rings + sparkles + bouncy device) --- */
+        @keyframes c100-tc-badge-pop {
+            0% { opacity: 0; transform: scale(0.4); }
+            55% { opacity: 1; transform: scale(1.12); }
+            75% { transform: scale(0.96); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes c100-tc-check-in {
+            0% { opacity: 0; transform: scale(0.35) rotate(-18deg); }
+            70% { opacity: 1; transform: scale(1.15) rotate(4deg); }
+            100% { opacity: 1; transform: scale(1) rotate(0deg); }
+        }
+        @keyframes c100-tc-pulse-ring {
+            0% {
+                transform: scale(0.55);
+                opacity: 0.85;
+            }
+            100% {
+                transform: scale(2.35);
+                opacity: 0;
+            }
+        }
+        @keyframes c100-tc-headline-in {
+            0% { opacity: 0; transform: translateY(18px) scale(0.96); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes c100-tc-preview-fade {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+        @keyframes c100-tc-device-bindisc {
+            0% {
+                opacity: 0;
+                transform: translateY(36px) scale(0.82);
+                filter: blur(6px);
+            }
+            50% {
+                opacity: 1;
+                filter: blur(0);
+            }
+            68% {
+                transform: translateY(-8px) scale(1.04);
+            }
+            82% {
+                transform: translateY(4px) scale(0.99);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                filter: blur(0);
+            }
+        }
+        @keyframes c100-tc-sparkle {
+            0% {
+                opacity: 0;
+                transform: scale(0) rotate(0deg);
+            }
+            40% {
+                opacity: 1;
+                transform: scale(1) rotate(120deg);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.4) rotate(260deg);
+            }
+        }
+        @keyframes c100-tc-slide-up {
+            from {
+                transform: translateY(22px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        @keyframes c100-tc-btn-glow {
+            0%,
+            100% {
+                box-shadow:
+                    0 1px 0 rgba(255, 255, 255, 0.15) inset,
+                    0 8px 24px rgba(79, 70, 229, 0.45),
+                    0 2px 6px rgba(0, 0, 0, 0.2);
+            }
+            50% {
+                box-shadow:
+                    0 1px 0 rgba(255, 255, 255, 0.2) inset,
+                    0 10px 36px rgba(129, 140, 248, 0.65),
+                    0 4px 14px rgba(79, 70, 229, 0.5);
+            }
+        }
+
+        /*
+         * Important: do NOT fade the overlay with opacity — it multiplies with child animations
+         * and makes the entrance look like an instant “jump.” Visibility = display only.
+         */
+        .c100-tutorial-complete {
+            position: fixed;
+            inset: 0;
+            z-index: 10050;
+            display: none;
+            overflow: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            font-family: "DM Sans", system-ui, -apple-system, Segoe UI, sans-serif;
+            background:
+                radial-gradient(ellipse 120% 80% at 50% 0%, rgba(99, 102, 241, 0.22) 0%, transparent 55%),
+                radial-gradient(ellipse 90% 60% at 100% 100%, rgba(167, 139, 250, 0.18) 0%, transparent 50%),
+                linear-gradient(168deg, #0f172a 0%, #1e1b4b 38%, #172554 72%, #0c1222 100%);
+            box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.35);
+            opacity: 1;
+            pointer-events: none;
+        }
+        .c100-tutorial-complete.c100-tutorial-complete--visible {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+        }
+        .c100-tutorial-complete__inner {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: clamp(24px, 5vh, 40px) clamp(18px, 5vw, 32px) clamp(28px, 6vh, 48px);
+            max-width: min(420px, 100%);
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .c100-tutorial-complete__success-mark {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            margin-bottom: clamp(18px, 3.5vh, 26px);
+            min-height: 76px;
+        }
+        .c100-tutorial-complete__pulse-rings {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 76px;
+            height: 76px;
+            margin: -38px 0 0 -38px;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .c100-tutorial-complete__pulse-ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 2px solid rgba(52, 211, 153, 0.55);
+            box-shadow: 0 0 20px rgba(52, 211, 153, 0.35);
+            opacity: 0;
+            will-change: transform, opacity;
+        }
+        .c100-tutorial-complete__check-badge {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(145deg, #34d399 0%, #059669 55%, #047857 100%);
+            color: #ffffff;
+            box-shadow:
+                0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+                0 12px 40px rgba(16, 185, 129, 0.45),
+                0 4px 12px rgba(0, 0, 0, 0.25);
+            opacity: 0;
+            position: relative;
+            z-index: 1;
+        }
+        .c100-tutorial-complete__check-svg {
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0;
+            display: block;
+            overflow: visible;
+            opacity: 0;
+            transform-origin: center center;
+        }
+        .c100-tutorial-complete__check-path {
+            fill: currentColor;
+        }
+        .c100-tutorial-complete__title {
+            font-family: "Outfit", "DM Sans", system-ui, sans-serif;
+            font-size: clamp(26px, 5vw, 36px);
+            font-weight: 700;
+            color: #f8fafc;
+            margin: 0 0 12px;
+            letter-spacing: -0.02em;
+            line-height: 1.15;
+            opacity: 0;
+        }
+        .c100-tutorial-complete__subcopy {
+            font-size: clamp(15px, 3.2vw, 17px);
+            font-weight: 500;
+            color: rgba(226, 232, 240, 0.88);
+            margin: 0 0 clamp(22px, 4vh, 30px);
+            line-height: 1.6;
+            opacity: 0;
+        }
+        .c100-tutorial-complete__subcopy-line {
+            margin: 0 0 8px;
+        }
+        .c100-tutorial-complete__subcopy-line:last-child {
+            margin-bottom: 0;
+        }
+        /*
+         * Completion overlay: same markup + classes as #console-root so global C-100 CSS applies 1:1.
+         * Does not change #console-root. Uses .c100-tutorial-complete__mini-viewport (not .c100-console-viewport)
+         * so body:has(.c100-console-viewport:not(.hidden)) is unaffected when the overlay is open.
+         */
+        .c100-tutorial-complete__console-preview {
+            opacity: 0;
+            margin: 0 auto clamp(22px, 4vh, 32px);
+            width: 100%;
+            max-width: min(340px, 100%);
+            box-sizing: border-box;
+            line-height: normal;
+            position: relative;
+        }
+        .c100-tutorial-complete__sparkles {
+            position: absolute;
+            left: 50%;
+            top: 42%;
+            width: 0;
+            height: 0;
+            pointer-events: none;
+            z-index: 2;
+        }
+        .c100-tutorial-complete__sparkles span {
+            position: absolute;
+            width: 7px;
+            height: 7px;
+            margin: -3.5px 0 0 -3.5px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #fff 0%, rgba(255, 255, 255, 0) 70%);
+            box-shadow: 0 0 10px rgba(167, 139, 250, 0.95);
+            opacity: 0;
+            will-change: transform, opacity;
+        }
+        .c100-tutorial-complete__sparkles span:nth-child(1) {
+            left: -62px;
+            top: -18px;
+        }
+        .c100-tutorial-complete__sparkles span:nth-child(2) {
+            left: 58px;
+            top: -28px;
+        }
+        .c100-tutorial-complete__sparkles span:nth-child(3) {
+            left: -48px;
+            top: 32px;
+        }
+        .c100-tutorial-complete__sparkles span:nth-child(4) {
+            left: 52px;
+            top: 38px;
+        }
+        .c100-tutorial-complete__sparkles span:nth-child(5) {
+            left: 0;
+            top: -52px;
+        }
+        .c100-tutorial-complete__mini-viewport {
+            width: 100%;
+            max-width: 480px;
+            margin-left: auto;
+            margin-right: auto;
+            box-sizing: border-box;
+            overflow: visible;
+            line-height: normal;
+        }
+        @media (max-width: 540px) {
+            .c100-tutorial-complete__mini-viewport {
+                max-width: min(320px, calc(100vw - 24px));
+            }
+        }
+        .c100-tutorial-complete__live-replica {
+            pointer-events: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .c100-tutorial-complete__live-replica .key {
+            cursor: default;
+        }
+        .c100-tutorial-complete__mini-scale-wrap {
+            --c100-mini-scale: 0.36;
+            width: calc(480px * var(--c100-mini-scale));
+            margin: 0 auto;
+            position: relative;
+            overflow: visible;
+            z-index: 1;
+            opacity: 0;
+        }
+        .c100-tutorial-complete__mini-scale-inner {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 480px;
+            margin-left: -240px;
+            transform: scale(var(--c100-mini-scale));
+            transform-origin: top center;
+            pointer-events: none;
+            -webkit-font-smoothing: antialiased;
+        }
+        .c100-tutorial-complete__dismiss {
+            opacity: 0;
+            margin-top: 4px;
+            padding: 14px 32px;
+            min-width: 200px;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: "DM Sans", system-ui, sans-serif;
+            color: #f8fafc;
+            background: linear-gradient(180deg, #6366f1 0%, #4f46e5 45%, #4338ca 100%);
+            border: none;
+            border-radius: 999px;
+            cursor: pointer;
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.15) inset,
+                0 8px 24px rgba(79, 70, 229, 0.45),
+                0 2px 6px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        }
+        .c100-tutorial-complete__dismiss:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.2) inset,
+                0 12px 32px rgba(79, 70, 229, 0.55),
+                0 4px 10px rgba(0, 0, 0, 0.25);
+        }
+        .c100-tutorial-complete__dismiss:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .c100-tutorial-complete__check-badge,
+            .c100-tutorial-complete__check-svg,
+            .c100-tutorial-complete__title,
+            .c100-tutorial-complete__subcopy,
+            .c100-tutorial-complete__console-preview,
+            .c100-tutorial-complete__mini-scale-wrap,
+            .c100-tutorial-complete__dismiss,
+            .c100-tutorial-complete__pulse-ring,
+            .c100-tutorial-complete__sparkles span {
+                animation: none !important;
+                opacity: 1 !important;
+                transform: none !important;
+                filter: none !important;
+            }
+            .c100-tutorial-complete__pulse-ring,
+            .c100-tutorial-complete__sparkles span {
+                opacity: 0 !important;
+            }
+            .c100-tutorial-complete__dismiss {
+                box-shadow:
+                    0 1px 0 rgba(255, 255, 255, 0.15) inset,
+                    0 8px 24px rgba(79, 70, 229, 0.45),
+                    0 2px 6px rgba(0, 0, 0, 0.2) !important;
+            }
+        }
+
+        /* --- Phones & narrow viewports: fit without clipping; circles scale together (clamp / vw) --- */
+        @media (max-width: 540px) {
+            .smartbob-long {
+                display: none !important;
+            }
+            .smartbob-short {
+                display: inline !important;
+            }
+            /* Single C-100 line under logo — hide duplicate “Model C-100” row */
+            .screen-and-brand .model {
+                display: none !important;
+            }
+            /*
+             * Mobile: lock document scroll so the page doesn’t rubber-band / scroll vertically
+             * (which on Safari/Chrome shows & hides the URL bar and shifts layout).
+             * Inner panels (e.g. tutorial completion overlay) keep overflow: auto where needed.
+             */
+            html {
+                -webkit-text-size-adjust: 100%;
+                height: 100%;
+                height: -webkit-fill-available;
+                overflow: hidden;
+                overscroll-behavior: none;
+                width: 100%;
+            }
+            body {
+                margin: 0;
+                padding-left: env(safe-area-inset-left, 0);
+                padding-right: env(safe-area-inset-right, 0);
+                overflow: hidden;
+                overflow-x: hidden;
+                overscroll-behavior: none;
+                width: 100%;
+                height: 100%;
+                height: -webkit-fill-available;
+                max-height: 100dvh;
+                touch-action: manipulation;
+                position: fixed;
+                inset: 0;
+                left: 0;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                box-sizing: border-box;
+            }
+            .main-content {
+                padding: 12px max(8px, env(safe-area-inset-left)) 12px max(8px, env(safe-area-inset-right));
+                min-height: 0;
+                flex: 1 1 auto;
+                max-height: 100%;
+                overflow: hidden;
+                box-sizing: border-box;
+            }
+            .home-page {
+                padding: 22px max(16px, env(safe-area-inset-left)) 22px max(16px, env(safe-area-inset-right));
+                border-radius: 16px;
+            }
+            .home-page h1 {
+                font-size: clamp(22px, 6vw, 28px);
+            }
+
+            /*
+             * Mobile: optically centered above the fixed guide (tuned bottom padding).
+             * Nintendo DS–style D-pad: ↑ / ← → / ↓ (one cell each), tight gaps, ✕ ✓ below.
+             */
+            body:has(.c100-console-viewport:not(.hidden)) {
+                justify-content: center;
+                align-items: center;
+                width: 100%;
+                padding-top: max(8px, env(safe-area-inset-top));
+                padding-left: max(12px, env(safe-area-inset-left));
+                padding-right: max(12px, env(safe-area-inset-right));
+                /* Reserve only ~guide height so the device sits nearer the visual middle */
+                padding-bottom: calc(clamp(118px, 24vh, 175px) + env(safe-area-inset-bottom));
+                box-sizing: border-box;
+                min-height: 100dvh;
+                min-height: 100vh;
+            }
+
+            .console-container {
+                width: min(480px, calc(100vw - 16px));
+                max-width: 100%;
+                margin-left: auto;
+                margin-right: auto;
+                padding: 8px 10px 10px;
+                box-sizing: border-box;
+            }
+            .c100-console-viewport {
+                margin-left: auto;
+                margin-right: auto;
+                width: 100%;
+                max-width: min(320px, calc(100vw - 24px));
+                align-self: center;
+            }
+            .display-area {
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+                padding: 8px;
+                margin-bottom: 0;
+            }
+            .screen-and-brand {
+                width: 100%;
+                max-width: 100%;
+                align-self: center;
+                align-items: stretch;
+                gap: 6px;
+            }
+            .screen-and-brand .screen {
+                width: 100%;
+                max-width: none;
+                margin-left: auto;
+                margin-right: auto;
+                box-sizing: border-box;
+                font-size: 12px;
+                padding: 4px;
+            }
+            .screen-and-brand .brand {
+                width: 100%;
+                max-width: none;
+                margin-left: auto;
+                margin-right: auto;
+                box-sizing: border-box;
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                align-items: center;
+                justify-content: center;
+                gap: 4px 10px;
+                padding: 5px 8px;
+                border-radius: 6px;
+                text-align: center;
+                overflow-wrap: anywhere;
+                background: linear-gradient(180deg, #ebebeb 0%, #dedede 100%);
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), inset 0 -1px 1px rgba(0, 0, 0, 0.05);
+            }
+            .screen-and-brand .binmaster,
+            .screen-and-brand .smartbob,
+            .screen-and-brand .model {
+                text-align: center;
+            }
+            .screen-and-brand .binmaster {
+                margin-bottom: 0;
+                line-height: 1.1;
+                font-size: clamp(14px, 3.8vw, 17px);
+            }
+            .screen-and-brand .binmaster .bin {
+                font-size: clamp(15px, 4.1vw, 18px);
+            }
+            .screen-and-brand .binmaster .master {
+                font-size: clamp(14px, 3.8vw, 17px);
+            }
+            .screen-and-brand .smartbob {
+                display: inline;
+                margin: 0;
+                padding: 0;
+                border: none;
+                font-size: clamp(10px, 2.8vw, 12px);
+                font-weight: 700;
+                letter-spacing: 0.14em;
+                color: #222;
+            }
+
+            /*
+             * Tight 3-column cross — no side fr columns (less dead white).
+             * ← / → pulled toward center with translateX so they sit closer to ↑ / ↓.
+             */
+            .keypad {
+                display: grid !important;
+                grid-template-columns: 56px 56px 56px;
+                grid-template-rows: auto auto auto auto;
+                column-gap: 0;
+                row-gap: 2px;
+                justify-content: center;
+                justify-items: center;
+                align-items: center;
+                width: fit-content;
+                max-width: calc(100vw - 24px);
+                margin-left: auto;
+                margin-right: auto;
+                padding: 6px 6px !important;
+                border-radius: 18px !important;
+                box-sizing: border-box;
+                background: linear-gradient(180deg, #fafafa 0%, #e8e8e8 100%);
+                box-shadow:
+                    inset 0 1px 2px rgba(255, 255, 255, 0.9),
+                    inset 0 -2px 4px rgba(0, 0, 0, 0.06),
+                    0 4px 14px rgba(0, 0, 0, 0.1);
+            }
+            .keypad .key {
+                grid-area: unset !important;
+                width: 56px !important;
+                height: 56px !important;
+                min-width: 48px;
+                min-height: 48px;
+                max-width: 56px;
+                max-height: 56px;
+                font-size: clamp(18px, 5vw, 22px) !important;
+                border-radius: 13px !important;
+                box-shadow: 0 4px 0 #151515, 0 6px 12px rgba(0, 0, 0, 0.2);
+                -webkit-tap-highlight-color: transparent;
+                touch-action: manipulation;
+            }
+            .keypad .key.up {
+                grid-area: 1 / 2 / 2 / 3 !important;
+            }
+            .keypad .key.left {
+                grid-area: 2 / 1 / 3 / 2 !important;
+                transform: translateX(22px);
+                z-index: 2;
+            }
+            .keypad .key.right {
+                grid-area: 2 / 3 / 3 / 4 !important;
+                transform: translateX(-22px);
+                z-index: 2;
+            }
+            .keypad .key.down {
+                grid-area: 3 / 2 / 4 / 3 !important;
+            }
+            .keypad .key.x-mark {
+                grid-area: 4 / 1 / 5 / 2 !important;
+                transform: translateX(22px);
+                margin-top: 6px !important;
+                font-size: clamp(18px, 5vw, 22px) !important;
+                z-index: 2;
+            }
+            .keypad .key.check-mark {
+                grid-area: 4 / 3 / 5 / 4 !important;
+                transform: translateX(-22px);
+                margin-top: 6px !important;
+                font-size: clamp(18px, 5vw, 22px) !important;
+                z-index: 2;
+            }
+            .keypad .key.left:active,
+            .keypad .key.x-mark:active {
+                transform: translateX(22px) translateY(2px) !important;
+            }
+            .keypad .key.right:active,
+            .keypad .key.check-mark:active {
+                transform: translateX(-22px) translateY(2px) !important;
+            }
+            .keypad .key.up:active,
+            .keypad .key.down:active {
+                transform: translateY(2px) !important;
+            }
+
+            .c100-console-viewport:not(.hidden) {
+                transform: none;
+            }
+
+            /* Tutorial: tooltip & pointers — proportional sizing (circles stay circular) */
+            .tutorial-tooltip {
+                bottom: max(12px, env(safe-area-inset-bottom));
+                width: min(360px, calc(100% - 20px));
+                padding: 12px 14px;
+            }
+            .tutorial-pointer {
+                font-size: clamp(26px, 7.5vw, 32px);
+            }
+            .tutorial-pointer-circle {
+                width: clamp(42px, 13.5vw, 56px);
+                height: clamp(42px, 13.5vw, 56px);
+                border-width: clamp(2px, 0.65vw, 3px);
+                box-shadow: 0 0 0 clamp(1px, 0.45vw, 2px) rgba(216, 42, 39, 0.3);
+            }
+
+            /* Setup complete overlay: scroll instead of vertical center clip */
+            .c100-tutorial-complete.c100-tutorial-complete--visible {
+                align-items: flex-start;
+                justify-content: flex-start;
+                padding-top: max(4px, env(safe-area-inset-top));
+                padding-bottom: max(4px, env(safe-area-inset-bottom));
+            }
+            .c100-tutorial-complete__inner {
+                max-width: 100%;
+                width: 100%;
+                box-sizing: border-box;
+                padding: max(14px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-left)) max(28px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-right));
+                flex-shrink: 0;
+            }
+            .c100-tutorial-complete__check-badge {
+                width: clamp(64px, 18vw, 76px);
+                height: clamp(64px, 18vw, 76px);
+            }
+            .c100-tutorial-complete__check-svg {
+                width: clamp(32px, 9vw, 40px);
+                height: clamp(32px, 9vw, 40px);
+            }
+            .c100-tutorial-complete__console-preview {
+                max-width: 100%;
+            }
+            /* Slightly smaller scaled clone on phones */
+            .c100-tutorial-complete__mini-scale-wrap {
+                --c100-mini-scale: 0.33;
+            }
+            .c100-tutorial-complete__dismiss {
+                width: 100%;
+                max-width: 320px;
+                box-sizing: border-box;
+            }
+        }
+
+        /* --- Desktop / tablet: original emulated device chrome (stacked brand text, row display+keypad) --- */
+        @media (min-width: 541px) {
+            .smartbob-long {
+                display: inline !important;
+            }
+            .smartbob-short {
+                display: none !important;
+            }
+            .screen-and-brand .model {
+                display: block !important;
+            }
+            .display-area {
+                flex-direction: row !important;
+                justify-content: space-between;
+                align-items: center;
+                gap: 16px;
+                padding: 16px;
+                margin-bottom: 16px;
+            }
+            .console-container {
+                width: 480px;
+                padding: 25px;
+            }
+            .screen-and-brand {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                width: auto;
+                max-width: none;
+                align-self: auto;
+            }
+            .screen-and-brand .screen {
+                font-size: 13px;
+                padding: 6px;
+                width: 260px;
+                max-width: 260px;
+            }
+            .screen-and-brand .brand {
+                display: block !important;
+                width: auto;
+                max-width: none;
+                margin: 0;
+                padding: 10px 12px;
+                border-radius: 4px;
+                text-align: left;
+                background-color: #e8e8e8 !important;
+                background-image: none !important;
+                box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+            }
+            .screen-and-brand .binmaster {
+                margin-bottom: 4px !important;
+                line-height: 1.2 !important;
+                font-size: 20px !important;
+            }
+            .screen-and-brand .binmaster .bin {
+                font-size: 22px !important;
+            }
+            .screen-and-brand .binmaster .master {
+                font-size: 20px !important;
+            }
+            .screen-and-brand .smartbob {
+                display: block !important;
+                margin: 0 0 2px !important;
+                padding: 0 !important;
+                border: none !important;
+                font-size: 12px !important;
+                font-weight: 600 !important;
+                letter-spacing: normal !important;
+                color: #000 !important;
+            }
+            .screen-and-brand .model {
+                font-size: 11px !important;
+                color: #333 !important;
+            }
+            .keypad {
+                display: grid !important;
+                grid-template-columns: repeat(2, 44px) !important;
+                grid-template-rows: repeat(4, 44px) !important;
+                gap: 8px 6px !important;
+                width: fit-content !important;
+                max-width: none !important;
+                padding: 24px 18px !important;
+                border-radius: 40px !important;
+                column-gap: 6px !important;
+                row-gap: 8px !important;
+            }
+            .keypad .key {
+                width: 44px !important;
+                height: 44px !important;
+                min-width: 44px !important;
+                min-height: 44px !important;
+                max-width: 44px !important;
+                max-height: 44px !important;
+                transform: none !important;
+                z-index: auto !important;
+                font-size: 18px !important;
+                border-radius: 12px !important;
+                box-shadow: 0 3px 0 #000, 0 4px 6px rgba(0, 0, 0, 0.3) !important;
+            }
+            .keypad .key.up {
+                grid-area: 1 / 1 / 2 / 3 !important;
+            }
+            .keypad .key.left {
+                grid-area: 2 / 1 / 3 / 2 !important;
+            }
+            .keypad .key.right {
+                grid-area: 2 / 2 / 3 / 3 !important;
+            }
+            .keypad .key.down {
+                grid-area: 3 / 1 / 4 / 3 !important;
+            }
+            .keypad .key.x-mark {
+                grid-area: 4 / 1 / 5 / 2 !important;
+                margin-top: 14px !important;
+            }
+            .keypad .key.check-mark {
+                grid-area: 4 / 2 / 5 / 3 !important;
+                margin-top: 14px !important;
+            }
+            .keypad .key.left:active,
+            .keypad .key.right:active,
+            .keypad .key.x-mark:active,
+            .keypad .key.check-mark:active {
+                transform: translateY(2px) !important;
+            }
+            .keypad .key.up:active,
+            .keypad .key.down:active {
+                transform: translateY(2px) !important;
+            }
+            .c100-console-viewport:not(.hidden) {
+                transform: none;
+                max-width: 480px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-content">
+    <!-- Front-page device type selection (styled similar to BinDisc home screen) -->
+    <div id="home-page" class="home-page">
+        <h1>BinMaster C-100 Guide</h1>
+        <p>Select the type of C-100 device you want to emulate.</p>
+        <div class="device-type-selection">
+            <button class="device-btn" onclick="selectC100Device('C100-SB')">C100-SB</button>
+            <button class="device-btn" onclick="selectC100Device('C100-R')">C100-R</button>
+        </div>
+    </div>
+</div>
+
+<div id="c100-console-viewport" class="c100-console-viewport hidden">
+    <div id="c100-console-scaled" class="c100-console-scaled">
+<!-- Interactive tutorial emulator (live screen + keys). Completion screen uses separate markup below. -->
+<div id="console-root" class="console-container hidden">
+    <div class="screw-bottom-left"></div>
+    <div class="screw-bottom-right"></div>
+    <div class="display-area">
+        <div class="screen-and-brand">
+            <div id="screen" class="screen"></div>
+            <div class="brand">
+                <div class="binmaster">
+                    <span class="bin">BIN</span><span class="master">MASTER</span><span class="registered">®</span>
+                </div>
+                <div class="smartbob"><span class="smartbob-long">SmartBob Console</span><span class="smartbob-short">C-100</span></div>
+                <div class="model">Model C-100</div>
+            </div>
+        </div>
+        <div class="keypad">
+            <button class="key up" data-key="up" onclick="navigate('up')">&#9650;</button>
+            <button class="key left" data-key="left" onclick="navigate('left')">&#9664;</button>
+            <button class="key right" data-key="right" onclick="navigate('right')">&#9654;</button>
+            <button class="key down" data-key="down" onclick="navigate('down')">&#9660;</button>
+            <button class="key x-mark" data-key="back" onclick="navigate('back')">&#10005;</button>
+            <button class="key check-mark" data-key="select" onclick="navigate('select')">&#10003;</button>
+        </div>
+    </div>
+</div>
+    </div>
+</div>
+
+<div id="tutorial-tooltip" class="tutorial-tooltip tutorial-hidden" role="dialog" aria-live="polite">
+    <div class="tutorial-step" id="tutorial-step-count"></div>
+    <h3 id="tutorial-title"></h3>
+    <p id="tutorial-message"></p>
+    <div class="tutorial-actions">
+        <button id="tutorial-skip" type="button">Skip Guide</button>
+    </div>
+</div>
+<div id="tutorial-pointer" class="tutorial-pointer tutorial-hidden">👉</div>
+<div id="tutorial-pointer-circle" class="tutorial-pointer-circle tutorial-hidden"></div>
+
+<!-- Tutorial COMPLETION: scaled clone of #console-root markup (same classes as live device) -->
+<div id="c100-tutorial-complete-overlay" class="c100-tutorial-complete" aria-hidden="true">
+    <div class="c100-tutorial-complete__inner">
+        <div class="c100-tutorial-complete__success-mark">
+            <div class="c100-tutorial-complete__pulse-rings" aria-hidden="true">
+                <span class="c100-tutorial-complete__pulse-ring"></span>
+                <span class="c100-tutorial-complete__pulse-ring"></span>
+                <span class="c100-tutorial-complete__pulse-ring"></span>
+            </div>
+            <div class="c100-tutorial-complete__check-badge">
+                <svg class="c100-tutorial-complete__check-svg" viewBox="0 0 24 24" aria-hidden="true">
+                    <path class="c100-tutorial-complete__check-path" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+            </div>
+        </div>
+        <h1 class="c100-tutorial-complete__title" id="c100-tutorial-complete-title"></h1>
+        <div class="c100-tutorial-complete__subcopy" id="c100-tutorial-complete-subcopy">
+            <p class="c100-tutorial-complete__subcopy-line" id="c100-tutorial-complete-line1"></p>
+            <p class="c100-tutorial-complete__subcopy-line" id="c100-tutorial-complete-line2"></p>
+        </div>
+        <div class="c100-tutorial-complete__console-preview" id="c100-tutorial-complete-console-preview">
+            <div class="c100-tutorial-complete__sparkles" aria-hidden="true">
+                <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <div class="c100-tutorial-complete__mini-scale-wrap" id="c100-tutorial-complete-mini-scale-wrap" aria-hidden="true">
+                <div class="c100-tutorial-complete__mini-scale-inner">
+                    <div class="c100-tutorial-complete__mini-viewport">
+                        <div class="c100-console-scaled">
+                            <div class="console-container c100-tutorial-complete__live-replica">
+                                <div class="screw-bottom-left"></div>
+                                <div class="screw-bottom-right"></div>
+                                <div class="display-area">
+                                    <div class="screen-and-brand">
+                                        <div class="screen"></div>
+                                        <div class="brand">
+                                            <div class="binmaster">
+                                                <span class="bin">BIN</span><span class="master">MASTER</span><span class="registered">®</span>
+                                            </div>
+                                            <div class="smartbob"><span class="smartbob-long">SmartBob Console</span><span class="smartbob-short">C-100</span></div>
+                                            <div class="model">Model C-100</div>
+                                        </div>
+                                    </div>
+                                    <div class="keypad">
+                                        <button type="button" class="key up" tabindex="-1">&#9650;</button>
+                                        <button type="button" class="key left" tabindex="-1">&#9664;</button>
+                                        <button type="button" class="key right" tabindex="-1">&#9654;</button>
+                                        <button type="button" class="key down" tabindex="-1">&#9660;</button>
+                                        <button type="button" class="key x-mark" tabindex="-1">&#10005;</button>
+                                        <button type="button" class="key check-mark" tabindex="-1">&#10003;</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button type="button" class="c100-tutorial-complete__dismiss" id="c100-tutorial-complete-dismiss">Continue</button>
+    </div>
+</div>
+
+<script>
+    // --- FRONT-PAGE DEVICE TYPE SELECTION ---
+    let selectedC100Device = null;
+
+    function selectC100Device(deviceType) {
+        selectedC100Device = deviceType;
+
+        const homePage = document.getElementById('home-page');
+        const mainContent = document.querySelector('.main-content');
+        const consoleViewport = document.getElementById('c100-console-viewport');
+        const consoleRoot = document.getElementById('console-root');
+
+        if (homePage) homePage.classList.add('hidden');
+        if (mainContent) mainContent.classList.add('hidden');
+        if (consoleViewport) consoleViewport.classList.remove('hidden');
+        if (consoleRoot) consoleRoot.classList.remove('hidden');
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => fitC100ConsoleScale());
+        });
+
+        if (!tutorialActive) {
+            setTimeout(() => startC100Tutorial(), 100);
+        }
+    }
+
+    // --- CONSOLE STATE AND NAVIGATION LOGIC ---
+
+    function isMobileBrandingViewport() {
+        return typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 540px)').matches;
+    }
+    
+    // Define different types of menus: 'nav' (list to a new menu), 'select' (choice with checkmark), 'input' (numeric value), 'detail' (display only), 'welcome' (splash screen)
+    const menuData = {
+        'WELCOME': {
+            type: 'welcome',
+            items: function welcomeItems() {
+                const line2 = isMobileBrandingViewport() ? 'C-100' : 'SmartBob Console';
+                return ['BinMaster C-100', line2, 'v2.00 Apr 21 2016', 'Press any key...'];
+            }
+        },
+        'MAIN_MENU': { type: 'nav', items: ['Measure/View', 'Setup'] },
+        
+        // --- MEASURE/VIEW BRANCH ---
+        'MEASURE_VIEW_NO_SENSORS': { type: 'info', items: ['MEASURE/VIEW Prod', 'No sensors enabled.', 'Go to Add/Remove', 'under the Setup menu.'] },
+        'MEASURE_VIEW_PROD': { 
+            type: 'nav', 
+            items: function() {
+                if (enabledSensors.length === 0) {
+                    return ['No sensors enabled', 'Go to Add/Remove', 'under the Setup menu.'];
+                } else {
+                    const items = ['Measure All'];
+                    enabledSensors.forEach((sensor) => {
+                        if (measureAllInProgress && measureAllPhase) {
+                            if (measureAllPhase === 'pending') {
+                                items.push(`${sensor}: Pending...`);
+                            } else if (measureAllPhase === 'measuring') {
+                                items.push(`${sensor}: Measuring...`);
+                            } else if (measureAllPhase === 'retracted') {
+                                items.push(`${sensor}: Retracted`);
+                            }
+                        } else if (measurementData[sensor]) {
+                            const w = parseFloat(measurementData[sensor].product.weight).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                            items.push(`${sensor}: ${w} lb`);
+                        } else {
+                            items.push(`${sensor}: No data.`);
+                        }
+                    });
+                    return items;
+                }
+            }
+        },
+        'MEASURE_VIEW_SENSOR_001': { type: 'nav', items: ['Product of 001:', 'Capacity of 001:'] },
+        'MEASURE_VIEW_PRODUCT_DETAIL': { 
+            type: 'detail', 
+            label: 'MEASURE/VIEW DETAILS', 
+            items: function() {
+                if (showingMeasuring) {
+                    return [
+                        `Product of ${currentDetailSensor}:`,
+                        'Measuring...',
+                        ''
+                    ];
+                }
+                const data = measurementData[currentDetailSensor];
+                if (!data) {
+                    return [
+                        `Product of ${currentDetailSensor}:`,
+                        'No Data',
+                        ''
+                    ];
+                }
+                const formatWeight = (weight) => {
+                    return parseFloat(weight).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                };
+                return [
+                    `Product of ${currentDetailSensor}:`,
+                    `${data.product.percent}%  ${data.product.feet} ft \u25C0`,
+                    `${formatWeight(data.product.weight)} lb`
+                ];
+            },
+            detailType: 'product'
+        },
+        'MEASURE_VIEW_HEADROOM_DETAIL': { 
+            type: 'detail', 
+            label: 'MEASURE/VIEW DETAILS', 
+            items: function() {
+                if (showingMeasuring) {
+                    return [
+                        `Headroom of ${currentDetailSensor}:`,
+                        'Measuring...',
+                        ''
+                    ];
+                }
+                const data = measurementData[currentDetailSensor];
+                if (!data) {
+                    return [
+                        `Headroom of ${currentDetailSensor}:`,
+                        'No Data',
+                        ''
+                    ];
+                }
+                const formatWeight = (weight) => {
+                    return parseFloat(weight).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                };
+                return [
+                    `Headroom of ${currentDetailSensor}:`,
+                    `${data.headroom.percent}%  ${data.headroom.feet} ft \u25C0`,
+                    `${formatWeight(data.headroom.weight)} lb`
+                ];
+            },
+            detailType: 'headroom'
+        },
+        'MEASURE_VIEW_CAPACITY_DETAIL': { 
+            type: 'detail', 
+            label: 'MEASURE/VIEW DETAILS', 
+            items: function() {
+                if (showingMeasuring) {
+                    return [
+                        `Capacity of ${currentDetailSensor}:`,
+                        'Measuring...',
+                        ''
+                    ];
+                }
+                const data = measurementData[currentDetailSensor];
+                if (!data) {
+                    return [
+                        `Capacity of ${currentDetailSensor}:`,
+                        'No Data',
+                        ''
+                    ];
+                }
+                const formatWeight = (weight) => {
+                    return parseFloat(weight).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                };
+                return [
+                    `Capacity of ${currentDetailSensor}:`,
+                    `${data.capacity.percent}%  ${data.capacity.feet} ft \u25C0`,
+                    `${formatWeight(data.capacity.weight)} lb`
+                ];
+            },
+            detailType: 'capacity'
+        },
+
+        // --- SETUP BRANCH ---
+        'SETUP': { 
+            type: 'nav', 
+            items: function() {
+                if (selectedC100Device === 'C100-R') {
+                    // C-100-R specific menu
+                    return [
+                        'Sensor Type',
+                        'SB-485 Termination',
+                        'Auto Add/Remove',
+                        'Add/Remove',
+                        'Unit of Measure',
+                        'Weight Calculations',
+                        'Vessel Setup',
+                        'C-50 Setup',
+                        'I/O Assignment',
+                        '4-20mA Output',
+                        '4-20mA Error',
+                        'Interval Timer',
+                        'Measurement Format',
+                        'Measurement Type',
+                        'Access Code',
+                        'Language/Idioma',
+                        'Info/About'
+                    ];
+                } else {
+                    // C-100-SB (default) menu
+                    return [
+                        'SB-485 Protocol',
+                        'SB-485 Termination',
+                        'Auto Add/Remove',
+                        'Add/Remove',
+                        'Unit of Measure',
+                        'Weight Calculations',
+                        'Vessel Setup',
+                        'C-50 Setup',
+                        'I/O Assignment',
+                        '4-20mA Output',
+                        '4-20mA Error',
+                        'Interval Timer',
+                        'Measurement Format',
+                        'Measurement Type',
+                        'Access Code',
+                        'Language/Idioma',
+                        'Info/About'
+                    ];
+                }
+            }
+        },
+        'SETUP_ADD_REMOVE': { 
+            type: 'select', 
+            items: function() {
+                // Generate sensor list from 001 to 120
+                const sensors = [];
+                for (let i = 1; i <= 120; i++) {
+                    sensors.push(String(i).padStart(3, '0'));
+                }
+                return sensors;
+            },
+            checked: function() {
+                // Return indices of sensors that are in enabledSensors
+                const menu = menuData['SETUP_ADD_REMOVE'];
+                const items = typeof menu.items === 'function' ? menu.items() : menu.items;
+                const checkedIndices = [];
+                items.forEach((sensor, index) => {
+                    if (enabledSensors.includes(sensor)) {
+                        checkedIndices.push(index);
+                    }
+                });
+                return checkedIndices;
+            },
+            allowsToggle: true, 
+            next: 'SETUP_ADD_REMOVE_CONFIG' 
+        },
+        'SETUP_SENSOR_TYPE': { type: 'select', items: ['NCR-80/GWR-2000', 'SmartSonic'], checked: 0, next: 'SETUP' },
+        'SETUP_SB485_PROTOCOL': { type: 'select', items: ['Protocol A', 'Protocol B'], checked: 0 },
+        'SETUP_SB485_TERMINATION': { type: 'select', items: ['IN', 'OUT'], checked: 0 },
+        'SETUP_INTERVAL_TIMER': { type: 'select', items: ['On/Set', 'Off'], checked: 1 },
+        'SETUP_INTERVAL_TIMER_TIME': { type: 'input', label: 'INTERVAL TIMER', unit: 'as HH:MM', value: '04:00', next: 'SETUP_INTERVAL_TIMER_ASSIGN' },
+        'SETUP_INTERVAL_TIMER_ASSIGN': { 
+            type: 'select', 
+            items: function() {
+                if (enabledSensors.length === 0) {
+                    return ['No sensors enabled'];
+                }
+                // Check if all sensors are assigned to determine text
+                const allAssigned = enabledSensors.length > 0 && enabledSensors.every(sensor => intervalTimerAssignedSensors.includes(sensor));
+                const items = [allAssigned ? 'Unassign All' : 'Assign All'];
+                enabledSensors.forEach(sensor => items.push(sensor));
+                return items;
+            },
+            checked: function() {
+                if (enabledSensors.length === 0) return [];
+                const menu = menuData['SETUP_INTERVAL_TIMER_ASSIGN'];
+                const items = typeof menu.items === 'function' ? menu.items() : menu.items;
+                const checkedIndices = [];
+                items.forEach((item, index) => {
+                    if (index === 0) {
+                        // Check "Assign All"/"Unassign All" if all enabled sensors are assigned
+                        const allAssigned = enabledSensors.length > 0 && enabledSensors.every(sensor => intervalTimerAssignedSensors.includes(sensor));
+                        if (allAssigned) checkedIndices.push(0);
+                    } else if (intervalTimerAssignedSensors.includes(item)) {
+                        checkedIndices.push(index);
+                    }
+                });
+                return checkedIndices;
+            },
+            allowsToggle: true, 
+            next: 'SETUP' 
+        },
+        'SETUP_UNIT_OF_MEASURE': { type: 'select', items: ['U.S. (lb, ft)', 'Metric (kg, m)'], checked: 0 },
+        'SETUP_WEIGHT_CALCULATIONS': { type: 'select', items: ['Enabled', 'Disabled'], checked: 1, next: 'SETUP' },
+        'SETUP_MEASUREMENT_TYPE': { type: 'select', items: ['Headroom', 'Product'], checked: function() { return measurementType === 'Product' ? [1] : [0]; }, next: 'SETUP' },
+        'SETUP_PRODUCT_DENSITY': { type: 'input', label: 'PRODUCT DENSITY', unit: 'in lb/cu ft:', value: '038.00', next: 'SETUP' }, // Back to Setup after input
+        'SETUP_VESSEL_SETUP': { type: 'nav', items: function() { 
+            const items = ['Set All'];
+            enabledSensors.forEach(sensor => items.push(sensor));
+            return items;
+        }},
+        'SETUP_AUTO_ADD_REMOVE_WARNING': {
+            type: 'info',
+            items: ['AUTO ADD/REMOVE', 'Rescan for new and', 'removed sensors?']
+        },
+        'SETUP_AUTO_ADD_REMOVE': { 
+            type: 'info', 
+            items: function() {
+                const sensorNum = String(autoAddRemoveCurrentSensor).padStart(3, '0');
+                const foundLine = `Found ${autoAddRemoveFoundCount}`;
+                const scanningLine = autoAddRemoveScanning ? `Scanning ${sensorNum}...` : 'Finished';
+                return ['AUTO ADD/REMOVE', 'Press X to stop.', foundLine, scanningLine];
+            }
+        },
+        'SETUP_SMARTBOB_MAX_DROP': { type: 'select', items: ['Enabled', 'Disabled'], checked: 1, next: 'SETUP_SMARTBOB_MAX_DROP_INPUT' },
+        'SETUP_SMARTBOB_MAX_DROP_INPUT': { type: 'input', label: 'SMARTBOB MAX DROP', unit: 'in feet:', value: '02.50', next: 'SETUP_SENSOR_OFFSET' },
+        'SETUP_SENSOR_OFFSET': { type: 'input', label: 'SENSOR OFFSET', unit: 'in feet:', value: '00.00', next: 'SETUP' }, // Back to Setup after input
+        'SETUP_ACCESS_CODE': { type: 'select', items: ['On/Set', 'Off'], checked: function() { return accessCodeEnabled ? [0] : [1]; } },
+        'SETUP_ACCESS_CODE_INPUT': { type: 'input', label: 'ACCESS CODE', unit: '4 digits:', value: '####', next: 'SETUP' },
+        'ACCESS_CODE_ENTRY': { type: 'input', label: 'ACCESS CODE', unit: 'Enter code:', value: '####', next: null },
+        'SETUP_LANGUAGE': { type: 'select', items: ['English', 'Español'], checked: 0 },
+        'SETUP_INFO_ABOUT': { type: 'info', items: ['INFO/ABOUT', 'BinMaster C-100', 'Smartbob Console', 'v3.03 Feb 14, 2023'] },
+
+        // --- VESSEL CONFIGURATION SCREENS --- (Simplified flow starting from Set All/001 selection)
+        'VESSEL_CONFIG_START': { type: 'nav', items: ['VESSEL SHAPE', 'BODY HEIGHT', 'BODY RADIUS', 'HOPPER PRESENT', 'SENSOR OFFSET', 'SMARTBOB MAX DROP'] }, // Added offset/drop
+
+        'CONFIG_VESSEL_SHAPE': { type: 'select', items: ['Circular', 'Rectangular'], checked: 0, next: 'CONFIG_BODY_HEIGHT' },
+        'CONFIG_BODY_HEIGHT': { type: 'input', label: 'BODY HEIGHT', unit: 'in feet:', value: '020.00', next: 'CONFIG_BODY_RADIUS' },
+        'CONFIG_BODY_RADIUS': { type: 'input', label: 'BODY RADIUS', unit: 'in feet:', value: '15.00', next: 'CONFIG_HOPPER_PRESENT' },
+        'CONFIG_HOPPER_PRESENT': { type: 'select', items: ['Yes', 'No'], checked: 0, next: 'CONFIG_HOPPER_HEIGHT' },
+        'CONFIG_HOPPER_HEIGHT': { type: 'input', label: 'HOPPER HEIGHT', unit: 'in feet:', value: '06.00', next: 'CONFIG_OUTLET_RADIUS' },
+        'CONFIG_OUTLET_RADIUS': { type: 'input', label: 'OUTLET RADIUS', unit: 'in feet:', value: '01.00', next: 'CONFIG_SENSOR_OFFSET' },
+        'CONFIG_SENSOR_OFFSET': { type: 'input', label: 'SENSOR OFFSET', unit: 'in feet:', value: '+00.00', next: 'CONFIG_PRODUCT_DENSITY' },
+        'CONFIG_PRODUCT_DENSITY': { type: 'input', label: 'PRODUCT DENSITY', unit: 'in lb/cu ft:', value: '020.00', next: 'CONFIG_SMARTBOB_MAX_DROP' },
+        'CONFIG_SMARTBOB_MAX_DROP': { type: 'select', items: ['Enabled', 'Disabled'], checked: 1, next: 'CONFIG_SMARTBOB_MAX_DROP_INPUT' },
+        'CONFIG_SMARTBOB_MAX_DROP_INPUT': { type: 'input', label: 'SMARTBOB MAX DROP', unit: 'in feet:', value: '02.50', next: 'SETUP_VESSEL_SETUP' }, // Loop back to Vessel Setup to end configuration sequence
+    };
+
+    // Maps a menu item selection to the next state (or null for no change/end action)
+    const nextStateMap = {
+        'MAIN_MENU': {
+            'Measure/View': 'MEASURE_VIEW_PROD',
+            'Setup': 'SETUP'
+        },
+        'MEASURE_VIEW_PROD': {
+             'Measure All': 'MEASURE_VIEW_PRODUCT_DETAIL', // Simulating a measurement result
+             // Dynamic sensor entries will be handled in navigation code
+        },
+        'MEASURE_VIEW_SENSOR_001': {
+             'Product of 001:': 'MEASURE_VIEW_PRODUCT_DETAIL',
+             'Capacity of 001:': 'MEASURE_VIEW_CAPACITY_DETAIL'
+        },
+        'SETUP': {
+            'Sensor Type': 'SETUP_SENSOR_TYPE', // C-100-R only
+            'SB-485 Protocol': 'SETUP_SB485_PROTOCOL', // C-100-SB only
+            'SB-485 Termination': 'SETUP_SB485_TERMINATION',
+            'Auto Add/Remove': function() {
+                // Only show warning if sensors are already added
+                return enabledSensors.length > 0 ? 'SETUP_AUTO_ADD_REMOVE_WARNING' : 'SETUP_AUTO_ADD_REMOVE';
+            },
+            'Add/Remove': 'SETUP_ADD_REMOVE',
+            'Unit of Measure': 'SETUP_UNIT_OF_MEASURE',
+            'Weight Calculations': 'SETUP_WEIGHT_CALCULATIONS',
+            'Vessel Setup': 'SETUP_VESSEL_SETUP',
+            'C-50 Setup': null,
+            'I/O Assignment': null,
+            '4-20mA Output': null,
+            '4-20mA Error': null,
+            'Interval Timer': 'SETUP_INTERVAL_TIMER',
+            'Measurement Format': null,
+            'Measurement Type': 'SETUP_MEASUREMENT_TYPE',
+            'Access Code': 'SETUP_ACCESS_CODE',
+            'Language/Idioma': 'SETUP_LANGUAGE',
+            'Info/About': 'SETUP_INFO_ABOUT'
+        },
+        'SETUP_VESSEL_SETUP': {
+            'Set All': 'CONFIG_VESSEL_SHAPE', // Start the sequence
+            '001': 'CONFIG_VESSEL_SHAPE' 
+        },
+        'CONFIG_VESSEL_SHAPE': {
+            'Circular': 'CONFIG_BODY_HEIGHT',
+            'Rectangular': 'CONFIG_BODY_HEIGHT'
+        },
+        'CONFIG_HOPPER_PRESENT': {
+            'Yes': 'CONFIG_HOPPER_HEIGHT',
+            'No': 'CONFIG_SENSOR_OFFSET' // Skip hopper height and outlet radius if no hopper
+        },
+        'CONFIG_SMARTBOB_MAX_DROP': {
+            'Enabled': 'CONFIG_SMARTBOB_MAX_DROP_INPUT',
+            'Disabled': 'SETUP_VESSEL_SETUP', // Skip input if disabled
+        },
+        'SETUP_WEIGHT_CALCULATIONS': {
+            'Enabled': 'SETUP', // Back to Setup menu; product density is in Vessel Setup
+            'Disabled': 'SETUP',
+        },
+        'SETUP_SMARTBOB_MAX_DROP': {
+            'Enabled': 'SETUP_SMARTBOB_MAX_DROP_INPUT',
+            'Disabled': 'SETUP', // Go back to Setup menu if disabled
+        },
+        'SETUP_INTERVAL_TIMER': {
+            'On/Set': 'SETUP_INTERVAL_TIMER_TIME',
+            'Off': 'SETUP' // Go back to Setup menu if Off
+        },
+        'SETUP_ACCESS_CODE': {
+            'On/Set': 'SETUP_ACCESS_CODE_INPUT',
+            'Off': 'SETUP' // Go back to Setup menu if Off
+        }
+    };
+
+    let currentState = 'WELCOME';
+    let previousState = 'WELCOME'; // Track previous state to detect state changes
+    let history = [];
+    let selectedIndex = 0;
+    let previousSelectedIndex = 0; // Track previous index to determine scroll direction
+    let previousViewportOffset = -1; // Track previous viewport position
+    let lastListNavDirection = null; // 'up' | 'down' (used to bias viewport positioning)
+    let inputCursorPos = 0; 
+    const screenElement = document.getElementById('screen');
+    
+    // Track selectedIndex for each menu state
+    let stateIndexMap = {};
+    
+    // Vessel configuration storage - saves settings for use in measure/view
+    let vesselConfig = {
+        shape: 'Circular',
+        bodyHeight: '020.00',
+        bodyRadius: '15.00',
+        hopperPresent: 'Yes',
+        hopperHeight: '06.00',
+        outletRadius: '01.00',
+        sensorOffset: '+00.00',
+        productDensity: '020.00',
+        smartBobMaxDropEnabled: 'Disabled',
+        smartBobMaxDrop: '02.50'
+    };
+    
+    // Track enabled sensors (added through Add/Remove or Auto Add/Remove)
+    let enabledSensors = [];
+    
+    // Track sensors assigned to interval timer
+    let intervalTimerAssignedSensors = [];
+    
+    // Access code storage
+    let accessCodeEnabled = false;
+    let accessCodeValue = '0000';
+    
+    // Measurement type storage
+    let measurementType = 'Product'; // Default to Product
+    
+    // Measurement data storage per sensor
+    let measurementData = {}; // Format: { '001': { product: {...}, headroom: {...}, capacity: {...} } }
+    
+    // Current sensor being viewed in detail screens
+    let currentDetailSensor = '001';
+    
+    // Measurement state tracking
+    let isMeasuring = false;
+    let measurementTimeout = null;
+    
+    // Auto Add/Remove scanning state
+    let autoAddRemoveScanning = false;
+    let autoAddRemoveCurrentSensor = 0;
+    let autoAddRemoveFoundCount = 0;
+    let autoAddRemoveLastFound = null; // Track the last found sensor number
+    let autoAddRemoveInterval = null;
+    
+    // Initialize measurement data for a sensor with default values
+    function initializeMeasurementData(sensorNum) {
+        if (!measurementData[sensorNum]) {
+            // Default values based on vessel config
+            const bodyHeight = parseFloat(vesselConfig.bodyHeight) || 20.0;
+            const hopperHeight = parseFloat(vesselConfig.hopperHeight) || 6.0;
+            const totalHeight = bodyHeight + hopperHeight;
+            const headroom = 2.59; // Default headroom
+            const productHeight = totalHeight - headroom;
+            const productPercent = (productHeight / totalHeight) * 100;
+            const headroomPercent = (headroom / totalHeight) * 100;
+            const density = parseFloat(vesselConfig.productDensity) || 20.0;
+            
+            // Calculate volumes and weights (simplified circular vessel calculation)
+            const radius = parseFloat(vesselConfig.bodyRadius) || 1.0;
+            const productVolume = Math.PI * radius * radius * productHeight;
+            const headroomVolume = Math.PI * radius * radius * headroom;
+            const totalVolume = Math.PI * radius * radius * totalHeight;
+            
+            measurementData[sensorNum] = {
+                product: {
+                    percent: productPercent.toFixed(1),
+                    feet: productHeight.toFixed(2),
+                    weight: (productVolume * density).toFixed(2)
+                },
+                headroom: {
+                    percent: headroomPercent.toFixed(1),
+                    feet: headroom.toFixed(2),
+                    weight: (headroomVolume * density).toFixed(2)
+                },
+                capacity: {
+                    percent: '100.0',
+                    feet: totalHeight.toFixed(2),
+                    weight: (totalVolume * density).toFixed(2)
+                }
+            };
+        }
+        return measurementData[sensorNum];
+    }
+    
+    // Measurement state flag for showing "Measuring..." message
+    let showingMeasuring = false;
+    let measureAllInProgress = false;
+    /** Synchronized UI phase for all sensors during measure-all (plain list text only). */
+    let measureAllPhase = null; // 'pending' | 'measuring' | 'retracted' | null
+    let measureAllTimerIds = [];
+
+    function clearMeasureAllTimers() {
+        measureAllTimerIds.forEach((id) => clearTimeout(id));
+        measureAllTimerIds = [];
+    }
+    function scheduleMeasureAllStep(fn, delayMs) {
+        const id = setTimeout(fn, delayMs);
+        measureAllTimerIds.push(id);
+        return id;
+    }
+    
+    // Perform measurement for a single sensor (used by detail view and measure-all)
+    function performMeasurement(sensorNum, onComplete) {
+        if (isMeasuring && !measureAllInProgress) return;
+        
+        isMeasuring = true;
+        showingMeasuring = !measureAllInProgress;
+        
+        renderScreen();
+        
+        measurementTimeout = setTimeout(() => {
+            const existingData = measurementData[sensorNum];
+            
+            // Calculate capacity from vessel config (stays constant)
+            const bodyHeight = parseFloat(vesselConfig.bodyHeight) || 20.0;
+            const hopperHeight = parseFloat(vesselConfig.hopperHeight) || 6.0;
+            const totalHeight = bodyHeight + hopperHeight;
+            const density = parseFloat(vesselConfig.productDensity) || 20.0;
+            const radius = parseFloat(vesselConfig.bodyRadius) || 1.0;
+            const totalVolume = Math.PI * radius * radius * totalHeight;
+            const capacityFeet = totalHeight;
+            const capacityWeight = totalVolume * density;
+            
+            // Determine new headroom
+            let newHeadroom;
+            if (existingData) {
+                // If we have existing data, vary headroom from current value
+                const headroomVariation = (Math.random() * 4 - 2).toFixed(2);
+                const currentHeadroom = parseFloat(existingData.headroom.feet);
+                newHeadroom = Math.max(0.1, Math.min(capacityFeet - 0.1, parseFloat((currentHeadroom + parseFloat(headroomVariation)).toFixed(2))));
+            } else {
+                // First measurement - start with a default headroom
+                const defaultHeadroom = 2.59;
+                const headroomVariation = (Math.random() * 4 - 2).toFixed(2);
+                newHeadroom = Math.max(0.1, Math.min(capacityFeet - 0.1, parseFloat((defaultHeadroom + parseFloat(headroomVariation)).toFixed(2))));
+            }
+            
+            // Product is calculated as Capacity - Headroom
+            const productHeight = capacityFeet - newHeadroom;
+            const productPercent = (productHeight / capacityFeet) * 100;
+            const headroomPercent = (newHeadroom / capacityFeet) * 100;
+            
+            // Calculate volumes
+            const productVolume = Math.PI * radius * radius * productHeight;
+            const headroomVolume = Math.PI * radius * radius * newHeadroom;
+            
+            // Calculate weights
+            const productWeight = productVolume * density;
+            const headroomWeight = headroomVolume * density;
+            
+            // Create or update measurement data - Capacity stays the same!
+            measurementData[sensorNum] = {
+                product: {
+                    percent: productPercent.toFixed(1),
+                    feet: productHeight.toFixed(2),
+                    weight: productWeight.toFixed(2)
+                },
+                headroom: {
+                    percent: headroomPercent.toFixed(1),
+                    feet: newHeadroom.toFixed(2),
+                    weight: headroomWeight.toFixed(2)
+                },
+                capacity: {
+                    percent: '100.0',
+                    feet: capacityFeet.toFixed(2),
+                    weight: capacityWeight.toFixed(2)
+                }
+            };
+            
+            showingMeasuring = false;
+            isMeasuring = false;
+            renderScreen();
+            if (onComplete) onComplete();
+        }, 3000); // 3 seconds
+    }
+    
+    /** Compute and store measurement for one sensor (shared with measure-all sequence). */
+    function applyMeasurementForSensor(sensorNum) {
+        const bodyHeight = parseFloat(vesselConfig.bodyHeight) || 20.0;
+        const hopperHeight = parseFloat(vesselConfig.hopperHeight) || 6.0;
+        const totalHeight = bodyHeight + hopperHeight;
+        const density = parseFloat(vesselConfig.productDensity) || 20.0;
+        const radius = parseFloat(vesselConfig.bodyRadius) || 1.0;
+        const totalVolume = Math.PI * radius * radius * totalHeight;
+        const capacityFeet = totalHeight;
+        const existingData = measurementData[sensorNum];
+        let newHeadroom;
+        if (existingData) {
+            const headroomVariation = (Math.random() * 4 - 2).toFixed(2);
+            const currentHeadroom = parseFloat(existingData.headroom.feet);
+            newHeadroom = Math.max(0.1, Math.min(capacityFeet - 0.1, parseFloat((currentHeadroom + parseFloat(headroomVariation)).toFixed(2))));
+        } else {
+            const defaultHeadroom = 2.59;
+            const headroomVariation = (Math.random() * 4 - 2).toFixed(2);
+            newHeadroom = Math.max(0.1, Math.min(capacityFeet - 0.1, parseFloat((defaultHeadroom + parseFloat(headroomVariation)).toFixed(2))));
+        }
+        const productHeight = capacityFeet - newHeadroom;
+        const productPercent = (productHeight / capacityFeet) * 100;
+        const headroomPercent = (newHeadroom / capacityFeet) * 100;
+        const productVolume = Math.PI * radius * radius * productHeight;
+        const headroomVolume = Math.PI * radius * radius * newHeadroom;
+        const productWeight = productVolume * density;
+        const headroomWeight = headroomVolume * density;
+        const capacityWeight = totalVolume * density;
+        measurementData[sensorNum] = {
+            product: { percent: productPercent.toFixed(1), feet: productHeight.toFixed(2), weight: productWeight.toFixed(2) },
+            headroom: { percent: headroomPercent.toFixed(1), feet: newHeadroom.toFixed(2), weight: headroomWeight.toFixed(2) },
+            capacity: { percent: '100.0', feet: capacityFeet.toFixed(2), weight: capacityWeight.toFixed(2) }
+        };
+    }
+
+    /**
+     * All enabled sensors share the same phases: Pending... → Measuring... → Retracted (short) → lb readout.
+     */
+    function performMeasureAll() {
+        clearMeasureAllTimers();
+        if (enabledSensors.length === 0) {
+            measureAllInProgress = false;
+            measureAllPhase = null;
+            renderScreen();
+            return;
+        }
+
+        const MS_PENDING = 600;
+        const MS_MEASURING = 1400;
+        const MS_RETRACTED = 320;
+
+        measureAllInProgress = true;
+        measureAllPhase = 'pending';
+        renderScreen();
+
+        scheduleMeasureAllStep(() => {
+            measureAllPhase = 'measuring';
+            renderScreen();
+        }, MS_PENDING);
+
+        scheduleMeasureAllStep(() => {
+            measureAllPhase = 'retracted';
+            renderScreen();
+        }, MS_PENDING + MS_MEASURING);
+
+        scheduleMeasureAllStep(() => {
+            enabledSensors.forEach((s) => applyMeasurementForSensor(s));
+            measureAllInProgress = false;
+            measureAllPhase = null;
+            clearMeasureAllTimers();
+            renderScreen();
+        }, MS_PENDING + MS_MEASURING + MS_RETRACTED);
+    }
+    
+    // Auto Add/Remove scanning functions
+    function startAutoAddRemoveScanning() {
+        // Reset state
+        autoAddRemoveScanning = true;
+        // Note: autoAddRemoveCurrentSensor should already be set to 1 before calling this function
+        
+        // Process first sensor immediately (001)
+        processSensorScan();
+        
+        // Start scanning with interval - scan each number from 002 to 120
+        autoAddRemoveInterval = setInterval(() => {
+            // Increment to next sensor
+            autoAddRemoveCurrentSensor++;
+            
+            // Stop at 120
+            if (autoAddRemoveCurrentSensor > 120) {
+                stopAutoAddRemoveScanning();
+                return;
+            }
+            
+            // Process this sensor
+            processSensorScan();
+        }, 60); // ~7 seconds total for 120 sensors
+    }
+    
+    // Helper function to process scanning for current sensor
+    function processSensorScan() {
+        const sensorNum = String(autoAddRemoveCurrentSensor).padStart(3, '0');
+        
+        // Simulate checking if there's an address for this sensor number
+        // For demo purposes, we'll find sensors at certain intervals (e.g., every 5th sensor)
+        // In real implementation, this would check actual hardware addresses
+        const sensorFound = checkSensorAddress(autoAddRemoveCurrentSensor);
+        
+        if (sensorFound) {
+            // Sensor found - add it to enabled sensors
+            if (!enabledSensors.includes(sensorNum)) {
+                enabledSensors.push(sensorNum);
+                autoAddRemoveFoundCount++;
+                autoAddRemoveLastFound = sensorNum;
+            }
+        }
+        
+        // Update the display
+        renderScreen();
+    }
+    
+    // Function to simulate checking if a sensor address exists
+    // In real implementation, this would check actual hardware
+    function checkSensorAddress(sensorNumber) {
+        // Find sensors 001, 004, and 009 (3 out of 256)
+        if (sensorNumber === 1 || sensorNumber === 4 || sensorNumber === 9) return true;
+        return false; // All other sensors won't be found
+    }
+    
+    function stopAutoAddRemoveScanning() {
+        autoAddRemoveScanning = false;
+        if (autoAddRemoveInterval) {
+            clearInterval(autoAddRemoveInterval);
+            autoAddRemoveInterval = null;
+        }
+        // Render one final time to show "Finished"
+        renderScreen();
+    }
+    
+    // Track if we're in vessel configuration flow
+    const vesselConfigStates = ['CONFIG_VESSEL_SHAPE', 'CONFIG_BODY_HEIGHT', 'CONFIG_BODY_RADIUS', 
+                                'CONFIG_HOPPER_PRESENT', 'CONFIG_HOPPER_HEIGHT', 'CONFIG_OUTLET_RADIUS', 'CONFIG_SENSOR_OFFSET', 'CONFIG_PRODUCT_DENSITY', 
+                                'CONFIG_SMARTBOB_MAX_DROP', 'CONFIG_SMARTBOB_MAX_DROP_INPUT'];
+
+    /** Guide only: MEASURE_VIEW_PROD needs sensors or list shows "No sensors enabled" and Measure All never appears. */
+    function ensureTutorialSensorsOnMeasureView() {
+        if (!tutorialActive || currentState !== 'MEASURE_VIEW_PROD' || enabledSensors.length > 0) return;
+        enabledSensors = ['001', '004', '009'];
+    }
+
+    // --- RENDER FUNCTION ---
+    function renderScreen() {
+        ensureTutorialSensorsOnMeasureView();
+
+        // Reset previousSelectedIndex and previousViewportOffset if state changed
+        if (currentState !== previousState) {
+            previousSelectedIndex = selectedIndex;
+            previousViewportOffset = -1; // Reset viewport tracking
+            lastListNavDirection = null; // Reset directional posture on state change
+            previousState = currentState;
+        }
+        
+        const menu = menuData[currentState];
+        if (!menu) {
+            console.error('Menu not found for state:', currentState);
+            return;
+        }
+        let html = '';
+        let title = '';
+        let itemsToShow = [];
+        let viewportOffset = 0;
+        const ITEMS_PER_SCREEN = 3;
+        
+        // Handle dynamic menu items (functions that return arrays) - only for menus that have items
+        let menuItems = null;
+        if (menu.items) {
+            menuItems = typeof menu.items === 'function' ? menu.items() : menu.items;
+            // Ensure selectedIndex is within bounds for dynamic menus
+            if (menuItems && menuItems.length > 0 && selectedIndex >= menuItems.length) {
+                selectedIndex = menuItems.length - 1;
+            }
+        } else if (menu.type === 'nav' || menu.type === 'select' || menu.type === 'welcome' || menu.type === 'info' || menu.type === 'detail') {
+            // These menu types should always have items - if not, it's an error
+            console.error('Menu type', menu.type, 'should have items but doesn\'t:', currentState);
+        }
+
+        if (menu.type === 'welcome') {
+            // Welcome screen - left-aligned text, show all 4 items
+            html = menuItems.map((item, index) => {
+                return `<div class="menu-item" style="text-align: left;">${item}</div>`;
+            }).join('');
+
+        } else if (menu.type === 'nav') {
+            title = menuItems[selectedIndex];
+            // Get proper screen title from context
+            if (currentState === 'MAIN_MENU') title = 'MAIN MENU';
+            if (currentState === 'SETUP') title = 'SETUP';
+            if (currentState.startsWith('MEASURE_VIEW')) title = 'MEASURE/VIEW Prod'; 
+
+            // Special handling for "No sensors enabled" message - render as info screen
+            if (menuItems.length > 0 && menuItems[0] === 'No sensors enabled') {
+                title = 'MEASURE/VIEW Prod';
+                const displayCount = Math.min(ITEMS_PER_SCREEN, menuItems.length);
+                for (let i = 0; i < displayCount; i++) {
+                    html += `<div class="menu-item">${menuItems[i]}</div>`;
+                }
+            } else {
+                // Calculate which items to show (only 3 at a time)
+                const totalItems = menuItems.length;
+                if (totalItems <= ITEMS_PER_SCREEN) {
+                    // Show all items if 3 or fewer
+                    itemsToShow = menuItems.map((item, index) => ({ item, index }));
+                    viewportOffset = 0;
+                } else {
+                    // Stable 3-row window (no jumping):
+                    // - The highlight moves within the 3 visible rows.
+                    // - The window scrolls only when the highlight would go off-screen.
+                    const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+                    const maxOffset = totalItems - ITEMS_PER_SCREEN;
+
+                    // Start from previous window if possible, otherwise center around selection.
+                    viewportOffset = previousViewportOffset !== -1 ? previousViewportOffset : clamp(selectedIndex - 1, 0, maxOffset);
+
+                    // Adjust window based on last navigation direction.
+                    if (lastListNavDirection === 'up') {
+                        if (selectedIndex < viewportOffset) {
+                            viewportOffset = selectedIndex; // keep selection on top
+                        } else if (selectedIndex >= viewportOffset + ITEMS_PER_SCREEN) {
+                            viewportOffset = selectedIndex - (ITEMS_PER_SCREEN - 1); // bring into view at bottom
+                        }
+                    } else if (lastListNavDirection === 'down') {
+                        if (selectedIndex >= viewportOffset + ITEMS_PER_SCREEN) {
+                            viewportOffset = selectedIndex - (ITEMS_PER_SCREEN - 1); // keep selection on bottom
+                        } else if (selectedIndex < viewportOffset) {
+                            viewportOffset = selectedIndex; // bring into view at top
+                        }
+                    } else {
+                        // No direction yet; just ensure visible.
+                        if (selectedIndex < viewportOffset) viewportOffset = selectedIndex;
+                        if (selectedIndex >= viewportOffset + ITEMS_PER_SCREEN) viewportOffset = selectedIndex - (ITEMS_PER_SCREEN - 1);
+                    }
+
+                    viewportOffset = clamp(viewportOffset, 0, maxOffset);
+
+                    for (let i = 0; i < ITEMS_PER_SCREEN; i++) {
+                        const idx = viewportOffset + i;
+                        itemsToShow.push({ item: menuItems[idx], index: idx });
+                    }
+                }
+
+                const hasMoreAbove = viewportOffset > 0;
+                const hasMoreBelow = viewportOffset + ITEMS_PER_SCREEN < totalItems;
+                
+                // Store viewport offset for next render (for nav menus)
+                previousViewportOffset = viewportOffset;
+                
+                html = itemsToShow.map(({ item, index }, localRow) => {
+                    const isSelected = index === selectedIndex ? 'selected' : '';
+                    let scrollIndicator = '';
+
+                    // Up arrow on first visible row if there are items above
+                    if (hasMoreAbove && localRow === 0) {
+                        scrollIndicator = ' \u25B4';
+                    }
+                    // Down arrow on last visible row if there are items below
+                    if (hasMoreBelow && localRow === itemsToShow.length - 1) {
+                        scrollIndicator = ' \u25BE';
+                    }
+
+                    return `<div class="menu-item ${isSelected}" data-menu-index="${index}" data-state="${currentState}">${item}${scrollIndicator}</div>`;
+                }).join('');
+            }
+
+        } else if (menu.type === 'select') {
+            title = currentState.replace('SETUP_', '').replace('CONFIG_', '').replace(/_/g, ' '); 
+            title = (title === 'ADD/REMOVE') ? title : title.toUpperCase();
+            
+            // Handle dynamic menu items (functions that return arrays)
+            const selectMenuItems = typeof menu.items === 'function' ? menu.items() : menu.items;
+            title = selectMenuItems[0] === 'Circular' ? 'VESSEL SHAPE' : title;
+            
+            // Special title for Auto Add/Remove warning
+            if (currentState === 'SETUP_AUTO_ADD_REMOVE_WARNING') {
+                title = 'Rescan for new and removed sensors?';
+            } 
+            
+            // Calculate which items to show (only 3 at a time)
+            const totalItems = selectMenuItems.length;
+            if (totalItems <= ITEMS_PER_SCREEN) {
+                itemsToShow = selectMenuItems.map((item, index) => ({ item, index }));
+                viewportOffset = 0;
+            } else {
+                // Stable 3-row window (no jumping) for select menus too.
+                const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+                const maxOffset = totalItems - ITEMS_PER_SCREEN;
+
+                viewportOffset = previousViewportOffset !== -1 ? previousViewportOffset : clamp(selectedIndex - 1, 0, maxOffset);
+
+                if (lastListNavDirection === 'up') {
+                    if (selectedIndex < viewportOffset) {
+                        viewportOffset = selectedIndex;
+                    } else if (selectedIndex >= viewportOffset + ITEMS_PER_SCREEN) {
+                        viewportOffset = selectedIndex - (ITEMS_PER_SCREEN - 1);
+                    }
+                } else if (lastListNavDirection === 'down') {
+                    if (selectedIndex >= viewportOffset + ITEMS_PER_SCREEN) {
+                        viewportOffset = selectedIndex - (ITEMS_PER_SCREEN - 1);
+                    } else if (selectedIndex < viewportOffset) {
+                        viewportOffset = selectedIndex;
+                    }
+                } else {
+                    if (selectedIndex < viewportOffset) viewportOffset = selectedIndex;
+                    if (selectedIndex >= viewportOffset + ITEMS_PER_SCREEN) viewportOffset = selectedIndex - (ITEMS_PER_SCREEN - 1);
+                }
+
+                viewportOffset = clamp(viewportOffset, 0, maxOffset);
+
+                for (let i = 0; i < ITEMS_PER_SCREEN; i++) {
+                    const idx = viewportOffset + i;
+                    itemsToShow.push({ item: selectMenuItems[idx], index: idx });
+                }
+            }
+
+            const hasMoreAbove = viewportOffset > 0;
+            const hasMoreBelow = viewportOffset + ITEMS_PER_SCREEN < totalItems;
+            
+            // Store viewport offset for next render (for select menus)
+            previousViewportOffset = viewportOffset;
+            
+            // Get checked items - handle function or array
+            let checkedIndices = [];
+            if (typeof menu.checked === 'function') {
+                checkedIndices = menu.checked();
+            } else if (Array.isArray(menu.checked)) {
+                checkedIndices = menu.checked;
+            } else if (menu.checked !== undefined && menu.checked !== -1) {
+                checkedIndices = [menu.checked];
+            }
+            
+            html = itemsToShow.map(({ item, index }, localRow) => {
+                const isSelected = index === selectedIndex ? 'selected' : '';
+                // Checkmark shows on checked items
+                let isChecked = '  ';
+                if (checkedIndices.includes(index)) {
+                    isChecked = '\u2714 ';
+                } 
+                let scrollIndicator = '';
+
+                if (hasMoreAbove && localRow === 0) {
+                    scrollIndicator = ' \u25B4';
+                }
+                if (hasMoreBelow && localRow === itemsToShow.length - 1) {
+                    scrollIndicator = ' \u25BE';
+                }
+
+                return `<div class="menu-item ${isSelected}" data-menu-index="${index}" data-state="${currentState}">${isChecked}${item}${scrollIndicator}</div>`;
+            }).join('');
+
+        } else if (menu.type === 'input') {
+            title = menu.label;
+            const val = menu.value.split('');
+            let valueHtml = val.map((digit, index) => {
+                if (digit === '.' || digit === ':') return digit;
+                const charIndex = (val.slice(0, index).filter(c => c !== '.' && c !== ':').length); 
+                const isCursor = charIndex === inputCursorPos ? 'input-cursor' : '';
+                return `<span class="${isCursor}">${digit}</span>`;
+            }).join('');
+
+            html = `
+                <div class="menu-item">Enter ${menu.unit}</div>
+                <div class="input-value">${valueHtml}</div>
+                <div class="menu-item"><small>\u25C0/\u25B6: Cursor &nbsp; \u25B2/\u25BC: Digit</small></div>
+            `;
+            if (menu.value[inputCursorPos] === '.' || menu.value[inputCursorPos] === ':') {
+                inputCursorPos = Math.min(menu.value.length - 1, inputCursorPos + 1);
+            }
+
+        } else if (menu.type === 'info') {
+             // Handle dynamic menu items (functions that return arrays)
+             const infoMenuItems = typeof menu.items === 'function' ? menu.items() : menu.items;
+             title = infoMenuItems[0];
+             const infoItems = infoMenuItems.slice(1);
+             const displayCount = Math.min(ITEMS_PER_SCREEN, infoItems.length);
+             for (let i = 0; i < displayCount; i++) {
+                html += `<div class="menu-item">${infoItems[i]}</div>`;
+            }
+        } else if (menu.type === 'detail') {
+             title = menu.label;
+             
+             // Get the items for the current detail screen (handle function or array)
+             // Don't initialize data automatically - only when measurement is taken
+             const detailItems = typeof menu.items === 'function' ? menu.items() : menu.items;
+             const displayCount = Math.min(ITEMS_PER_SCREEN, detailItems.length);
+             for (let i = 0; i < displayCount; i++) {
+                html += `<div class="menu-item">${detailItems[i]}</div>`;
+            }
+        }
+
+        if (menu.type === 'welcome') {
+            screenElement.innerHTML = `
+                <div class="menu-items-container">
+                    <div class="menu-items-viewport">${html}</div>
+                </div>
+            `;
+        } else {
+            screenElement.innerHTML = `
+                <div class="menu-title">${title}</div>
+                <div class="menu-items-container">
+                    <div class="menu-items-viewport">${html}</div>
+                </div>
+            `;
+        }
+
+        updateTutorialUI();
+
+        if (tutorialPendingAdvance) {
+            const pending = tutorialPendingAdvance;
+            tutorialPendingAdvance = null;
+            maybeAdvanceAfterAction(pending.direction, pending.actionContext);
+        }
+
+        // Must run AFTER pending: advanceWhen uses the updated step (e.g. after ✓ Measure All → Wait,
+        // we need !measureAllInProgress to see measureAllInProgress === true). Running before pending
+        // could skip Wait immediately or leave the guide out of sync with Measure All.
+        maybeAutoAdvanceTutorial();
+
+        requestAnimationFrame(() => fitC100ConsoleScale());
+    }
+
+    /** Portrait (narrow): CSS stacks the face — no zoom. Landscape (narrow): zoom fits horizontal bar. */
+    const C100_MOBILE_SCALE_MAX_W = 540;
+    const C100_DESIGN_W = 480;
+    const C100_SCALE_SIDE_PAD = 16;
+
+    function fitC100ConsoleScale() {
+        const vp = document.getElementById('c100-console-viewport');
+        const scaled = document.getElementById('c100-console-scaled');
+        const root = document.getElementById('console-root');
+        if (!vp || !scaled || !root) return;
+        if (root.classList.contains('hidden')) {
+            scaled.style.zoom = '';
+            scaled.style.removeProperty('transform');
+            scaled.style.removeProperty('transform-origin');
+            scaled.style.width = '';
+            vp.style.height = '';
+            vp.style.width = '';
+            return;
+        }
+        const vw = window.innerWidth;
+        if (vw > C100_MOBILE_SCALE_MAX_W) {
+            scaled.style.zoom = '';
+            scaled.style.removeProperty('transform');
+            scaled.style.removeProperty('transform-origin');
+            scaled.style.width = '';
+            vp.style.height = '';
+            vp.style.width = '';
+            return;
+        }
+        const portrait = typeof window.matchMedia === 'function' && window.matchMedia('(orientation: portrait)').matches;
+        if (portrait) {
+            scaled.style.zoom = '';
+            scaled.style.removeProperty('transform');
+            scaled.style.removeProperty('transform-origin');
+            scaled.style.width = '';
+            vp.style.width = '';
+            vp.style.height = '';
+            return;
+        }
+        const s = Math.min(1, (vw - C100_SCALE_SIDE_PAD) / C100_DESIGN_W);
+        scaled.style.zoom = String(s);
+        scaled.style.removeProperty('transform');
+        scaled.style.removeProperty('transform-origin');
+        scaled.style.width = '';
+        vp.style.width = '';
+        vp.style.height = '';
+    }
+
+    // --- TUTORIAL SYSTEM ---
+    const C100_TUTORIAL_STEPS = [
+        { state: 'WELCOME', title: 'Welcome to the C-100 Guide', message: 'Press any key to begin the guided setup.', action: 'any', target: '#screen' },
+        { state: 'MAIN_MENU', title: 'Move to Setup', message: 'Press the down arrow to highlight "Setup".', action: 'down', targetIndex: 1 },
+        { state: 'MAIN_MENU', title: 'Open Setup', message: 'Press ✓ to enter Setup.', action: 'select', targetIndex: 1 },
+        { state: 'SETUP', title: 'Move to Auto Add/Remove', message: 'Press the down arrow to highlight the next option.', action: 'down', targetIndex: 1 },
+        { state: 'SETUP', title: 'Move to Auto Add/Remove', message: 'Press the down arrow again to highlight "Auto Add/Remove".', action: 'down', targetIndex: 2 },
+        { state: 'SETUP', title: 'Auto Add/Remove', message: 'Press ✓ to start the scan.', action: 'select', targetIndex: 2 },
+        // Require scan to have finished (sensor > 120), not just !scanning — before startAutoAddRemoveScanning(),
+        // scanning is still false for one render; the extra maybeAutoAdvanceTutorial() after pending would skip
+        // this step early and allow back while the scan is running.
+        { state: 'SETUP_AUTO_ADD_REMOVE', title: 'Scan for Sensors', message: 'Wait for the scan to finish. When it says "Finished," we will continue.', action: 'wait', target: '#screen', advanceWhen: () => currentState === 'SETUP_AUTO_ADD_REMOVE' && !autoAddRemoveScanning && autoAddRemoveCurrentSensor > 120 },
+        { state: 'SETUP_AUTO_ADD_REMOVE', title: 'Return to Setup', message: 'Press X to return to the Setup menu.', action: 'back', target: '#screen' },
+        { state: 'SETUP', title: 'Move to Weight Calculations', message: 'Press the down arrow to highlight "Add/Remove".', action: 'down', targetIndex: 3 },
+        { state: 'SETUP', title: 'Move to Weight Calculations', message: 'Press the down arrow to highlight "Unit of Measure".', action: 'down', targetIndex: 4 },
+        { state: 'SETUP', title: 'Move to Weight Calculations', message: 'Press the down arrow to highlight "Weight Calculations".', action: 'down', targetIndex: 5 },
+        { state: 'SETUP', title: 'Weight Calculations', message: 'Press ✓ to open Weight Calculations.', action: 'select', targetIndex: 5 },
+        { state: 'SETUP_WEIGHT_CALCULATIONS', title: 'Enable Weight Calculations', message: 'Press ✓ to select "Enabled".', action: 'select', targetIndex: 0 },
+        { state: 'SETUP', title: 'Move to Vessel Setup', message: 'Press the down arrow to highlight "Vessel Setup".', action: 'down', targetIndex: 6 },
+        { state: 'SETUP', title: 'Vessel Setup', message: 'Press ✓ to open Vessel Setup.', action: 'select', targetIndex: 6 },
+        { state: 'SETUP_VESSEL_SETUP', title: 'Set All', message: 'Press ✓ on "Set All" to configure every sensor.', action: 'select', targetIndex: 0 },
+        { state: 'CONFIG_VESSEL_SHAPE', title: 'Vessel Shape', message: 'Press ✓ to select "Circular".', action: 'select', targetIndex: 0 },
+        { state: 'CONFIG_BODY_HEIGHT', title: 'Body Height', message: 'Body Height is the measurement from the top of your cone to the top weld seam. Press ✓ to continue.', action: 'select', selector: '.input-value' },
+        { state: 'CONFIG_BODY_RADIUS', title: 'Body Radius', message: 'Body Radius is the half of the diameter of the vessel. Press ✓ to continue.', action: 'select', selector: '.input-value' },
+        { state: 'CONFIG_HOPPER_PRESENT', title: 'Hopper Present', message: 'Press ✓ to select "Yes" if the vessel has a hopper.', action: 'select', targetIndex: 0 },
+        { state: 'CONFIG_HOPPER_HEIGHT', title: 'Hopper Height', message: 'Enter the hopper height, then press ✓.', action: 'select', selector: '.input-value' },
+        { state: 'CONFIG_OUTLET_RADIUS', title: 'Outlet Radius', message: 'Enter the outlet radius at the hopper discharge, then press ✓.', action: 'select', selector: '.input-value' },
+        { state: 'CONFIG_SENSOR_OFFSET', title: 'Sensor Offset', message: 'The sensor offset is typically 0. However, if the sensor is raised by extensions or mounted inside the silo, it may be positive/negative in feet. Example 2 feet positive. Adding 2 feet to distance. Press ✓ to continue.', action: 'select', selector: '.input-value' },
+        { state: 'CONFIG_PRODUCT_DENSITY', title: 'Product Density', message: 'Enter product density for weight calculations, then press ✓.', action: 'select', selector: '.input-value' },
+        { state: 'CONFIG_SMARTBOB_MAX_DROP', title: 'SmartBob Max Drop', message: 'This is the distance in feet your Smartbob is allowed to drop. Usually set to vessel height or top of cone. Press the up arrow to select "Enabled".', action: 'up', targetIndex: 0 },
+        { state: 'CONFIG_SMARTBOB_MAX_DROP', title: 'SmartBob Max Drop', message: 'Press ✓ to confirm Enabled.', action: 'select', targetIndex: 0 },
+        { state: 'CONFIG_SMARTBOB_MAX_DROP_INPUT', title: 'Max Drop Value', message: 'This is the distance in feet your Smartbob is allowed to drop. Usually set to vessel height or top of cone. Enter the value, then press ✓.', action: 'select', selector: '.input-value' },
+        { state: 'SETUP_VESSEL_SETUP', title: 'Return to Setup', message: 'Press X to return to the Setup menu.', action: 'back', target: '#screen' },
+        { state: 'SETUP', title: 'Return to Main Menu', message: 'Press X to return to the Main Menu.', action: 'back', target: '#screen' },
+        { state: 'MAIN_MENU', title: 'Move to Measure/View', message: 'Press the up arrow to highlight "Measure/View".', action: 'up', targetIndex: 0 },
+        { state: 'MAIN_MENU', title: 'Measure/View', message: 'Press ✓ to open Measure/View.', action: 'select', targetIndex: 0 },
+        { state: 'MEASURE_VIEW_PROD', title: 'Measure All', message: 'Press ✓ on "Measure All" to measure all sensor addresses. Wait for each to show its weight in lb.', action: 'select', targetIndex: 0 },
+        { state: 'MEASURE_VIEW_PROD', title: 'Wait for Measurements', message: 'Wait for the measurements to complete. Each address will show its weight (e.g. 916.25 lb) when ready.', action: 'wait', target: '#screen', advanceWhen: () => currentState === 'MEASURE_VIEW_PROD' && !measureAllInProgress },
+        { state: 'MEASURE_VIEW_PROD', title: 'Select an Address', message: 'Press the down arrow to select an address (001, 004, etc.) to view its measurement types.', action: 'down', targetIndex: 1 },
+        { state: 'MEASURE_VIEW_PROD', title: 'Open Address Details', message: 'Press ✓ to open this sensor\'s detail view. Use ▶ to move through Product, Capacity, and Headroom.', action: 'select', targetIndex: 1 },
+        { state: 'MEASURE_VIEW_PRODUCT_DETAIL', title: 'Product Level', message: 'Product Level is the product in the vessel. Press ▶ to view Capacity.', action: 'right', keyTarget: 'right' },
+        { state: 'MEASURE_VIEW_CAPACITY_DETAIL', title: 'Capacity', message: 'Capacity is the full volume for this sensor (vessel height). Press ▶ to view Headroom Height.', action: 'right', keyTarget: 'right' },
+        { state: 'MEASURE_VIEW_HEADROOM_DETAIL', title: 'Headroom Height', message: 'Headroom is the empty space from the sensor down to the product surface. When you are ready, press X to return to the Measure/View list.', action: 'back', target: '#screen' },
+        { state: 'MEASURE_VIEW_PROD', title: 'Back to Main Menu', message: 'Press X to return to the Main Menu.', action: 'back', target: '#screen' }
+    ];
+
+    let tutorialActive = false;
+    let currentTutorialStep = 0;
+    let tutorialAdvanceTimer = null;
+    let tutorialHighlightElement = null;
+    let tutorialSettingSelection = false;
+    let tutorialPendingAdvance = null;
+
+    const tutorialTooltip = document.getElementById('tutorial-tooltip');
+    const tutorialStepCount = document.getElementById('tutorial-step-count');
+    const tutorialTitle = document.getElementById('tutorial-title');
+    const tutorialMessage = document.getElementById('tutorial-message');
+    const tutorialSkipButton = document.getElementById('tutorial-skip');
+    const tutorialPointer = document.getElementById('tutorial-pointer');
+    const tutorialPointerCircle = document.getElementById('tutorial-pointer-circle');
+
+    function getTutorialStep() {
+        return tutorialActive ? C100_TUTORIAL_STEPS[currentTutorialStep] : null;
+    }
+
+    function getMenuIndexByLabel(state, label) {
+        const menu = menuData[state];
+        if (!menu || !menu.items) return null;
+        const items = typeof menu.items === 'function' ? menu.items() : menu.items;
+        const index = items ? items.indexOf(label) : -1;
+        return index >= 0 ? index : null;
+    }
+
+    function clearTutorialHighlight() {
+        if (tutorialHighlightElement) {
+            tutorialHighlightElement.classList.remove('tutorial-highlight');
+            tutorialHighlightElement = null;
+        }
+    }
+
+    function getTutorialTargetElement(step) {
+        if (!step) return null;
+        // For select steps with targetIndex: point to up/down when user needs to navigate to target first
+        if (step.action === 'select' && step.state === currentState && (step.targetIndex !== undefined && step.targetIndex !== null)) {
+            if (selectedIndex > step.targetIndex) {
+                const upBtn = document.querySelector('button[data-key="up"]');
+                if (upBtn) return upBtn;
+            }
+            if (selectedIndex < step.targetIndex) {
+                const downBtn = document.querySelector('button[data-key="down"]');
+                if (downBtn) return downBtn;
+            }
+        }
+        const keyTargetMap = {
+            any: 'select',
+            select: 'select',
+            back: 'back',
+            up: 'up',
+            down: 'down',
+            left: 'left',
+            right: 'right'
+        };
+        const actionKey = step.action !== 'auto' && step.action !== 'wait'
+            ? (step.keyTarget || keyTargetMap[step.action])
+            : null;
+        if (actionKey) {
+            return document.querySelector(`button[data-key="${actionKey}"]`);
+        }
+        if (step.selector) return document.querySelector(step.selector);
+        if (step.target === '#screen') return document.getElementById('screen');
+        if (step.targetLabel) {
+            const idx = getMenuIndexByLabel(step.state, step.targetLabel);
+            if (idx !== null) {
+                return document.querySelector(`.menu-item[data-state="${step.state}"][data-menu-index="${idx}"]`);
+            }
+        }
+        if (step.targetIndex !== undefined && step.targetIndex !== null) {
+            return document.querySelector(`.menu-item[data-state="${step.state}"][data-menu-index="${step.targetIndex}"]`);
+        }
+        return null;
+    }
+
+    function positionTutorialPointer(target) {
+        if (!tutorialPointer || !tutorialPointerCircle || !target) return;
+        const rect = target.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const pointerW = 40;
+        const pointerH = 36;
+        const gap = 12;
+        const margin = 12;
+        const overlapBuffer = 8;
+
+        // Match CSS clamp() sizing on phones — never assume a fixed 56px circle
+        const circleHalf = (tutorialPointerCircle.offsetWidth && tutorialPointerCircle.offsetHeight)
+            ? Math.min(tutorialPointerCircle.offsetWidth, tutorialPointerCircle.offsetHeight) / 2
+            : 28;
+        tutorialPointerCircle.style.left = `${centerX - circleHalf}px`;
+        tutorialPointerCircle.style.top = `${centerY - circleHalf}px`;
+
+        // Elements to avoid: other keypad buttons and the tooltip
+        const keypadButtons = Array.from(document.querySelectorAll('button[data-key]'));
+        const tooltipEl = document.getElementById('tutorial-tooltip');
+        const avoidRects = [
+            ...keypadButtons.filter(btn => btn !== target).map(btn => btn.getBoundingClientRect()),
+            ...(tooltipEl && !tooltipEl.classList.contains('tutorial-hidden') ? [tooltipEl.getBoundingClientRect()] : [])
+        ];
+
+        function overlaps(pos) {
+            const pr = { left: pos.left, right: pos.left + pointerW, top: pos.top, bottom: pos.top + pointerH };
+            return avoidRects.some(r =>
+                !(pr.right < r.left - overlapBuffer || pr.left > r.right + overlapBuffer ||
+                  pr.bottom < r.top - overlapBuffer || pr.top > r.bottom + overlapBuffer));
+        }
+
+        const keypad = document.querySelector('#console-root .keypad');
+        const screenBrand = document.querySelector('#console-root .screen-and-brand');
+        const inKeypad = target.closest('.keypad');
+
+        // Build candidate positions. For keypad: always try "right of button" first (like step 1) - works for up, down, right, select; overlap check filters left/back
+        let candidates = [];
+        if (inKeypad && keypad) {
+            const keypadRect = keypad.getBoundingClientRect();
+            const screenRect = screenBrand ? screenBrand.getBoundingClientRect() : null;
+            const gapLeft = screenRect ? screenRect.right + gap : 0;
+            const gapRight = keypadRect.left - gap;
+            const spaceNextToButton = 16;
+            // For down/up (full-width): nudge top so pointer stays clear of row below/above
+            const targetKey = target.getAttribute('data-key');
+            const topRightOfButton = targetKey === 'down' ? Math.min(centerY - pointerH / 2, rect.bottom - pointerH - 4) : (targetKey === 'up' ? Math.max(centerY - pointerH / 2, rect.top + 4) : centerY - pointerH / 2);
+
+            // Back and left have a button to their right (✓ and right arrow) – must use LEFT of button. Others use RIGHT (like step 1).
+            const useLeftOfButton = targetKey === 'back' || targetKey === 'left';
+            candidates = useLeftOfButton ? [
+                { left: rect.left - pointerW - spaceNextToButton, top: centerY - pointerH / 2, emoji: '👉' },
+                { left: centerX - pointerW / 2, top: keypadRect.top - pointerH - gap, emoji: '👇' },
+                { left: centerX - pointerW / 2, top: rect.bottom + gap, emoji: '👆' }
+            ] : [
+                { left: rect.right + spaceNextToButton, top: topRightOfButton, emoji: '👈' },
+                { left: centerX - pointerW / 2, top: keypadRect.top - pointerH - gap, emoji: '👇' },
+                { left: centerX - pointerW / 2, top: rect.bottom + gap, emoji: '👆' },
+                { left: Math.min(gapRight - pointerW - gap, gapLeft + Math.max(0, gapRight - gapLeft - pointerW) / 2), top: centerY - pointerH / 2, emoji: '👉' }
+            ];
+        } else {
+            // Screen/menu targets
+            candidates = [
+                { left: rect.right + gap, top: centerY - pointerH / 2, emoji: '👈' },
+                { left: rect.left - pointerW - gap, top: centerY - pointerH / 2, emoji: '👉' },
+                { left: centerX - pointerW / 2, top: rect.top - pointerH - gap, emoji: '👇' },
+                { left: centerX - pointerW / 2, top: rect.bottom + gap, emoji: '👆' }
+            ];
+        }
+
+        for (const c of candidates) {
+            const left = Math.max(margin, Math.min(c.left, window.innerWidth - pointerW - margin));
+            const top = Math.max(margin, Math.min(c.top, window.innerHeight - pointerH - margin));
+            if (!overlaps({ left, top })) {
+                tutorialPointer.textContent = c.emoji;
+                tutorialPointer.style.transform = 'none';
+                tutorialPointer.style.left = `${left}px`;
+                tutorialPointer.style.top = `${top}px`;
+                return;
+            }
+        }
+        // Fallback: use first candidate that does NOT overlap (never block buttons)
+        for (const c of candidates) {
+            const left = Math.max(margin, Math.min(c.left, window.innerWidth - pointerW - margin));
+            const top = Math.max(margin, Math.min(c.top, window.innerHeight - pointerH - margin));
+            if (!overlaps({ left, top })) {
+                tutorialPointer.textContent = c.emoji;
+                tutorialPointer.style.transform = 'none';
+                tutorialPointer.style.left = `${left}px`;
+                tutorialPointer.style.top = `${top}px`;
+                return;
+            }
+        }
+        // Last resort: hide pointer rather than block a button
+        tutorialPointer.classList.add('tutorial-hidden');
+    }
+
+    function updateTutorialUI() {
+        const step = getTutorialStep();
+        if (!tutorialActive || !step || !tutorialTooltip) {
+            if (tutorialTooltip) tutorialTooltip.classList.add('tutorial-hidden');
+            if (tutorialPointer) tutorialPointer.classList.add('tutorial-hidden');
+            if (tutorialPointerCircle) tutorialPointerCircle.classList.add('tutorial-hidden');
+            clearTutorialHighlight();
+            return;
+        }
+
+        tutorialStepCount.textContent = `Step ${currentTutorialStep + 1} of ${C100_TUTORIAL_STEPS.length}`;
+        tutorialTitle.textContent = step.title || '';
+        tutorialMessage.textContent = step.message || '';
+        tutorialTooltip.classList.remove('tutorial-hidden');
+
+        clearTutorialHighlight();
+        const target = getTutorialTargetElement(step);
+        const hideCircle = step.hideCircle ||
+            (step.state === 'SETUP_AUTO_ADD_REMOVE' && step.action === 'wait') ||
+            (step.state === 'MEASURE_VIEW_PROD' && step.action === 'wait') ||
+            (step.state === 'MEASURE_VIEW_PRODUCT_DETAIL' && step.action === 'right') ||
+            (step.state === 'MEASURE_VIEW_CAPACITY_DETAIL' && step.action === 'right');
+        if (target) {
+            tutorialHighlightElement = target;
+            tutorialHighlightElement.classList.add('tutorial-highlight');
+            if (hideCircle) {
+                tutorialPointerCircle.classList.add('tutorial-hidden');
+            } else {
+                tutorialPointerCircle.classList.remove('tutorial-hidden');
+            }
+            positionTutorialPointer(target);
+            tutorialPointer.classList.remove('tutorial-hidden');
+        } else {
+            tutorialPointer.classList.add('tutorial-hidden');
+            tutorialPointerCircle.classList.add('tutorial-hidden');
+        }
+    }
+
+    let layoutResizeDebounce = null;
+    function onLayoutResizeOrRotate() {
+        clearTimeout(layoutResizeDebounce);
+        layoutResizeDebounce = setTimeout(() => {
+            fitC100ConsoleScale();
+            if (typeof tutorialActive !== 'undefined' && tutorialActive) {
+                updateTutorialUI();
+            }
+            if (typeof currentState !== 'undefined' && currentState === 'WELCOME') {
+                renderScreen();
+            }
+            const tcOverlay = document.getElementById('c100-tutorial-complete-overlay');
+            if (tcOverlay && tcOverlay.classList.contains('c100-tutorial-complete--visible')) {
+                resizeC100TutorialCompleteMiniWrap();
+            }
+        }, 100);
+    }
+    window.addEventListener('resize', onLayoutResizeOrRotate);
+    window.addEventListener('orientationchange', () => {
+        setTimeout(onLayoutResizeOrRotate, 200);
+    });
+
+    /** Mobile: keep window scroll at 0 so layout doesn’t shift when browser UI toggles. */
+    (function initMobileViewportLock() {
+        if (typeof window.matchMedia === 'undefined' || !window.matchMedia('(max-width: 540px)').matches) return;
+        function scrollTop() {
+            window.scrollTo(0, 0);
+            if (document.documentElement) document.documentElement.scrollTop = 0;
+            if (document.body) document.body.scrollTop = 0;
+        }
+        scrollTop();
+        window.addEventListener('orientationchange', () => setTimeout(scrollTop, 50));
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') scrollTop();
+        });
+    })();
+
+    (function initC100ConsoleResizeObserver() {
+        const root = document.getElementById('console-root');
+        if (!root || typeof ResizeObserver === 'undefined') return;
+        const ro = new ResizeObserver(() => fitC100ConsoleScale());
+        ro.observe(root);
+    })();
+
+    function showTutorialStep(stepIndex) {
+        if (!tutorialActive) return;
+        if (stepIndex >= C100_TUTORIAL_STEPS.length) {
+            endC100Tutorial(false);
+            return;
+        }
+
+        currentTutorialStep = stepIndex;
+
+        if (tutorialAdvanceTimer) {
+            clearTimeout(tutorialAdvanceTimer);
+            tutorialAdvanceTimer = null;
+        }
+
+        updateTutorialUI();
+
+        const step = C100_TUTORIAL_STEPS[stepIndex];
+        if (step && step.action === 'auto') {
+            const delay = step.advanceDelay || 1500;
+            tutorialAdvanceTimer = setTimeout(() => nextTutorialStep(), delay);
+        }
+    }
+
+    function nextTutorialStep() {
+        showTutorialStep(currentTutorialStep + 1);
+    }
+
+    function resizeC100TutorialCompleteMiniWrap() {
+        const wrap = document.querySelector('#c100-tutorial-complete-overlay .c100-tutorial-complete__mini-scale-wrap');
+        const inner = document.querySelector('#c100-tutorial-complete-overlay .c100-tutorial-complete__mini-scale-inner');
+        if (!wrap || !inner) return;
+        const scaleStr = getComputedStyle(wrap).getPropertyValue('--c100-mini-scale').trim();
+        const scale = parseFloat(scaleStr) || 0.36;
+        const h = inner.offsetHeight;
+        wrap.style.height = Math.max(1, Math.ceil(h * scale)) + 'px';
+    }
+
+    function resetC100TutorialCompleteAnimations() {
+        const overlay = document.getElementById('c100-tutorial-complete-overlay');
+        if (!overlay) return;
+        const badge = overlay.querySelector('.c100-tutorial-complete__check-badge');
+        const checkSvg = overlay.querySelector('.c100-tutorial-complete__check-svg');
+        const title = document.getElementById('c100-tutorial-complete-title');
+        const subcopy = document.getElementById('c100-tutorial-complete-subcopy');
+        const preview = document.getElementById('c100-tutorial-complete-console-preview');
+        const miniWrap = document.getElementById('c100-tutorial-complete-mini-scale-wrap');
+        const btn = document.getElementById('c100-tutorial-complete-dismiss');
+        const pulseRings = overlay.querySelectorAll('.c100-tutorial-complete__pulse-ring');
+        const sparkles = overlay.querySelectorAll('.c100-tutorial-complete__sparkles span');
+        [badge, checkSvg, title, subcopy, preview, miniWrap, btn].forEach((el) => {
+            if (el) el.style.animation = 'none';
+        });
+        pulseRings.forEach((el) => {
+            el.style.animation = 'none';
+        });
+        sparkles.forEach((el) => {
+            el.style.animation = 'none';
+        });
+        void overlay.offsetWidth;
+        if (badge) badge.style.animation = 'c100-tc-badge-pop 0.62s cubic-bezier(0.34, 1.55, 0.64, 1) forwards';
+        if (checkSvg) checkSvg.style.animation = 'c100-tc-check-in 0.48s cubic-bezier(0.34, 1.2, 0.64, 1) 0.12s forwards';
+        pulseRings.forEach((el, i) => {
+            el.style.animation = `c100-tc-pulse-ring 1.05s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${i * 0.11}s forwards`;
+        });
+        if (title) title.style.animation = 'c100-tc-headline-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.42s forwards';
+        if (subcopy) subcopy.style.animation = 'c100-tc-headline-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.58s forwards';
+        if (preview) preview.style.animation = 'c100-tc-preview-fade 0.36s ease-out 0.18s forwards';
+        if (miniWrap) {
+            miniWrap.style.animation = 'c100-tc-device-bindisc 1.12s cubic-bezier(0.34, 1.15, 0.64, 1) 0.22s forwards';
+        }
+        sparkles.forEach((el, i) => {
+            el.style.animation = `c100-tc-sparkle 0.78s cubic-bezier(0.34, 1.1, 0.64, 1) ${0.34 + i * 0.055}s forwards`;
+        });
+        if (btn) {
+            btn.style.animation =
+                'c100-tc-slide-up 0.58s cubic-bezier(0.22, 1, 0.36, 1) 1.02s forwards, c100-tc-btn-glow 2.2s ease-in-out 1.52s 2 alternate';
+        }
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                resizeC100TutorialCompleteMiniWrap();
+            });
+        });
+    }
+
+    function showC100TutorialCompleteOverlay(skipped) {
+        const overlay = document.getElementById('c100-tutorial-complete-overlay');
+        const titleEl = document.getElementById('c100-tutorial-complete-title');
+        const line1 = document.getElementById('c100-tutorial-complete-line1');
+        const line2 = document.getElementById('c100-tutorial-complete-line2');
+        const previewWrap = document.getElementById('c100-tutorial-complete-console-preview');
+        if (!overlay || !titleEl || !line1 || !line2) return;
+        if (skipped) {
+            titleEl.textContent = 'Guide closed.';
+            line1.textContent = 'The tutorial is off. You can keep using the C-100 emulator below.';
+            line2.textContent = '';
+            line2.style.display = 'none';
+            if (previewWrap) previewWrap.classList.add('hidden');
+        } else {
+            titleEl.textContent = 'Setup Complete';
+            line1.textContent = "You've finished the guided walkthrough.";
+            line2.textContent = '';
+            line2.style.display = 'none';
+            if (previewWrap) previewWrap.classList.remove('hidden');
+        }
+        overlay.style.display = 'flex';
+        overlay.setAttribute('aria-hidden', 'false');
+        /* Defer animations: display:none→flex in the same frame skips CSS animations in many browsers. */
+        requestAnimationFrame(() => {
+            overlay.classList.add('c100-tutorial-complete--visible');
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    resetC100TutorialCompleteAnimations();
+                });
+            });
+        });
+    }
+
+    function hideC100TutorialCompleteOverlay() {
+        const overlay = document.getElementById('c100-tutorial-complete-overlay');
+        if (!overlay) return;
+        overlay.classList.remove('c100-tutorial-complete--visible');
+        overlay.setAttribute('aria-hidden', 'true');
+        setTimeout(() => {
+            if (!overlay.classList.contains('c100-tutorial-complete--visible')) {
+                overlay.style.display = 'none';
+            }
+        }, 600);
+    }
+
+    function endC100Tutorial(skipped) {
+        tutorialActive = false;
+        if (tutorialAdvanceTimer) {
+            clearTimeout(tutorialAdvanceTimer);
+            tutorialAdvanceTimer = null;
+        }
+        updateTutorialUI();
+        showC100TutorialCompleteOverlay(!!skipped);
+    }
+
+    function startC100Tutorial() {
+        tutorialActive = true;
+        currentTutorialStep = 0;
+        showTutorialStep(0);
+    }
+
+    function maybeAutoAdvanceTutorial() {
+        const step = getTutorialStep();
+        if (!tutorialActive || !step || !step.advanceWhen) return;
+        if (step.advanceWhen()) {
+            nextTutorialStep();
+        }
+    }
+
+    function queueTutorialAdvance(direction, actionContext) {
+        if (!tutorialActive || !actionContext) return;
+        const step = actionContext.step;
+        if (!step) return;
+        if (step.state && step.state !== actionContext.prevState) return;
+
+        if (step.action === 'any') {
+            tutorialPendingAdvance = { direction, actionContext };
+            return;
+        }
+
+        if (step.action === direction) {
+            tutorialPendingAdvance = { direction, actionContext };
+        }
+    }
+
+    function tutorialAllowsAction(direction) {
+        if (!tutorialActive) return true;
+        const step = getTutorialStep();
+        if (!step) return true;
+
+        if (step.state && step.state !== currentState) {
+            return false;
+        }
+
+        if (step.action === 'any') {
+            return true;
+        }
+
+        if (step.action === 'auto' || step.action === 'wait') {
+            // Block all keys including back during wait (scan, measure-all, etc.) so the guide can't be skipped
+            return false;
+        }
+
+        // For select steps with targetIndex/targetLabel: allow up/down to navigate to target first
+        if (step.action === 'select' && (step.targetIndex !== undefined || step.targetLabel)) {
+            const targetIdx = step.targetLabel ? getMenuIndexByLabel(step.state, step.targetLabel) : step.targetIndex;
+            if (targetIdx !== null && targetIdx !== undefined && selectedIndex !== targetIdx) {
+                if (direction === 'up' || direction === 'down') return true;
+                return false; // Block select until we're on target
+            }
+        }
+
+        if (direction === 'select') {
+            if (step.action !== 'select') return false;
+            if (step.targetLabel) {
+                const idx = getMenuIndexByLabel(step.state, step.targetLabel);
+                return idx !== null && selectedIndex === idx;
+            }
+            if (step.targetIndex !== undefined && step.targetIndex !== null) {
+                return selectedIndex === step.targetIndex;
+            }
+            return true;
+        }
+
+        if (direction === 'back') {
+            return step.action === 'back';
+        }
+
+        // Input steps (selector): allow left/right/up/down for editing digits; back remains blocked above
+        const menu = menuData[currentState];
+        if (step.selector && menu?.type === 'input') {
+            if (direction === 'left' || direction === 'right' || direction === 'up' || direction === 'down') {
+                return true;
+            }
+        }
+
+        if (direction === 'right') {
+            return step.action === 'right';
+        }
+
+        if (direction === 'left') {
+            return step.action === 'left';
+        }
+
+        if (direction === 'up') {
+            // When on target for a 'down' step, block up to prevent navigating away
+            if (step.action === 'down' && step.targetIndex !== undefined && selectedIndex === step.targetIndex) {
+                return false;
+            }
+            return step.action === 'up';
+        }
+
+        if (direction === 'down') {
+            // When on target for an 'up' step, block down to prevent navigating away
+            if (step.action === 'up' && step.targetIndex !== undefined && selectedIndex === step.targetIndex) {
+                return false;
+            }
+            return step.action === 'down';
+        }
+
+        return true;
+    }
+
+    function maybeAdvanceAfterAction(direction, actionContext) {
+        const step = actionContext ? actionContext.step : null;
+        if (!tutorialActive || !step) return;
+
+        const { prevState, prevIndex } = actionContext;
+        const matchesState = step.state === prevState;
+
+        if (direction === 'select' && step.action === 'select' && matchesState) {
+            if (step.targetLabel) {
+                const idx = getMenuIndexByLabel(step.state, step.targetLabel);
+                if (idx !== null && prevIndex === idx) {
+                    if (step.advanceDelay) {
+                        tutorialAdvanceTimer = setTimeout(() => nextTutorialStep(), step.advanceDelay);
+                    } else {
+                        nextTutorialStep();
+                    }
+                }
+            } else if (step.targetIndex !== undefined && step.targetIndex !== null) {
+                if (prevIndex === step.targetIndex) {
+                    if (step.advanceDelay) {
+                        tutorialAdvanceTimer = setTimeout(() => nextTutorialStep(), step.advanceDelay);
+                    } else {
+                        nextTutorialStep();
+                    }
+                }
+            } else {
+                if (step.advanceDelay) {
+                    tutorialAdvanceTimer = setTimeout(() => nextTutorialStep(), step.advanceDelay);
+                } else {
+                    nextTutorialStep();
+                }
+            }
+        } else if (direction === 'back' && step.action === 'back' && matchesState) {
+            nextTutorialStep();
+        } else if (direction === 'right' && step.action === 'right' && matchesState) {
+            nextTutorialStep();
+        } else if (direction === 'left' && step.action === 'left' && matchesState) {
+            nextTutorialStep();
+        } else if (direction === 'down' && step.action === 'down' && matchesState) {
+            if (step.targetIndex !== undefined && step.targetIndex !== null) {
+                if (selectedIndex === step.targetIndex) {
+                    nextTutorialStep();
+                }
+            } else if (step.targetLabel) {
+                const idx = getMenuIndexByLabel(step.state, step.targetLabel);
+                if (idx !== null && selectedIndex === idx) {
+                    nextTutorialStep();
+                }
+            } else {
+                nextTutorialStep();
+            }
+        } else if (direction === 'up' && step.action === 'up' && matchesState) {
+            if (step.targetIndex !== undefined && step.targetIndex !== null) {
+                if (selectedIndex === step.targetIndex) {
+                    nextTutorialStep();
+                }
+            } else if (step.targetLabel) {
+                const idx = getMenuIndexByLabel(step.state, step.targetLabel);
+                if (idx !== null && selectedIndex === idx) {
+                    nextTutorialStep();
+                }
+            } else {
+                nextTutorialStep();
+            }
+        } else if (step.action === 'any') {
+            nextTutorialStep();
+        }
+    }
+
+    if (tutorialSkipButton) {
+        tutorialSkipButton.addEventListener('click', () => endC100Tutorial(true));
+    }
+
+    const c100TutorialCompleteDismiss = document.getElementById('c100-tutorial-complete-dismiss');
+    if (c100TutorialCompleteDismiss) {
+        c100TutorialCompleteDismiss.addEventListener('click', () => hideC100TutorialCompleteOverlay());
+    }
+
+    // --- NAVIGATION HANDLERS ---
+    function navigate(direction) {
+        ensureTutorialSensorsOnMeasureView();
+
+        const menu = menuData[currentState];
+        const actionContext = tutorialActive ? { step: getTutorialStep(), prevState: currentState, prevIndex: selectedIndex } : null;
+
+        if (!tutorialAllowsAction(direction)) {
+            return;
+        }
+
+        if (tutorialActive && actionContext) {
+            queueTutorialAdvance(direction, actionContext);
+        }
+
+        // Handle welcome screen - any key press goes to main menu
+        if (menu.type === 'welcome') {
+            currentState = 'MAIN_MENU';
+            selectedIndex = 0;
+            renderScreen();
+            return;
+        }
+
+        // Handle back from Auto Add/Remove screens (type: info - not in nav/select block)
+        if (direction === 'back' && (currentState === 'SETUP_AUTO_ADD_REMOVE' || currentState === 'SETUP_AUTO_ADD_REMOVE_WARNING')) {
+            if (currentState === 'SETUP_AUTO_ADD_REMOVE') {
+                stopAutoAddRemoveScanning();
+            }
+            currentState = 'SETUP';
+            const setupItems = typeof menuData['SETUP'].items === 'function' ? menuData['SETUP'].items() : menuData['SETUP'].items;
+            selectedIndex = setupItems.indexOf('Auto Add/Remove');
+            renderScreen();
+            updateTutorialUI();
+            return;
+        }
+
+        if (menu.type === 'nav' || menu.type === 'select') {
+            // Handle dynamic menu items (functions that return arrays)
+            const items = typeof menu.items === 'function' ? menu.items() : menu.items;
+
+            // Disable navigation for "No sensors enabled" warning message
+            if (menu.type === 'nav' && items.length > 0 && items[0] === 'No sensors enabled') {
+                // Only allow back navigation
+                if (direction === 'back') {
+                    stateIndexMap[currentState] = selectedIndex;
+                    currentState = history.pop() || 'MAIN_MENU';
+                    selectedIndex = stateIndexMap[currentState] || 0;
+                    renderScreen();
+                }
+                return; // Ignore all other navigation
+            }
+            
+            // Disable navigation for "No sensors enabled" in select menus (like Interval Timer Assign)
+            if (menu.type === 'select' && items.length > 0 && items[0] === 'No sensors enabled') {
+                // Only allow back navigation
+                if (direction === 'back') {
+                    stateIndexMap[currentState] = selectedIndex;
+                    currentState = history.pop() || 'MAIN_MENU';
+                    selectedIndex = stateIndexMap[currentState] || 0;
+                    renderScreen();
+                }
+                return; // Ignore all other navigation
+            }
+
+            if (direction === 'up') {
+                previousSelectedIndex = selectedIndex;
+                lastListNavDirection = 'up';
+                selectedIndex = Math.max(0, selectedIndex - 1);
+            } else if (direction === 'down') {
+                previousSelectedIndex = selectedIndex;
+                lastListNavDirection = 'down';
+                selectedIndex = Math.min(items.length - 1, selectedIndex + 1);
+            } else if (direction === 'select') {
+                if (menu.type === 'select') {
+                    // Toggling checkmark or confirming selection
+                    if (menu.allowsToggle) {
+                        // For SETUP_ADD_REMOVE, checked is a function that reads from enabledSensors
+                        // So we update enabledSensors directly
+                        if (currentState === 'SETUP_ADD_REMOVE') {
+                            const sensorId = items[selectedIndex];
+                            const wasChecked = enabledSensors.includes(sensorId);
+                            if (wasChecked) {
+                                // Remove sensor
+                                enabledSensors = enabledSensors.filter(s => s !== sensorId);
+                            } else {
+                                // Add sensor
+                                if (!enabledSensors.includes(sensorId)) {
+                                    enabledSensors.push(sensorId);
+                                }
+                            }
+                        } else if (currentState === 'SETUP_INTERVAL_TIMER_ASSIGN') {
+                            // Handle "No sensors enabled" - no action
+                            if (enabledSensors.length === 0) {
+                                return; // Do nothing
+                            }
+                            
+                            const selectedItem = items[selectedIndex];
+                            
+                            if (selectedIndex === 0) {
+                                // "Assign All" or "Unassign All" was selected
+                                const allAssigned = enabledSensors.every(sensor => intervalTimerAssignedSensors.includes(sensor));
+                                if (allAssigned) {
+                                    // Unassign all
+                                    intervalTimerAssignedSensors = [];
+                                } else {
+                                    // Assign all enabled sensors
+                                    intervalTimerAssignedSensors = [...enabledSensors];
+                                }
+                            } else {
+                                // Individual sensor toggle
+                                const sensorId = selectedItem;
+                                const wasChecked = intervalTimerAssignedSensors.includes(sensorId);
+                                if (wasChecked) {
+                                    // Unassign sensor
+                                    intervalTimerAssignedSensors = intervalTimerAssignedSensors.filter(s => s !== sensorId);
+                                } else {
+                                    // Assign sensor
+                                    if (!intervalTimerAssignedSensors.includes(sensorId)) {
+                                        intervalTimerAssignedSensors.push(sensorId);
+                                    }
+                                }
+                            }
+                        } else {
+                            // For other toggle menus, handle checked as array
+                            if (typeof menu.checked === 'function') {
+                                // If checked is a function, we can't modify it directly
+                                // This shouldn't happen for other menus, but handle it gracefully
+                            } else {
+                                // Handle multiple selections - checked is an array of indices
+                                if (!Array.isArray(menu.checked)) {
+                                    menu.checked = menu.checked === -1 ? [] : [menu.checked];
+                                }
+                                const wasChecked = menu.checked.includes(selectedIndex);
+                                if (wasChecked) {
+                                    // Remove from checked array
+                                    menu.checked = menu.checked.filter(i => i !== selectedIndex);
+                                } else {
+                                    // Add to checked array
+                                    menu.checked.push(selectedIndex);
+                                }
+                            }
+                        } 
+                    } else {
+                        // For SETUP_ACCESS_CODE, don't set menu.checked since it's a function
+                        if (currentState !== 'SETUP_ACCESS_CODE') {
+                            menu.checked = selectedIndex;
+                        }
+                        let selectedValue = items[selectedIndex];
+                        
+                        // Handle access code disable (On/Set navigates to input screen)
+                        if (currentState === 'SETUP_ACCESS_CODE') {
+                            if (selectedValue === 'Off') {
+                                accessCodeEnabled = false;
+                                accessCodeValue = '0000'; // Reset code when disabled
+                            }
+                            // On/Set will navigate to SETUP_ACCESS_CODE_INPUT to set the code
+                        }
+                        
+                        // Save vessel configuration values
+                        if (currentState === 'CONFIG_VESSEL_SHAPE') {
+                            vesselConfig.shape = selectedValue;
+                        } else if (currentState === 'CONFIG_HOPPER_PRESENT') {
+                            vesselConfig.hopperPresent = selectedValue;
+                        } else if (currentState === 'CONFIG_SMARTBOB_MAX_DROP') {
+                            vesselConfig.smartBobMaxDropEnabled = selectedValue;
+                        }
+                        
+                        // Save measurement type
+                        if (currentState === 'SETUP_MEASUREMENT_TYPE') {
+                            measurementType = selectedValue;
+                        }
+                        
+                        // Handle other select menus
+                        {
+                            // Determine next state based on selection value (e.g., Weight Calc Enabled/Disabled)
+                            nextState = null;
+                            const nextStateMapEntry = nextStateMap[currentState];
+                            if (nextStateMapEntry) {
+                                if (typeof nextStateMapEntry === 'function') {
+                                    nextState = nextStateMapEntry();
+                                } else if (nextStateMapEntry[selectedValue]) {
+                                    nextState = nextStateMapEntry[selectedValue];
+                                }
+                            }
+                            if (!nextState && menu.next) {
+                                nextState = menu.next;
+                            }
+                        }
+                        
+                        if (nextState) {
+                            // Stop Auto Add/Remove scanning if leaving that menu
+                            if (currentState === 'SETUP_AUTO_ADD_REMOVE') {
+                                stopAutoAddRemoveScanning();
+                            }
+                            
+                            // Stop Auto Add/Remove scanning if leaving that menu
+                            if (currentState === 'SETUP_AUTO_ADD_REMOVE') {
+                                stopAutoAddRemoveScanning();
+                            }
+                            
+                            // Save current state's selectedIndex before navigating away
+                            stateIndexMap[currentState] = selectedIndex;
+                            // If completing vessel config and returning to SETUP_VESSEL_SETUP, set history to just SETUP
+                            if (nextState === 'SETUP_VESSEL_SETUP' && vesselConfigStates.includes(currentState)) {
+                                history = ['SETUP']; // Set history to SETUP so back button goes directly to Setup menu
+                            } else if (vesselConfigStates.includes(nextState) && !vesselConfigStates.includes(currentState)) {
+                                history = [currentState]; // Keep only the entry point
+                            } else {
+                                history.push(currentState);
+                            }
+                            currentState = nextState;
+                            
+                            // Start Auto Add/Remove scanning when entering that menu
+                            if (nextState === 'SETUP_AUTO_ADD_REMOVE') {
+                                // Set initial value immediately before any render
+                                autoAddRemoveCurrentSensor = 1;
+                                autoAddRemoveFoundCount = 0;
+                                autoAddRemoveLastFound = null;
+                            }
+                            
+                            // Restore selectedIndex for the new state, or default to checked value or 0
+                            // For input screens, always use 0 (they don't use selectedIndex)
+                            const nextMenu = menuData[nextState];
+                            if (nextMenu && nextMenu.type === 'input') {
+                                selectedIndex = 0;
+                            } else {
+                                // For specific menus, set default selectedIndex
+                                if (nextState === 'CONFIG_SMARTBOB_MAX_DROP') {
+                                    selectedIndex = 1; // Disabled
+                                } else if (nextState === 'SETUP_SENSOR_TYPE') {
+                                    selectedIndex = 0; // NCR-80/GWR-2000 (default checked)
+                                } else if (nextState === 'SETUP_SB485_PROTOCOL') {
+                                    selectedIndex = 0; // Protocol A
+                                } else if (nextState === 'SETUP_SB485_TERMINATION') {
+                                    selectedIndex = 0; // IN
+                                } else if (nextState === 'SETUP_ACCESS_CODE') {
+                                    // Initialize based on accessCodeEnabled (Off = 1, On/Set = 0)
+                                    selectedIndex = accessCodeEnabled ? 0 : 1;
+                                } else if (nextState === 'SETUP_MEASUREMENT_TYPE') {
+                                    // Initialize based on current measurementType (Headroom = 0, Product = 1)
+                                    selectedIndex = measurementType === 'Product' ? 1 : 0;
+                                } else {
+                                    selectedIndex = stateIndexMap[nextState] || 0;
+                                }
+                            }
+                            
+                            // Start Auto Add/Remove scanning after state is fully set up
+                            if (nextState === 'SETUP_AUTO_ADD_REMOVE') {
+                                startAutoAddRemoveScanning();
+                                // Skip the final renderScreen() call since processSensorScan() will handle it
+                                return;
+                            }
+                        } else {
+                             // Save current state's selectedIndex before going back
+                             stateIndexMap[currentState] = selectedIndex;
+                             currentState = history.pop() || 'MAIN_MENU';
+                             // Restore selectedIndex for the previous state, or default to 0
+                             selectedIndex = stateIndexMap[currentState] || 0;
+                        }
+                    }
+                } else if (menu.type === 'nav') {
+                    // Navigate to next screen
+                    const selectedItem = items[selectedIndex];
+                    let nextState = null;
+                    
+                    // Handle dynamic sensor selection in Measure/View
+                    if (currentState === 'MEASURE_VIEW_PROD') {
+                        if (selectedItem === 'Measure All') {
+                            performMeasureAll();
+                            renderScreen();
+                            updateTutorialUI();
+                            return; // Stay on MEASURE_VIEW_PROD, don't navigate
+                        } else {
+                            const sensorMatch = selectedItem.match(/^(\d{3}):/);
+                            if (sensorMatch) {
+                                currentDetailSensor = sensorMatch[1];
+                                nextState = 'MEASURE_VIEW_PRODUCT_DETAIL';
+                            }
+                        }
+                    }
+                    // Handle dynamic sensor selection in Vessel Setup
+                    else if (currentState === 'SETUP_VESSEL_SETUP' && /^\d{3}$/.test(selectedItem)) {
+                        // Selected item is a sensor ID (3 digits), route to vessel config
+                        nextState = 'CONFIG_VESSEL_SHAPE';
+                    } else {
+                        // Handle function-based nextStateMap entries
+                        const nextStateMapEntry = nextStateMap[currentState];
+                        if (nextStateMapEntry) {
+                            const selectedValue = nextStateMapEntry[selectedItem];
+                            if (typeof selectedValue === 'function') {
+                                nextState = selectedValue();
+                            } else if (selectedValue) {
+                                nextState = selectedValue;
+                            } else {
+                                nextState = nextStateMapEntry['default'] || null;
+                            }
+                        }
+                    }
+                    
+                    // Intercept Setup navigation to check access code (only when coming from MAIN_MENU)
+                    if (nextState === 'SETUP' && currentState === 'MAIN_MENU' && accessCodeEnabled) {
+                        // Access code is enabled - show entry screen instead
+                        nextState = 'ACCESS_CODE_ENTRY';
+                        menuData['ACCESS_CODE_ENTRY'].value = '####'; // Reset entry screen
+                        inputCursorPos = 0;
+                    }
+
+                    if (nextState) {
+                        // Save current state's selectedIndex before navigating away
+                        stateIndexMap[currentState] = selectedIndex;
+                        // If entering vessel config, clear history to prevent back button from going through all steps
+                        if (vesselConfigStates.includes(nextState) && !vesselConfigStates.includes(currentState)) {
+                            history = [currentState]; // Keep only the entry point
+                        } else {
+                            history.push(currentState);
+                        }
+                        currentState = nextState;
+                        // Restore selectedIndex for the new state, or default to 0
+                        if (nextState === 'SETUP_ACCESS_CODE') {
+                            // Initialize based on accessCodeEnabled (Off = 1, On/Set = 0)
+                            selectedIndex = accessCodeEnabled ? 0 : 1;
+                        } else if (nextState === 'SETUP_MEASUREMENT_TYPE') {
+                            // Initialize based on current measurementType (Headroom = 0, Product = 1)
+                            selectedIndex = measurementType === 'Product' ? 1 : 0;
+                        } else {
+                            selectedIndex = stateIndexMap[nextState] || 0;
+                        }
+                        inputCursorPos = 0;
+                        
+                        // Start Auto Add/Remove scanning when entering that menu
+                        if (nextState === 'SETUP_AUTO_ADD_REMOVE') {
+                            // Set initial value immediately before any render
+                            autoAddRemoveCurrentSensor = 1;
+                            autoAddRemoveFoundCount = 0;
+                            autoAddRemoveLastFound = null;
+                            // Render screen first to show the state
+                            renderScreen();
+                            // Then start scanning (which will update the screen)
+                            startAutoAddRemoveScanning();
+                            return;
+                        }
+                    }
+                }
+            }
+        } else if (menu.type === 'input') {
+            let valArray = menu.value.split('');
+            // Include '#' in cursor navigation (all editable characters except . and :)
+            const allEditableIndices = valArray.map((c, i) => (c === '.' || c === ':') ? -1 : i).filter(i => i !== -1);
+            let currentDigitIndexInValue = allEditableIndices[inputCursorPos];
+            
+            if (direction === 'left') {
+                inputCursorPos = Math.max(0, inputCursorPos - 1);
+            } else if (direction === 'right') {
+                inputCursorPos = Math.min(allEditableIndices.length - 1, inputCursorPos + 1);
+            } else if (direction === 'up' || direction === 'down') {
+                let currentChar = valArray[currentDigitIndexInValue];
+                // Handle sign toggle for +/-
+                if (currentChar === '+' || currentChar === '-') {
+                    valArray[currentDigitIndexInValue] = currentChar === '+' ? '-' : '+';
+                    menu.value = valArray.join('');
+                } else if (currentChar === '#') {
+                    // Handle # character - up arrow changes to 0, down does nothing
+                    if (direction === 'up') {
+                        valArray[currentDigitIndexInValue] = '0';
+                        menu.value = valArray.join('');
+                    }
+                } else {
+                    let currentDigit = parseInt(currentChar);
+                    if (!isNaN(currentDigit)) {
+                        if (direction === 'up') {
+                            currentDigit = (currentDigit + 1) % 10;
+                        } else {
+                            currentDigit = (currentDigit + 9) % 10;
+                        }
+                        valArray[currentDigitIndexInValue] = currentDigit.toString();
+                        menu.value = valArray.join('');
+                    }
+                }
+            } else if (direction === 'back') {
+                // Handle back button for ACCESS_CODE_ENTRY - allow cancel back to MAIN_MENU
+                if (currentState === 'ACCESS_CODE_ENTRY') {
+                    // User can cancel entering the code; return to MAIN_MENU
+                    menu.value = '####'; // Reset
+                    inputCursorPos = 0;
+                    currentState = 'MAIN_MENU';
+                    selectedIndex = stateIndexMap['MAIN_MENU'] || 0;
+                    renderScreen();
+                    return;
+                }
+                // Handle back button for SETUP_ACCESS_CODE_INPUT - go back to SETUP_ACCESS_CODE without saving
+                if (currentState === 'SETUP_ACCESS_CODE_INPUT') {
+                    // Reset input value - don't save anything
+                    menu.value = '####';
+                    inputCursorPos = 0;
+                    // Don't enable access code or save anything - just go back
+                    stateIndexMap[currentState] = selectedIndex;
+                    currentState = history.pop() || 'SETUP';
+                    // Initialize based on accessCodeEnabled (Off = 1, On/Set = 0)
+                    if (currentState === 'SETUP_ACCESS_CODE') {
+                        selectedIndex = accessCodeEnabled ? 0 : 1;
+                    } else {
+                        selectedIndex = stateIndexMap[currentState] || 0;
+                    }
+                    renderScreen();
+                    return;
+                }
+                // Handle back button for input type when in vessel config
+                if (vesselConfigStates.includes(currentState)) {
+                    // Save current input value before leaving
+                    if (currentState === 'CONFIG_BODY_HEIGHT') {
+                        vesselConfig.bodyHeight = menu.value;
+                    } else if (currentState === 'CONFIG_BODY_RADIUS') {
+                        vesselConfig.bodyRadius = menu.value;
+                    } else if (currentState === 'CONFIG_HOPPER_HEIGHT') {
+                        vesselConfig.hopperHeight = menu.value;
+                    } else if (currentState === 'CONFIG_OUTLET_RADIUS') {
+                        vesselConfig.outletRadius = menu.value;
+                    } else if (currentState === 'CONFIG_SENSOR_OFFSET') {
+                        vesselConfig.sensorOffset = menu.value;
+                    } else if (currentState === 'CONFIG_PRODUCT_DENSITY') {
+                        vesselConfig.productDensity = menu.value;
+                    } else if (currentState === 'CONFIG_SMARTBOB_MAX_DROP_INPUT') {
+                        vesselConfig.smartBobMaxDrop = menu.value;
+                    }
+                    // Return to vessel setup selection
+                    currentState = 'SETUP_VESSEL_SETUP';
+                    selectedIndex = 0;
+                    inputCursorPos = 0;
+                    // Set history to just SETUP so back button goes directly to SETUP menu
+                    history = ['SETUP'];
+                }
+            } else if (direction === 'select') {
+                 // Handle ACCESS_CODE_ENTRY - verify code
+                 if (currentState === 'ACCESS_CODE_ENTRY') {
+                     // Check if all digits have been set (no # characters remaining)
+                     if (menu.value.includes('#')) {
+                         // Still has # characters - don't proceed, just return
+                         return;
+                     }
+                     // Replace any remaining # with 0 for comparison (shouldn't be any at this point)
+                     const enteredCode = menu.value.replace(/#/g, '0');
+                     if (enteredCode === accessCodeValue) {
+                         // Code correct - proceed to Setup
+                         // Set history to MAIN_MENU so back button goes to Main Menu, not ACCESS_CODE_ENTRY
+                         history = ['MAIN_MENU'];
+                         currentState = 'SETUP';
+                         selectedIndex = 0;
+                         inputCursorPos = 0;
+                         menu.value = '####'; // Reset for next time
+                         renderScreen();
+                         return;
+                     } else {
+                         // Code incorrect - reset and stay on entry screen
+                         menu.value = '####';
+                         inputCursorPos = 0;
+                         renderScreen();
+                         return;
+                     }
+                 }
+                 
+                 // Save access code when setting it and enable protection
+                 if (currentState === 'SETUP_ACCESS_CODE_INPUT') {
+                     // Check if all digits have been set (no # characters remaining)
+                     if (menu.value.includes('#')) {
+                         // Still has # characters - don't save, just return
+                         return;
+                     }
+                     // Replace any # with 0 before saving (shouldn't be any at this point, but just in case)
+                     accessCodeValue = menu.value.replace(/#/g, '0');
+                     // Enable access code protection
+                     accessCodeEnabled = true;
+                 }
+                 
+                 // Save vessel configuration input values
+                 if (currentState === 'CONFIG_BODY_HEIGHT') {
+                     vesselConfig.bodyHeight = menu.value;
+                 } else if (currentState === 'CONFIG_BODY_RADIUS') {
+                     vesselConfig.bodyRadius = menu.value;
+                 } else if (currentState === 'CONFIG_HOPPER_HEIGHT') {
+                     vesselConfig.hopperHeight = menu.value;
+                 } else if (currentState === 'CONFIG_OUTLET_RADIUS') {
+                     vesselConfig.outletRadius = menu.value;
+                 } else if (currentState === 'CONFIG_SENSOR_OFFSET') {
+                     vesselConfig.sensorOffset = menu.value;
+                 } else if (currentState === 'CONFIG_PRODUCT_DENSITY') {
+                     vesselConfig.productDensity = menu.value;
+                 } else if (currentState === 'CONFIG_SMARTBOB_MAX_DROP_INPUT') {
+                     vesselConfig.smartBobMaxDrop = menu.value;
+                 }
+                 
+                 // Finalize input and move to the next step
+                 const nextState = menu.next;
+                 if (nextState) {
+                    // If completing access code setup, don't add SETUP_ACCESS_CODE_INPUT to history
+                    // This prevents going back to the input screen after the code is saved
+                    if (currentState === 'SETUP_ACCESS_CODE_INPUT' && nextState === 'SETUP') {
+                        // After saving a code, Settings should exit with ONE back press like normal.
+                        // Reset history to MAIN_MENU so back from SETUP returns to MAIN_MENU (not to Access Code screens).
+                        history = ['MAIN_MENU'];
+                        // Don't push SETUP_ACCESS_CODE_INPUT to history
+                    } else if (nextState === 'SETUP_VESSEL_SETUP') {
+                        // If completing vessel config and returning to SETUP_VESSEL_SETUP, set history to just SETUP
+                        history = ['SETUP'];
+                    } else if (vesselConfigStates.includes(nextState)) {
+                        // Continue in vessel config flow
+                        history.push(currentState);
+                    } else {
+                        history.push(currentState);
+                    }
+                    currentState = nextState;
+                    // For CONFIG_SMARTBOB_MAX_DROP, always default to Disabled (index 1)
+                    if (nextState === 'CONFIG_SMARTBOB_MAX_DROP') {
+                        selectedIndex = 1; // Disabled
+                    } else {
+                        selectedIndex = 0;
+                    }
+                    inputCursorPos = 0;
+                 }
+            }
+
+        } else if (menu.type === 'info' || menu.type === 'detail') {
+             // Handle left/right navigation for detail pages
+             if (menu.type === 'detail' && (direction === 'left' || direction === 'right')) {
+                // Product → Capacity → Headroom (then ▶ wraps to Product)
+                const detailPages = ['MEASURE_VIEW_PRODUCT_DETAIL', 'MEASURE_VIEW_CAPACITY_DETAIL', 'MEASURE_VIEW_HEADROOM_DETAIL'];
+                const currentIndex = detailPages.indexOf(currentState);
+                if (currentIndex !== -1) {
+                    let nextIndex;
+                    if (direction === 'right') {
+                        nextIndex = (currentIndex + 1) % detailPages.length;
+                    } else {
+                        nextIndex = (currentIndex - 1 + detailPages.length) % detailPages.length;
+                    }
+                    currentState = detailPages[nextIndex];
+                    renderScreen();
+                    return;
+                }
+             }
+             if (direction === 'back') {
+                // Pressing back returns to the previous menu
+                if (currentState === 'SETUP_AUTO_ADD_REMOVE') {
+                     // Stop scanning
+                     stopAutoAddRemoveScanning();
+                     // Auto Add/Remove found sensor 001 - enable it (already added during scanning)
+                     currentState = 'SETUP';
+                     selectedIndex = menuData['SETUP'].items.indexOf('Auto Add/Remove');
+                } else if (currentState === 'SETUP_AUTO_ADD_REMOVE_WARNING') {
+                    // Go back to Setup
+                    currentState = 'SETUP';
+                    selectedIndex = menuData['SETUP'].items.indexOf('Auto Add/Remove');
+                } else {
+                    // Save current state's selectedIndex before going back
+                    stateIndexMap[currentState] = selectedIndex;
+                    currentState = history.pop() || 'MAIN_MENU';
+                    // For specific menus, set default selectedIndex
+                    if (currentState === 'CONFIG_SMARTBOB_MAX_DROP') {
+                        selectedIndex = 1; // Disabled
+                    } else if (currentState === 'SETUP_SENSOR_TYPE') {
+                        selectedIndex = 0; // NCR-80/GWR-2000 (default checked)
+                    } else if (currentState === 'SETUP_SB485_PROTOCOL') {
+                        selectedIndex = 0; // Protocol A
+                    } else if (currentState === 'SETUP_SB485_TERMINATION') {
+                        selectedIndex = 0; // IN
+                    } else {
+                        selectedIndex = stateIndexMap[currentState] || 0;
+                    }
+                }
+             } else if (direction === 'select') {
+                // Handle Auto Add/Remove warning - checkmark confirms and proceeds
+                if (currentState === 'SETUP_AUTO_ADD_REMOVE_WARNING') {
+                    // Clear enabled sensors and vessel settings
+                    enabledSensors = [];
+                    // Reset vessel config to defaults
+                    vesselConfig = {
+                        shape: 'Circular',
+                        bodyHeight: '020.00',
+                        bodyRadius: '15.00',
+                        hopperPresent: 'Yes',
+                        hopperHeight: '06.00',
+                        outletRadius: '01.00',
+                        sensorOffset: '+00.00',
+                        productDensity: '020.00',
+                        smartBobMaxDropEnabled: 'Disabled',
+                        smartBobMaxDrop: '02.50'
+                    };
+                    // Set history to SETUP so back button goes to Setup (not warning)
+                    history = ['SETUP'];
+                    currentState = 'SETUP_AUTO_ADD_REMOVE';
+                    // Set initial value and start scanning
+                    autoAddRemoveCurrentSensor = 1;
+                    autoAddRemoveFoundCount = 0;
+                    autoAddRemoveLastFound = null;
+                    startAutoAddRemoveScanning();
+                    return; // Skip renderScreen() since processSensorScan() will handle it
+                }
+                // For Auto Add/Remove scanning, select button does nothing
+                else if (currentState === 'SETUP_AUTO_ADD_REMOVE') {
+                    // Do nothing - only back button works
+                    return;
+                } 
+                // Handle measurement trigger on detail screens
+                else if (menu.type === 'detail') {
+                    // Trigger measurement for the current sensor
+                    performMeasurement(currentDetailSensor);
+                    return; // Don't navigate away, just update the screen
+                } else {
+                    // For other info/detail screens, select returns to previous menu
+                    stateIndexMap[currentState] = selectedIndex;
+                    currentState = history.pop() || 'MAIN_MENU';
+                    selectedIndex = stateIndexMap[currentState] || 0;
+                }
+             }
+        }
+
+        // General Back command (X button)
+        if (direction === 'back' && menu.type !== 'input' && menu.type !== 'info' && menu.type !== 'detail') {
+            // Handle Auto Add/Remove warning - go back to Setup
+            if (currentState === 'SETUP_AUTO_ADD_REMOVE_WARNING') {
+                currentState = 'SETUP';
+                selectedIndex = menuData['SETUP'].items.indexOf('Auto Add/Remove');
+            }
+            // If in vessel configuration, return to vessel setup selection page
+            else if (vesselConfigStates.includes(currentState)) {
+                // Save current configuration before leaving
+                if (menu.type === 'select' && currentState === 'CONFIG_VESSEL_SHAPE') {
+                    vesselConfig.shape = menu.items[menu.checked] || vesselConfig.shape;
+                } else if (menu.type === 'select' && currentState === 'CONFIG_HOPPER_PRESENT') {
+                    vesselConfig.hopperPresent = menu.items[menu.checked] || vesselConfig.hopperPresent;
+                } else if (menu.type === 'select' && currentState === 'CONFIG_SMARTBOB_MAX_DROP') {
+                    vesselConfig.smartBobMaxDropEnabled = menu.items[menu.checked] || vesselConfig.smartBobMaxDropEnabled;
+                }
+                // Return to vessel setup selection
+                currentState = 'SETUP_VESSEL_SETUP';
+                selectedIndex = 0;
+                // Set history to just SETUP so back button goes directly to SETUP menu
+                history = ['SETUP'];
+            } else {
+                // Save current state's selectedIndex before going back
+                stateIndexMap[currentState] = selectedIndex;
+                currentState = history.pop() || 'MAIN_MENU';
+                // For specific menus, set default selectedIndex
+                if (currentState === 'CONFIG_SMARTBOB_MAX_DROP') {
+                    selectedIndex = 1; // Disabled
+                } else if (currentState === 'SETUP_SENSOR_TYPE') {
+                    selectedIndex = 0; // NCR-80/GWR-2000 (default checked)
+                } else if (currentState === 'SETUP_SB485_PROTOCOL') {
+                    selectedIndex = 0; // Protocol A
+                } else if (currentState === 'SETUP_SB485_TERMINATION') {
+                    selectedIndex = 0; // IN
+                } else {
+                    selectedIndex = stateIndexMap[currentState] || 0;
+                }
+            }
+        }
+
+        renderScreen();
+    }
+
+    // Initialize the console
+    renderScreen();
+
+    // Keyboard controls for easier testing
+    document.addEventListener('keydown', (e) => {
+        const tcOverlay = document.getElementById('c100-tutorial-complete-overlay');
+        if (tcOverlay && tcOverlay.classList.contains('c100-tutorial-complete--visible')) {
+            if (e.key === 'Escape' || e.key === 'Enter') {
+                hideC100TutorialCompleteOverlay();
+                e.preventDefault();
+            }
+            return;
+        }
+        switch (e.key) {
+            case 'ArrowUp':
+                navigate('up');
+                e.preventDefault();
+                break;
+            case 'ArrowDown':
+                navigate('down');
+                e.preventDefault();
+                break;
+            case 'ArrowLeft':
+                navigate('left');
+                e.preventDefault();
+                break;
+            case 'ArrowRight':
+                navigate('right');
+                e.preventDefault();
+                break;
+            case 'Enter': 
+                navigate('select');
+                e.preventDefault();
+                break;
+            case 'Escape': 
+            case 'Backspace':
+                navigate('back');
+                e.preventDefault();
+                break;
+        }
+    });
+
+</script>
+
+</body>
+</html>
