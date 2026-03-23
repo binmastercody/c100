@@ -527,15 +527,14 @@
                 opacity: 1;
             }
         }
+        /* No filter: blur() here — animating filter on the scaled mini-wrap snaps to the end on many desktop GPUs. */
         @keyframes tc-device-bindisc {
             0% {
                 opacity: 0;
                 transform: translateY(36px) scale(0.82);
-                filter: blur(6px);
             }
-            50% {
+            45% {
                 opacity: 1;
-                filter: blur(0);
             }
             68% {
                 transform: translateY(-8px) scale(1.04);
@@ -546,7 +545,6 @@
             100% {
                 opacity: 1;
                 transform: translateY(0) scale(1);
-                filter: blur(0);
             }
         }
         @keyframes tc-sparkle {
@@ -655,11 +653,9 @@
             0% {
                 opacity: 0;
                 transform: translateY(64px) scale(0.66);
-                filter: blur(10px);
             }
-            48% {
+            45% {
                 opacity: 1;
-                filter: blur(0);
             }
             64% {
                 transform: translateY(-16px) scale(1.09);
@@ -670,7 +666,6 @@
             100% {
                 opacity: 1;
                 transform: translateY(0) scale(1);
-                filter: blur(0);
             }
         }
         @keyframes tc-sparkle-lg {
@@ -1164,40 +1159,13 @@
             filter: brightness(0.98);
         }
 
-        @media (prefers-reduced-motion: reduce) {
-            .tutorial-complete__actions {
-                opacity: 1 !important;
-                transform: none !important;
-            }
-            .tutorial-complete__check-badge,
-            .tutorial-complete__check-svg,
-            .tutorial-complete__title,
-            .tutorial-complete__subcopy,
-            .tutorial-complete__console-preview,
-            .tutorial-complete__mini-scale-wrap,
-            .tutorial-complete__dismiss,
-            .tutorial-complete__recap-btn,
-            .tutorial-complete__pulse-ring,
-            .tutorial-complete__sparkles span {
-                animation: none !important;
-                opacity: 1 !important;
-                transform: none !important;
-                filter: none !important;
-            }
-            .tutorial-complete__pulse-ring,
-            .tutorial-complete__sparkles span {
-                opacity: 0 !important;
-            }
-            .tutorial-complete__dismiss {
-                box-shadow:
-                    0 1px 0 rgba(255, 255, 255, 0.15) inset,
-                    0 8px 24px rgba(79, 70, 229, 0.45),
-                    0 2px 6px rgba(0, 0, 0, 0.2) !important;
-            }
-            .tutorial-complete__recap-btn {
-                border-color: rgba(148, 163, 184, 0.45) !important;
-            }
-        }
+        /*
+         * Tutorial completion celebration: do NOT put .tutorial-complete__* rules inside
+         * @media (prefers-reduced-motion: reduce) with opacity/transform !important — that forces an
+         * instant “pop” on Windows (system often sets reduce motion) and blocks Web Animations.
+         * Motion is driven only from JS (resetTutorialCompleteAnimations). Optional gentle path
+         * for prefers-reduced-motion can be added there without !important CSS.
+         */
 
         /* --- Phones & narrow viewports: fit without clipping; circles scale together (clamp / vw) --- */
         @media (max-width: 540px) {
@@ -1845,10 +1813,6 @@
 
     // --- CONSOLE STATE AND NAVIGATION LOGIC ---
 
-    function isMobileBrandingViewport() {
-        return typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 540px)').matches;
-    }
-    
     // Define different types of menus: 'nav' (list to a new menu), 'select' (choice with checkmark), 'input' (numeric value), 'detail' (display only), 'welcome' (splash screen)
     const menuData = {
         'WELCOME': {
@@ -1862,10 +1826,8 @@
                         'Press any key'
                     ];
                 }
-                const line2 = isMobileBrandingViewport()
-                    ? 'C-100'
-                    : 'SmartBob Console';
-                return ['BinMaster C-100', line2, 'v2.00 Apr 21 2016', 'Press any key...'];
+                /* C100-SB: mobile + desktop — line 2 SmartBob Console (was “C-100” on mobile only) */
+                return ['BinMaster C-100', 'SmartBob Console', 'v2.00 Apr 21 2016', 'Press any key...'];
             }
         },
         'MAIN_MENU': { type: 'nav', items: ['Measure/View', 'Setup'] },
@@ -2937,7 +2899,7 @@
         { state: 'CONFIG_HOPPER_PRESENT', title: 'Hopper Present', message: 'Hopper is also known as a Cone. Press ✓ to select "Yes" if the vessel has a hopper/cone.', action: 'select', targetIndex: 0 },
         { state: 'CONFIG_HOPPER_HEIGHT', title: 'Hopper Height', message: 'Enter the hopper/cone height, then press ✓.', action: 'select', selector: '.input-value' },
         { state: 'CONFIG_OUTLET_RADIUS', title: 'Outlet Radius', message: 'Enter the outlet radius at the hopper/cone discharge, then press ✓.', action: 'select', selector: '.input-value' },
-        { state: 'CONFIG_SENSOR_OFFSET', title: 'Sensor Offset', message: 'The sensor offset is typically 0. However, if the sensor is raised by extensions or mounted inside the silo, it may be positive/negative in feet. Example, if the sensor is 3 feet inside the silo. Set the number to +03.00. For an extension by 3 feet, change the + to - and set it to -03.00. Press ✓ to continue.', action: 'select', selector: '.input-value' },
+        { state: 'CONFIG_SENSOR_OFFSET', title: 'Sensor Offset', message: 'The sensor offset is typically 0. If the sensor is 3 feet inside the silo. Set the number to +03.00. If raised by 3 feet, change the + to - and set it to -03.00. Press ✓ to continue.', action: 'select', selector: '.input-value' },
         { state: 'CONFIG_PRODUCT_DENSITY', title: 'Product Density', message: 'Enter the material/product density amount in pounds per cubic foot. For the most accurate number, measure a 1X1 cubic box with material in it, then press ✓.', action: 'select', selector: '.input-value' },
         { state: 'CONFIG_SMARTBOB_MAX_DROP', title: 'SmartBob Max Drop', message: 'This is the distance in feet your Smartbob is allowed to drop. Usually set to vessel height or top of cone. Press the up arrow to select "Enabled".', action: 'up', targetIndex: 0, skipWhen: () => selectedDevice === 'C100-R' },
         { state: 'CONFIG_SMARTBOB_MAX_DROP', title: 'SmartBob Max Drop', message: 'Press ✓ to confirm Enabled.', action: 'select', targetIndex: 0, skipWhen: () => selectedDevice === 'C100-R' },
@@ -3286,14 +3248,41 @@
         wrap.style.height = Math.max(1, Math.ceil(h * scale)) + 'px';
     }
 
-    function isTutorialCompleteDesktopMotion() {
-        return typeof window.matchMedia === 'function' && window.matchMedia('(min-width: 541px)').matches;
+    function tutorialCompletePrefersReducedMotion() {
+        try {
+            return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        } catch (e) {
+            return false;
+        }
     }
 
+    function cancelTutorialCompleteOverlayAnimations(overlay) {
+        if (!overlay) return;
+        try {
+            if (typeof overlay.getAnimations === 'function') {
+                overlay.getAnimations({ subtree: true }).forEach((a) => a.cancel());
+            }
+        } catch (e) { /* ignore */ }
+    }
+
+    function clearTutorialCompleteAnimInlineStyles(els) {
+        els.forEach((el) => {
+            if (!el) return;
+            el.style.removeProperty('opacity');
+            el.style.removeProperty('transform');
+            el.style.removeProperty('box-shadow');
+            el.style.removeProperty('animation');
+        });
+    }
+
+    /**
+     * Completion celebration via Web Animations API. Do not use prefers-reduced-motion CSS with
+     * opacity/transform !important on these nodes — Windows often sets reduce motion; that forced
+     * an instant pop and blocked motion. Gentle fade-up runs when the system asks for reduced motion.
+     */
     function resetTutorialCompleteAnimations() {
         const overlay = document.getElementById('tutorial-complete-overlay');
         if (!overlay) return;
-        const desktopMo = isTutorialCompleteDesktopMotion();
         const badge = overlay.querySelector('.tutorial-complete__check-badge');
         const checkSvg = overlay.querySelector('.tutorial-complete__check-svg');
         const title = document.getElementById('tutorial-complete-title');
@@ -3304,39 +3293,18 @@
         const btn = document.getElementById('tutorial-complete-dismiss');
         const pulseRings = overlay.querySelectorAll('.tutorial-complete__pulse-ring');
         const sparkles = overlay.querySelectorAll('.tutorial-complete__sparkles span');
-        [badge, checkSvg, title, subcopy, preview, miniWrap, actionsEl].forEach((el) => {
-            if (el) el.style.animation = 'none';
-        });
-        if (btn) btn.style.animation = 'none';
-        pulseRings.forEach((el) => {
-            el.style.animation = 'none';
-        });
-        sparkles.forEach((el) => {
-            el.style.animation = 'none';
-        });
+
+        cancelTutorialCompleteOverlayAnimations(overlay);
+        clearTutorialCompleteAnimInlineStyles([
+            badge, checkSvg, title, subcopy, preview, miniWrap, actionsEl, btn,
+            ...Array.from(pulseRings), ...Array.from(sparkles),
+        ]);
         void overlay.offsetWidth;
-        if (desktopMo) {
-            if (badge) badge.style.animation = 'tc-badge-pop-lg 0.76s cubic-bezier(0.34, 1.55, 0.64, 1) forwards';
-            if (checkSvg) checkSvg.style.animation = 'tc-check-in-lg 0.54s cubic-bezier(0.34, 1.2, 0.64, 1) 0.14s forwards';
-            pulseRings.forEach((el, i) => {
-                el.style.animation = `tc-pulse-ring-lg 1.18s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${i * 0.12}s forwards`;
-            });
-            if (title) title.style.animation = 'tc-headline-in-lg 0.64s cubic-bezier(0.22, 1, 0.36, 1) 0.48s forwards';
-            if (subcopy) subcopy.style.animation = 'tc-headline-in-lg 0.58s cubic-bezier(0.22, 1, 0.36, 1) 0.72s forwards';
-            if (preview) preview.style.animation = 'tc-preview-fade-lg 0.52s cubic-bezier(0.22, 1, 0.36, 1) 0.22s forwards';
-            if (miniWrap) {
-                miniWrap.style.animation = 'tc-device-bindisc-lg 1.45s cubic-bezier(0.34, 1.15, 0.64, 1) 0.28s forwards';
-            }
-            sparkles.forEach((el, i) => {
-                el.style.animation = `tc-sparkle-lg 0.95s cubic-bezier(0.34, 1.1, 0.64, 1) ${0.4 + i * 0.065}s forwards`;
-            });
-            if (actionsEl) {
-                actionsEl.style.animation = 'tc-slide-up-lg 0.72s cubic-bezier(0.22, 1, 0.36, 1) 1.08s forwards';
-            }
-            if (btn) {
-                btn.style.animation = 'tc-btn-glow 2.65s ease-in-out 1.92s 2 alternate';
-            }
-        } else {
+
+        const reducedMotion = tutorialCompletePrefersReducedMotion();
+        const canWAAPI = typeof Element !== 'undefined' && typeof Element.prototype.animate === 'function';
+
+        function runCssAnimationFallback() {
             if (badge) badge.style.animation = 'tc-badge-pop 0.62s cubic-bezier(0.34, 1.55, 0.64, 1) forwards';
             if (checkSvg) checkSvg.style.animation = 'tc-check-in 0.48s cubic-bezier(0.34, 1.2, 0.64, 1) 0.12s forwards';
             pulseRings.forEach((el, i) => {
@@ -3358,11 +3326,147 @@
                 btn.style.animation = 'tc-btn-glow 2.2s ease-in-out 1.54s 2 alternate';
             }
         }
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                resizeTutorialCompleteMiniWrap();
+
+        if (!canWAAPI) {
+            runCssAnimationFallback();
+            return;
+        }
+
+        /* System asks for reduced motion: soft fade-up only (still visible motion, not an instant pop). */
+        if (reducedMotion) {
+            const easeSoft = 'cubic-bezier(0.22, 1, 0.36, 1)';
+            function fadeUp(el, delay) {
+                if (!el) return;
+                el.animate(
+                    [
+                        { opacity: 0, transform: 'translateY(12px)' },
+                        { opacity: 1, transform: 'translateY(0)' },
+                    ],
+                    { duration: 480, delay, fill: 'forwards', easing: easeSoft }
+                );
+            }
+            fadeUp(badge, 0);
+            fadeUp(checkSvg, 70);
+            fadeUp(title, 110);
+            fadeUp(subcopy, 150);
+            fadeUp(preview, 170);
+            fadeUp(miniWrap, 180);
+            fadeUp(actionsEl, 230);
+            pulseRings.forEach((el) => {
+                el.style.opacity = '0';
             });
+            sparkles.forEach((el) => {
+                el.style.opacity = '0';
+            });
+            return;
+        }
+
+        const easePop = 'cubic-bezier(0.34, 1.55, 0.64, 1)';
+        const easeSoft = 'cubic-bezier(0.22, 1, 0.36, 1)';
+        const easeRing = 'cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        const easeSpark = 'cubic-bezier(0.34, 1.1, 0.64, 1)';
+
+        if (badge) {
+            badge.animate(
+                [
+                    { opacity: 0, transform: 'scale(0.4)' },
+                    { opacity: 1, transform: 'scale(1.12)', offset: 0.55 },
+                    { opacity: 1, transform: 'scale(0.96)', offset: 0.75 },
+                    { opacity: 1, transform: 'scale(1)', offset: 1 },
+                ],
+                { duration: 620, fill: 'forwards', easing: easePop }
+            );
+        }
+        if (checkSvg) {
+            checkSvg.animate(
+                [
+                    { opacity: 0, transform: 'scale(0.35) rotate(-18deg)' },
+                    { opacity: 1, transform: 'scale(1.15) rotate(4deg)', offset: 0.7 },
+                    { opacity: 1, transform: 'scale(1) rotate(0deg)', offset: 1 },
+                ],
+                { duration: 480, delay: 120, fill: 'forwards', easing: easePop }
+            );
+        }
+        pulseRings.forEach((el, i) => {
+            el.animate(
+                [
+                    { transform: 'scale(0.55)', opacity: 0.85 },
+                    { transform: 'scale(2.35)', opacity: 0 },
+                ],
+                { duration: 1050, delay: i * 110, fill: 'forwards', easing: easeRing }
+            );
         });
+        if (title) {
+            title.animate(
+                [
+                    { opacity: 0, transform: 'translateY(18px) scale(0.96)' },
+                    { opacity: 1, transform: 'translateY(0) scale(1)' },
+                ],
+                { duration: 550, delay: 420, fill: 'forwards', easing: easeSoft }
+            );
+        }
+        if (subcopy) {
+            subcopy.animate(
+                [
+                    { opacity: 0, transform: 'translateY(18px) scale(0.96)' },
+                    { opacity: 1, transform: 'translateY(0) scale(1)' },
+                ],
+                { duration: 500, delay: 580, fill: 'forwards', easing: easeSoft }
+            );
+        }
+        if (preview) {
+            preview.animate([{ opacity: 0 }, { opacity: 1 }], {
+                duration: 360,
+                delay: 180,
+                fill: 'forwards',
+                easing: 'ease-out',
+            });
+        }
+        if (miniWrap) {
+            miniWrap.animate(
+                [
+                    { opacity: 0, transform: 'translateY(36px) scale(0.82)' },
+                    { opacity: 1, transform: 'translateY(10px) scale(0.92)', offset: 0.45 },
+                    { opacity: 1, transform: 'translateY(-8px) scale(1.04)', offset: 0.68 },
+                    { opacity: 1, transform: 'translateY(4px) scale(0.99)', offset: 0.82 },
+                    { opacity: 1, transform: 'translateY(0) scale(1)', offset: 1 },
+                ],
+                { duration: 1120, delay: 220, fill: 'forwards', easing: easePop }
+            );
+        }
+        sparkles.forEach((el, i) => {
+            el.animate(
+                [
+                    { opacity: 0, transform: 'scale(0) rotate(0deg)' },
+                    { opacity: 1, transform: 'scale(1) rotate(120deg)', offset: 0.4 },
+                    { opacity: 0, transform: 'scale(0.4) rotate(260deg)', offset: 1 },
+                ],
+                { duration: 780, delay: 340 + i * 55, fill: 'forwards', easing: easeSpark }
+            );
+        });
+        if (actionsEl) {
+            actionsEl.animate(
+                [
+                    { opacity: 0, transform: 'translateY(22px)' },
+                    { opacity: 1, transform: 'translateY(0)' },
+                ],
+                { duration: 580, delay: 960, fill: 'forwards', easing: easeSoft }
+            );
+        }
+        if (btn) {
+            const glowIdle =
+                '0 1px 0 rgba(255, 255, 255, 0.15) inset, 0 8px 24px rgba(79, 70, 229, 0.45), 0 2px 6px rgba(0, 0, 0, 0.2)';
+            const glowPeak =
+                '0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 10px 36px rgba(129, 140, 248, 0.65), 0 4px 14px rgba(79, 70, 229, 0.5)';
+            btn.animate(
+                [
+                    { boxShadow: glowIdle },
+                    { boxShadow: glowPeak, offset: 0.5 },
+                    { boxShadow: glowIdle, offset: 1 },
+                ],
+                { duration: 2200, delay: 1540, iterations: 2, direction: 'alternate', easing: 'ease-in-out', fill: 'forwards' }
+            );
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -3423,8 +3527,13 @@
             overlay.classList.add('tutorial-complete--visible');
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
-                    /* Extra tick + microtask so layout (display→flex, mini wrap height) is ready before keyframes run */
-                    setTimeout(() => resetTutorialCompleteAnimations(), 0);
+                    /* Layout mini wrap height first; then start keyframes (resize mid-animation can snap on desktop). */
+                    setTimeout(() => {
+                        resizeTutorialCompleteMiniWrap();
+                        requestAnimationFrame(() => {
+                            resetTutorialCompleteAnimations();
+                        });
+                    }, 0);
                 });
             });
         });
