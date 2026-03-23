@@ -10,7 +10,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>BinMaster C-100 Guide (readable build)</title>
+    <title>BinMaster C-100 Guide</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
@@ -928,6 +928,17 @@
             user-select: none;
             -webkit-user-select: none;
         }
+        /*
+         * Completion mini LCD: same panel #e8e8e8 as main .screen.
+         * Welcome lines use a light gray ink (not black) — main device stays black for clarity.
+         */
+        .tutorial-complete__live-replica .screen {
+            background-color: #e8e8e8;
+            color: #a3a3a3;
+        }
+        .tutorial-complete__live-replica .screen .menu-item {
+            color: #a3a3a3;
+        }
         .tutorial-complete__live-replica .key {
             cursor: default;
         }
@@ -1538,8 +1549,10 @@
                 max-width: 260px;
             }
             .screen-and-brand .brand {
-                display: block !important;
-                width: auto;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                width: 100%;
                 max-width: none;
                 margin: 0;
                 padding: 10px 12px;
@@ -1548,6 +1561,15 @@
                 background-color: #e8e8e8 !important;
                 background-image: none !important;
                 box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+                box-sizing: border-box;
+            }
+            .screen-and-brand .binmaster,
+            .screen-and-brand .smartbob,
+            .screen-and-brand .model {
+                width: 100%;
+                max-width: 100%;
+                margin-left: 0 !important;
+                box-sizing: border-box;
             }
             .screen-and-brand .binmaster {
                 margin-bottom: 4px !important;
@@ -1573,6 +1595,8 @@
             .screen-and-brand .model {
                 font-size: 11px !important;
                 color: #333 !important;
+                /* Optical: regular “Model” vs heavy BINMASTER — nudge to align capitals */
+                padding-left: 3px !important;
             }
             /* C100-R: Model C-100 replaces the SmartBob line — match former .smartbob styling */
             body.device-variant-radar .screen-and-brand .model {
@@ -1581,7 +1605,7 @@
                 letter-spacing: normal !important;
                 color: #000 !important;
                 margin: 0 0 2px !important;
-                padding: 0 !important;
+                padding: 0 0 0 2px !important;
                 border: none !important;
             }
             .keypad {
@@ -1734,6 +1758,7 @@
                                 <div class="screw-bottom-right"></div>
                                 <div class="display-area">
                                     <div class="screen-and-brand">
+                                        <!-- Mini LCD: filled by fillTutorialCompleteMiniScreenWithWelcome() when TUTORIAL_COMPLETE_MINI_SHOW_WELCOME is true -->
                                         <div class="screen"></div>
                                         <div class="brand">
                                             <div class="binmaster">
@@ -1806,6 +1831,9 @@
         if (consoleViewport) consoleViewport.classList.remove('hidden');
         if (consoleRoot) consoleRoot.classList.remove('hidden');
 
+        // WELCOME menu text depends on selectedDevice — re-render after pick (initial load had null).
+        renderScreen();
+
         requestAnimationFrame(() => {
             requestAnimationFrame(() => fitConsoleScale());
         });
@@ -1826,11 +1854,17 @@
         'WELCOME': {
             type: 'welcome',
             items: function welcomeItems() {
+                if (selectedDevice === 'C100-R') {
+                    return [
+                        'BinMaster C-100-R',
+                        'Modbus Console',
+                        'v2.04 Feb 17 2025',
+                        'Press any key'
+                    ];
+                }
                 const line2 = isMobileBrandingViewport()
                     ? 'C-100'
-                    : selectedDevice === 'C100-R'
-                      ? 'C-100'
-                      : 'SmartBob Console';
+                    : 'SmartBob Console';
                 return ['BinMaster C-100', line2, 'v2.00 Apr 21 2016', 'Press any key...'];
             }
         },
@@ -2888,7 +2922,7 @@
         // scanning is still false for one render; the extra maybeAutoAdvanceTutorial() after pending would skip
         // this step early and allow back while the scan is running.
         { state: 'SETUP_AUTO_ADD_REMOVE', title: 'Scan for Sensors', message: 'Wait for the scan to finish. When it says "Finished," we will continue.', action: 'wait', target: '#screen', advanceWhen: () => currentState === 'SETUP_AUTO_ADD_REMOVE' && !autoAddRemoveScanning && autoAddRemoveCurrentSensor > getAutoAddRemoveScanLimit() },
-        { state: 'SETUP_AUTO_ADD_REMOVE', title: 'Return to Setup', message: 'Press X to return to the Setup menu.', action: 'back', target: '#screen' },
+        { state: 'SETUP_AUTO_ADD_REMOVE', title: 'Return to Setup', message: 'Press X to return to Setup menu.', action: 'back', target: '#screen' },
         { state: 'SETUP', title: 'Move to Weight Calculations', message: 'Press the down arrow to highlight "Add/Remove".', action: 'down', targetIndex: 3 },
         { state: 'SETUP', title: 'Move to Weight Calculations', message: 'Press the down arrow to highlight "Unit of Measure".', action: 'down', targetIndex: 4 },
         { state: 'SETUP', title: 'Move to Weight Calculations', message: 'Press the down arrow to highlight "Weight Calculations".', action: 'down', targetIndex: 5 },
@@ -2900,11 +2934,11 @@
         { state: 'CONFIG_VESSEL_SHAPE', title: 'Vessel Shape', message: 'Press ✓ to select "Circular".', action: 'select', targetIndex: 0 },
         { state: 'CONFIG_BODY_HEIGHT', title: 'Body Height', message: 'Body Height is the measurement from the top of your cone to the top weld seam. Press ✓ to continue.', action: 'select', selector: '.input-value' },
         { state: 'CONFIG_BODY_RADIUS', title: 'Body Radius', message: 'Body Radius is the half of the diameter of the vessel. Press ✓ to continue.', action: 'select', selector: '.input-value' },
-        { state: 'CONFIG_HOPPER_PRESENT', title: 'Hopper Present', message: 'Press ✓ to select "Yes" if the vessel has a hopper.', action: 'select', targetIndex: 0 },
-        { state: 'CONFIG_HOPPER_HEIGHT', title: 'Hopper Height', message: 'Enter the hopper height, then press ✓.', action: 'select', selector: '.input-value' },
-        { state: 'CONFIG_OUTLET_RADIUS', title: 'Outlet Radius', message: 'Enter the outlet radius at the hopper discharge, then press ✓.', action: 'select', selector: '.input-value' },
-        { state: 'CONFIG_SENSOR_OFFSET', title: 'Sensor Offset', message: 'The sensor offset is typically 0. However, if the sensor is raised by extensions or mounted inside the silo, it may be positive/negative in feet. Example 2 feet positive. Adding 2 feet to distance. Press ✓ to continue.', action: 'select', selector: '.input-value' },
-        { state: 'CONFIG_PRODUCT_DENSITY', title: 'Product Density', message: 'Enter product density for weight calculations, then press ✓.', action: 'select', selector: '.input-value' },
+        { state: 'CONFIG_HOPPER_PRESENT', title: 'Hopper Present', message: 'Hopper is also known as a Cone. Press ✓ to select "Yes" if the vessel has a hopper/cone.', action: 'select', targetIndex: 0 },
+        { state: 'CONFIG_HOPPER_HEIGHT', title: 'Hopper Height', message: 'Enter the hopper/cone height, then press ✓.', action: 'select', selector: '.input-value' },
+        { state: 'CONFIG_OUTLET_RADIUS', title: 'Outlet Radius', message: 'Enter the outlet radius at the hopper/cone discharge, then press ✓.', action: 'select', selector: '.input-value' },
+        { state: 'CONFIG_SENSOR_OFFSET', title: 'Sensor Offset', message: 'The sensor offset is typically 0. However, if the sensor is raised by extensions or mounted inside the silo, it may be positive/negative in feet. Example, if the sensor is 3 feet inside the silo. Set the number to +03.00. For an extension by 3 feet, change the + to - and set it to -03.00. Press ✓ to continue.', action: 'select', selector: '.input-value' },
+        { state: 'CONFIG_PRODUCT_DENSITY', title: 'Product Density', message: 'Enter the material/product density amount in pounds per cubic foot. For the most accurate number, measure a 1X1 cubic box with material in it, then press ✓.', action: 'select', selector: '.input-value' },
         { state: 'CONFIG_SMARTBOB_MAX_DROP', title: 'SmartBob Max Drop', message: 'This is the distance in feet your Smartbob is allowed to drop. Usually set to vessel height or top of cone. Press the up arrow to select "Enabled".', action: 'up', targetIndex: 0, skipWhen: () => selectedDevice === 'C100-R' },
         { state: 'CONFIG_SMARTBOB_MAX_DROP', title: 'SmartBob Max Drop', message: 'Press ✓ to confirm Enabled.', action: 'select', targetIndex: 0, skipWhen: () => selectedDevice === 'C100-R' },
         { state: 'CONFIG_SMARTBOB_MAX_DROP_INPUT', title: 'Max Drop Value', message: 'This is the distance in feet your Smartbob is allowed to drop. Usually set to vessel height or top of cone. Enter the value, then press ✓.', action: 'select', selector: '.input-value', skipWhen: () => selectedDevice === 'C100-R' },
@@ -2916,7 +2950,7 @@
         { state: 'MEASURE_VIEW_PROD', title: 'Wait for Measurements', message: 'Wait for the measurements to complete. Each address will show its weight (e.g. 916.25 lb) when ready.', action: 'wait', target: '#screen', advanceWhen: () => currentState === 'MEASURE_VIEW_PROD' && !measureAllInProgress },
         { state: 'MEASURE_VIEW_PROD', title: 'Select an Address', message: 'Press the down arrow to select an address (001, 004, etc.) to view its measurement types.', action: 'down', targetIndex: 1 },
         { state: 'MEASURE_VIEW_PROD', title: 'Open Address Details', message: 'Press ✓ to open this sensor\'s detail view. Use ▶ to move through Product, Capacity, and Headroom.', action: 'select', targetIndex: 1 },
-        { state: 'MEASURE_VIEW_PRODUCT_DETAIL', title: 'Product Level', message: 'Product Level is the product in the vessel. Press ▶ to view Capacity.', action: 'right', keyTarget: 'right' },
+        { state: 'MEASURE_VIEW_PRODUCT_DETAIL', title: 'Product Level', message: 'Product represents how much material is in the bin (the fill). Press ▶ to view Capacity.', action: 'right', keyTarget: 'right' },
         { state: 'MEASURE_VIEW_CAPACITY_DETAIL', title: 'Capacity', message: 'Capacity is the full volume for this sensor (vessel height). Press ▶ to view Headroom Height.', action: 'right', keyTarget: 'right' },
         { state: 'MEASURE_VIEW_HEADROOM_DETAIL', title: 'Headroom Height', message: 'Headroom is the empty space from the sensor down to the product surface. When you are ready, press X to return to the Measure/View list.', action: 'back', target: '#screen' },
         { state: 'MEASURE_VIEW_PROD', title: 'Back to Main Menu', message: 'Press X to return to the Main Menu.', action: 'back', target: '#screen' }
@@ -3331,6 +3365,34 @@
         });
     }
 
+    // -------------------------------------------------------------------------
+    // Tutorial completion overlay — mini C-100 LCD preview (reversible)
+    // Set TUTORIAL_COMPLETE_MINI_SHOW_WELCOME to false to restore a blank LCD.
+    // -------------------------------------------------------------------------
+    const TUTORIAL_COMPLETE_MINI_SHOW_WELCOME = true;
+
+    function clearTutorialCompleteMiniScreen() {
+        const miniScreen = document.querySelector('#tutorial-complete-overlay .tutorial-complete__live-replica .screen');
+        if (miniScreen) miniScreen.innerHTML = '';
+    }
+
+    /** Same structure as renderScreen() welcome branch; uses menuData.WELCOME (C-100-R vs SB). */
+    function fillTutorialCompleteMiniScreenWithWelcome() {
+        if (!TUTORIAL_COMPLETE_MINI_SHOW_WELCOME) {
+            clearTutorialCompleteMiniScreen();
+            return;
+        }
+        const miniScreen = document.querySelector('#tutorial-complete-overlay .tutorial-complete__live-replica .screen');
+        if (!miniScreen || !menuData || !menuData.WELCOME) return;
+        const menu = menuData.WELCOME;
+        const menuItems = typeof menu.items === 'function' ? menu.items() : menu.items;
+        if (!menuItems || !menuItems.length) return;
+        const html = menuItems.map((item) => (
+            `<div class="menu-item" style="text-align: left;">${item}</div>`
+        )).join('');
+        miniScreen.innerHTML = `<div class="menu-items-container"><div class="menu-items-viewport">${html}</div></div>`;
+    }
+
     function showTutorialCompleteOverlay(skipped) {
         window.tutorialCompleteWasSkipped = !!skipped;
         const overlay = document.getElementById('tutorial-complete-overlay');
@@ -3345,12 +3407,14 @@
             line2.textContent = '';
             line2.style.display = 'none';
             if (previewWrap) previewWrap.classList.add('hidden');
+            clearTutorialCompleteMiniScreen();
         } else {
             titleEl.textContent = 'Setup Complete';
             line1.textContent = "You've finished the guided walkthrough. Open the recap for a full text summary, or press Complete to return home.";
             line2.textContent = '';
             line2.style.display = 'none';
             if (previewWrap) previewWrap.classList.remove('hidden');
+            fillTutorialCompleteMiniScreenWithWelcome();
         }
         overlay.style.display = 'flex';
         overlay.setAttribute('aria-hidden', 'false');
