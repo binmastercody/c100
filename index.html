@@ -3311,9 +3311,7 @@
         const target = getTutorialTargetElement(step);
         const hideCircle = step.hideCircle ||
             (step.state === 'SETUP_AUTO_ADD_REMOVE' && step.action === 'wait') ||
-            (step.state === 'MEASURE_VIEW_PROD' && step.action === 'wait') ||
-            (step.state === 'MEASURE_VIEW_PRODUCT_DETAIL' && step.action === 'right') ||
-            (step.state === 'MEASURE_VIEW_CAPACITY_DETAIL' && step.action === 'right');
+            (step.state === 'MEASURE_VIEW_PROD' && step.action === 'wait');
         if (target) {
             tutorialHighlightElement = target;
             tutorialHighlightElement.classList.add('tutorial-highlight');
