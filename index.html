@@ -1981,6 +1981,56 @@
 
     // --- CONSOLE STATE AND NAVIGATION LOGIC ---
 
+    /** Select screens that return to SETUP: after ✓, history is only MAIN_MENU so Back from Setup does not reopen the submenu. */
+    const SETUP_SELECT_RETURN_RESET_HISTORY = new Set([
+        'SETUP_MEASUREMENT_FORMAT',
+        'SETUP_MEASUREMENT_TYPE',
+        'SETUP_UNIT_OF_MEASURE',
+        'SETUP_4_20MA_OUTPUT',
+        'SETUP_4_20MA_ERROR',
+        'SETUP_WEIGHT_CALCULATIONS',
+        'SETUP_SENSOR_TYPE',
+        'SETUP_IO_ASSIGNMENT',
+        'SETUP_SB485_PROTOCOL',
+        'SETUP_SB485_TERMINATION'
+    ]);
+
+    /** Setup → Measurement Format when weight calcs enabled (MenuMeasurementFormat.c / Settings.h enum order). */
+    const MEASUREMENT_FORMAT_OPTIONS = [
+        'Percent',
+        'Height',
+        'Cubic Unit',
+        'US Gallon',
+        'US Bushel',
+        'Liter',
+        'Pound',
+        'Ton',
+        'Kilogram',
+        'Metric Ton'
+    ];
+
+    /**
+     * Matches Settings.weight_calcs (MenuVesselSetup.c). Declared before menuData so vessel/weight UI closures see a defined binding.
+     */
+    let weightCalculationsEnabled = false;
+
+    /**
+     * MenuMeasurementFormat.c: if weight_calcs disabled, Menu.num_items = 2 — only Percent and Height (indices 0–1).
+     */
+    const MEASUREMENT_FORMAT_OPTIONS_NO_WEIGHT = ['Percent', 'Height'];
+
+    function getMeasurementFormatOptions() {
+        return weightCalculationsEnabled ? MEASUREMENT_FORMAT_OPTIONS : MEASUREMENT_FORMAT_OPTIONS_NO_WEIGHT;
+    }
+
+    /** If stored format is not allowed for current weight-calcs mode, snap to Height (matches invalid EEPROM vs MenuMeasurementFormat.c two-item list). */
+    function clampMeasurementFormatToWeightMode() {
+        const opts = getMeasurementFormatOptions();
+        if (opts.indexOf(measurementFormat) < 0) {
+            measurementFormat = 'Height';
+        }
+    }
+
     // Define different types of menus: 'nav' (list to a new menu), 'select' (choice with checkmark), 'input' (numeric value), 'detail' (display only), 'welcome' (splash screen)
     const menuData = {
         'WELCOME': {
@@ -1990,18 +2040,24 @@
                     return [
                         'BinMaster C-100-R',
                         'Modbus Console',
-                        'v2.04 Feb 17 2025',
-                        'Press any key'
+                        'v2.04    Feb 17 2025',
+                        'Press any key...'
                     ];
                 }
-                /* C100-SB: mobile + desktop — line 2 SmartBob Console (was “C-100” on mobile only) */
-                return ['BinMaster C-100', 'SmartBob Console', 'v2.00 Apr 21 2016', 'Press any key...'];
+                /* C-100 v304 MenuStartup.c + About.h: BinMaster + MODEL_NUMBER_STR, str_SmartBob_Console, FirmwareVersionStr + BuildDate */
+                return ['BinMaster C-100', 'SmartBob Console', 'v3.04    Feb 14 2025', 'Press any key...'];
             }
         },
         'MAIN_MENU': { type: 'nav', items: ['Measure/View', 'Setup'] },
         
         // --- MEASURE/VIEW BRANCH ---
-        'MEASURE_VIEW_NO_SENSORS': { type: 'info', items: ['MEASURE/VIEW Prod', 'No sensors enabled.', 'Go to Add/Remove', 'under the Setup menu.'] },
+        'MEASURE_VIEW_NO_SENSORS': {
+            type: 'info',
+            items: function () {
+                const head = measurementType === 'Headroom' ? 'MEASURE/VIEW Hdrm' : 'MEASURE/VIEW Prod';
+                return [head, 'No sensors enabled.', 'Go to Add/Remove', 'under the Setup menu.'];
+            }
+        },
         'MEASURE_VIEW_PROD': { 
             type: 'nav', 
             items: function() {
@@ -2019,8 +2075,12 @@
                                 items.push(`${sensor}: Retracted`);
                             }
                         } else if (measurementData[sensor]) {
-                            const w = parseFloat(measurementData[sensor].product.weight).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                            items.push(`${sensor}: ${w} lb`);
+                            const cfg = getVesselConfigForSensor(sensor);
+                            const seg = measurementType === 'Headroom'
+                                ? measurementData[sensor].headroom
+                                : measurementData[sensor].product;
+                            const line = formatMeasureViewLine(seg, cfg.productDensity);
+                            items.push(`${sensor}: ${line}`);
                         } else {
                             items.push(`${sensor}: No data.`);
                         }
@@ -2049,13 +2109,10 @@
                         ''
                     ];
                 }
-                const formatWeight = (weight) => {
-                    return parseFloat(weight).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                };
                 return [
                     `Product of ${currentDetailSensor}:`,
-                    `${data.product.percent}%  ${data.product.feet} ft \u25C0`,
-                    `${formatWeight(data.product.weight)} lb`
+                    measureViewDetailSecondLine(data.product),
+                    formatMeasureDetailThirdLine(data.product, getVesselConfigForSensor(currentDetailSensor).productDensity)
                 ];
             },
             detailType: 'product'
@@ -2079,13 +2136,10 @@
                         ''
                     ];
                 }
-                const formatWeight = (weight) => {
-                    return parseFloat(weight).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                };
                 return [
                     `Headroom of ${currentDetailSensor}:`,
-                    `${data.headroom.percent}%  ${data.headroom.feet} ft \u25C0`,
-                    `${formatWeight(data.headroom.weight)} lb`
+                    measureViewDetailSecondLine(data.headroom),
+                    formatMeasureDetailThirdLine(data.headroom, getVesselConfigForSensor(currentDetailSensor).productDensity)
                 ];
             },
             detailType: 'headroom'
@@ -2109,13 +2163,10 @@
                         ''
                     ];
                 }
-                const formatWeight = (weight) => {
-                    return parseFloat(weight).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                };
                 return [
                     `Capacity of ${currentDetailSensor}:`,
-                    `${data.capacity.percent}%  ${data.capacity.feet} ft \u25C0`,
-                    `${formatWeight(data.capacity.weight)} lb`
+                    measureViewCapacitySecondLine(data.capacity),
+                    formatMeasureDetailThirdLine(data.capacity, getVesselConfigForSensor(currentDetailSensor).productDensity)
                 ];
             },
             detailType: 'capacity'
@@ -2195,11 +2246,33 @@
             allowsToggle: true, 
             next: 'SETUP_ADD_REMOVE_CONFIG' 
         },
+        /** Which enabled sensor drives I/O / 4–20 mA (surface only; one selection). List mirrors Add/Remove. */
+        'SETUP_IO_ASSIGNMENT': {
+            type: 'select',
+            items: function setupIoAssignmentItems() {
+                if (enabledSensors.length === 0) {
+                    return ['No sensors enabled'];
+                }
+                return [...enabledSensors].sort();
+            },
+            checked: function() {
+                const items = typeof menuData['SETUP_IO_ASSIGNMENT'].items === 'function'
+                    ? menuData['SETUP_IO_ASSIGNMENT'].items()
+                    : menuData['SETUP_IO_ASSIGNMENT'].items;
+                if (!items.length || items[0] === 'No sensors enabled') return [];
+                if (!ioAssignmentSelectedSensor || !items.includes(ioAssignmentSelectedSensor)) {
+                    return [0];
+                }
+                return [items.indexOf(ioAssignmentSelectedSensor)];
+            },
+            allowsToggle: true,
+            next: 'SETUP'
+        },
         'SETUP_SENSOR_TYPE': { type: 'select', items: ['NCR-80/GWR-2000', 'SmartSonic'], checked: 0, next: 'SETUP' },
-        'SETUP_SB485_PROTOCOL': { type: 'select', items: ['Protocol A', 'Protocol B'], checked: 0 },
-        'SETUP_SB485_TERMINATION': { type: 'select', items: ['IN', 'OUT'], checked: 0 },
+        'SETUP_SB485_PROTOCOL': { type: 'select', items: ['A', 'B'], checked: 0, next: 'SETUP' },
+        'SETUP_SB485_TERMINATION': { type: 'select', items: ['In', 'Out'], checked: 0, next: 'SETUP' },
         'SETUP_INTERVAL_TIMER': { type: 'select', items: ['On/Set', 'Off'], checked: 1 },
-        'SETUP_INTERVAL_TIMER_TIME': { type: 'input', label: 'INTERVAL TIMER', unit: 'as HH:MM', value: '04:00', next: 'SETUP_INTERVAL_TIMER_ASSIGN' },
+        'SETUP_INTERVAL_TIMER_TIME': { type: 'input', label: 'INTERVAL TIMER', unit: 'as HH:MM:', value: '04:00', next: 'SETUP_INTERVAL_TIMER_ASSIGN' },
         'SETUP_INTERVAL_TIMER_ASSIGN': { 
             type: 'select', 
             items: function() {
@@ -2231,9 +2304,58 @@
             allowsToggle: true, 
             next: 'SETUP' 
         },
-        'SETUP_UNIT_OF_MEASURE': { type: 'select', items: ['U.S. (lb, ft)', 'Metric (kg, m)'], checked: 0 },
-        'SETUP_WEIGHT_CALCULATIONS': { type: 'select', items: ['Enabled', 'Disabled'], checked: 1, next: 'SETUP' },
+        'SETUP_UNIT_OF_MEASURE': {
+            type: 'select',
+            items: ['U.S. (lb, ft)', 'Metric (kg, m)'],
+            checked: function() {
+                return unitOfMeasureIsMetric ? [1] : [0];
+            },
+            next: 'SETUP'
+        },
+        'SETUP_WEIGHT_CALCULATIONS': {
+            type: 'select',
+            items: ['Enabled', 'Disabled'],
+            checked: function () {
+                return weightCalculationsEnabled ? [0] : [1];
+            },
+            next: 'SETUP'
+        },
         'SETUP_MEASUREMENT_TYPE': { type: 'select', items: ['Headroom', 'Product'], checked: function() { return measurementType === 'Product' ? [1] : [0]; }, next: 'SETUP' },
+        'SETUP_MEASUREMENT_FORMAT': {
+            type: 'select',
+            items: function () {
+                return getMeasurementFormatOptions();
+            },
+            checked: function () {
+                const opts = getMeasurementFormatOptions();
+                const i = opts.indexOf(measurementFormat);
+                return [i >= 0 ? i : 0];
+            },
+            next: 'SETUP'
+        },
+        /** 4–20 mA output: which level drives the loop (Headroom vs Product). */
+        'SETUP_4_20MA_OUTPUT': {
+            type: 'select',
+            items: ['Headroom', 'Product'],
+            checked: function() {
+                return fourTwentyMaOutputSource === 'Product' ? [1] : [0];
+            },
+            next: 'SETUP'
+        },
+        /**
+         * 4–20 mA error (Menu420Error.c): two rows — low fault vs 22 mA. Non–C-50 shows 3.5 mA + 22 mA; C-50 shows 2 mA + 22 mA.
+         * Settings._420ma_error is 0 = low, 1 = 22 mA. Default in Settings.c is 22 mA.
+         */
+        'SETUP_4_20MA_ERROR': {
+            type: 'select',
+            items: function setup420ErrorItems() {
+                return ['3.5 mA', '22 mA'];
+            },
+            checked: function () {
+                return [fourTwentyMaErrorIndex];
+            },
+            next: 'SETUP'
+        },
         'SETUP_PRODUCT_DENSITY': { type: 'input', label: 'PRODUCT DENSITY', unit: 'in lb/cu ft:', value: '038.00', next: 'SETUP' }, // Back to Setup after input
         'SETUP_VESSEL_SETUP': { type: 'nav', items: function() { 
             const items = ['Set All'];
@@ -2260,16 +2382,31 @@
         'SETUP_ACCESS_CODE_INPUT': { type: 'input', label: 'ACCESS CODE', unit: '4 digits:', value: '####', next: 'SETUP' },
         'ACCESS_CODE_ENTRY': { type: 'input', label: 'ACCESS CODE', unit: 'Enter code:', value: '####', next: null },
         'SETUP_LANGUAGE': { type: 'select', items: ['English', 'Español'], checked: 0 },
-        'SETUP_INFO_ABOUT': { type: 'info', items: ['INFO/ABOUT', 'BinMaster C-100', 'Smartbob Console', 'v3.03 Feb 14, 2023'] },
+        'SETUP_INFO_ABOUT': {
+            type: 'info',
+            items: function setupInfoAboutItems() {
+                if (selectedDevice === 'C100-R') {
+                    return ['INFO / ABOUT', 'BinMaster C-100-R', 'Modbus Console', 'v2.04    Feb 17 2025'];
+                }
+                return ['INFO / ABOUT', 'BinMaster C-100', 'SmartBob Console', 'v3.04    Feb 14 2025'];
+            }
+        },
 
         // --- VESSEL CONFIGURATION SCREENS --- (Simplified flow starting from Set All/001 selection)
         'VESSEL_CONFIG_START': { type: 'nav', items: function() {
-            const base = ['VESSEL SHAPE', 'BODY HEIGHT', 'BODY RADIUS', 'HOPPER PRESENT', 'SENSOR OFFSET'];
-            if (selectedDevice === 'C100-R') return base;
-            return base.concat(['SMARTBOB MAX DROP']);
+            if (weightCalculationsEnabled) {
+                const base = ['VESSEL SHAPE', 'BODY HEIGHT', 'BODY RADIUS', 'HOPPER PRESENT', 'SENSOR OFFSET', 'PRODUCT DENSITY'];
+                if (selectedDevice === 'C100-R') return base;
+                return base.concat(['SMARTBOB MAX DROP']);
+            }
+            const simple = ['VESSEL HEIGHT', 'SENSOR OFFSET'];
+            if (selectedDevice === 'C100-R') return simple;
+            return simple.concat(['SMARTBOB MAX DROP']);
         } },
 
         'CONFIG_VESSEL_SHAPE': { type: 'select', items: ['Circular', 'Rectangular'], checked: 0, next: 'CONFIG_BODY_HEIGHT' },
+        /** Weight calcs off: MenuVesselSetup.c STATE_INIT_VESSEL_HEIGHT (VPARAM_VESSEL_HEIGHT), same storage as body height. */
+        'CONFIG_VESSEL_HEIGHT_SIMPLE': { type: 'input', label: 'VESSEL HEIGHT', unit: 'in feet:', value: '020.00', next: 'CONFIG_SENSOR_OFFSET' },
         'CONFIG_BODY_HEIGHT': { type: 'input', label: 'BODY HEIGHT', unit: 'in feet:', value: '020.00', next: 'CONFIG_BODY_RADIUS' },
         'CONFIG_BODY_RADIUS': { type: 'input', label: 'BODY RADIUS', unit: 'in feet:', value: '15.00', next: 'CONFIG_HOPPER_PRESENT' },
         'CONFIG_HOPPER_PRESENT': { type: 'select', items: ['Yes', 'No'], checked: 0, next: 'CONFIG_HOPPER_HEIGHT' },
@@ -2308,19 +2445,19 @@
             'Weight Calculations': 'SETUP_WEIGHT_CALCULATIONS',
             'Vessel Setup': 'SETUP_VESSEL_SETUP',
             'C-50 Setup': null,
-            'I/O Assignment': null,
-            '4-20mA Output': null,
-            '4-20mA Error': null,
+            'I/O Assignment': 'SETUP_IO_ASSIGNMENT',
+            '4-20mA Output': 'SETUP_4_20MA_OUTPUT',
+            '4-20mA Error': 'SETUP_4_20MA_ERROR',
             'Interval Timer': 'SETUP_INTERVAL_TIMER',
-            'Measurement Format': null,
+            'Measurement Format': 'SETUP_MEASUREMENT_FORMAT',
             'Measurement Type': 'SETUP_MEASUREMENT_TYPE',
             'Access Code': 'SETUP_ACCESS_CODE',
             'Language/Idioma': 'SETUP_LANGUAGE',
             'Info/About': 'SETUP_INFO_ABOUT'
         },
         'SETUP_VESSEL_SETUP': {
-            'Set All': 'CONFIG_VESSEL_SHAPE', // Start the sequence
-            '001': 'CONFIG_VESSEL_SHAPE' 
+            'Set All': 'CONFIG_VESSEL_SHAPE',
+            '001': 'CONFIG_VESSEL_SHAPE'
         },
         'CONFIG_VESSEL_SHAPE': {
             'Circular': 'CONFIG_BODY_HEIGHT',
@@ -2378,12 +2515,66 @@
         smartBobMaxDropEnabled: 'Disabled',
         smartBobMaxDrop: '02.50'
     };
+    /** Per-sensor overrides when configuring one address (not "Set All"). Undefined => use globalVesselCanonical. */
+    let vesselConfigBySensor = {};
+    /** 'all' = Set All flow; otherwise the 3-digit sensor id being edited. */
+    let vesselConfigEditScope = 'all';
+
+    function cloneVesselConfig(obj) {
+        return JSON.parse(JSON.stringify(obj));
+    }
+
+    /** Shared template after Set All; per-sensor uses override or this. */
+    let globalVesselCanonical = cloneVesselConfig(vesselConfig);
+
+    function applyVesselConfigToMenuData(cfg) {
+        menuData['CONFIG_BODY_HEIGHT'].value = cfg.bodyHeight;
+        menuData['CONFIG_VESSEL_HEIGHT_SIMPLE'].value = cfg.bodyHeight;
+        menuData['CONFIG_BODY_RADIUS'].value = cfg.bodyRadius;
+        menuData['CONFIG_HOPPER_HEIGHT'].value = cfg.hopperHeight;
+        menuData['CONFIG_OUTLET_RADIUS'].value = cfg.outletRadius;
+        menuData['CONFIG_SENSOR_OFFSET'].value = cfg.sensorOffset;
+        menuData['CONFIG_PRODUCT_DENSITY'].value = cfg.productDensity;
+        menuData['CONFIG_SMARTBOB_MAX_DROP_INPUT'].value = cfg.smartBobMaxDrop;
+        menuData['CONFIG_VESSEL_SHAPE'].checked = cfg.shape === 'Rectangular' ? 1 : 0;
+        menuData['CONFIG_HOPPER_PRESENT'].checked = cfg.hopperPresent === 'No' ? 1 : 0;
+        menuData['CONFIG_SMARTBOB_MAX_DROP'].checked = cfg.smartBobMaxDropEnabled === 'Enabled' ? 0 : 1;
+        lastInputUnitSyncKey = null;
+    }
+
+    function loadVesselConfigIntoWorkingState(sensorId) {
+        const src = vesselConfigBySensor[sensorId] || globalVesselCanonical;
+        Object.assign(vesselConfig, cloneVesselConfig(src));
+        applyVesselConfigToMenuData(vesselConfig);
+    }
+
+    function getVesselConfigForSensor(sensorId) {
+        return vesselConfigBySensor[sensorId] ? vesselConfigBySensor[sensorId] : globalVesselCanonical;
+    }
+
+    /**
+     * When leaving vessel CONFIG for SETUP_VESSEL_SETUP: save per-sensor overrides, or (when completing Set All) drop overrides so all sensors use global vesselConfig.
+     * @param {{ completedSetAll?: boolean }} opts completedSetAll: true only when finishing the full Set All wizard forward (not Back).
+     */
+    function finalizeVesselConfigSessionToVesselSetup(opts) {
+        const completedSetAll = opts && opts.completedSetAll;
+        if (vesselConfigEditScope === 'all') {
+            if (completedSetAll) {
+                globalVesselCanonical = cloneVesselConfig(vesselConfig);
+                vesselConfigBySensor = {};
+            }
+        } else {
+            vesselConfigBySensor[vesselConfigEditScope] = cloneVesselConfig(vesselConfig);
+        }
+    }
     
     // Track enabled sensors (added through Add/Remove or Auto Add/Remove)
     let enabledSensors = [];
     
     // Track sensors assigned to interval timer
     let intervalTimerAssignedSensors = [];
+    /** Single sensor address selected for I/O / 4–20 mA (Setup → I/O Assignment); must be in enabledSensors when set. */
+    let ioAssignmentSelectedSensor = null;
     
     // Access code storage
     let accessCodeEnabled = false;
@@ -2391,6 +2582,291 @@
     
     // Measurement type storage
     let measurementType = 'Product'; // Default to Product
+
+    /** 4–20 mA output source: Headroom or Product (Setup → 4-20mA Output). */
+    let fourTwentyMaOutputSource = 'Product';
+
+    /** Setup → 4-20mA Error row index: 0 = low (3.5 mA in non–C-50 build), 1 = 22 mA. Default matches Settings.c (_420MA_ERROR_22MA). */
+    let fourTwentyMaErrorIndex = 1;
+
+    /** Display format for Measure/View third line / list value; internal storage remains lb for weight. Product density entry stays lb/cu ft. */
+    /** Default MEASUREMENT_FORMAT_PERCENT (Settings.c); with weight calcs off, only Percent/Height exist. */
+    let measurementFormat = 'Percent';
+
+    /** Setup → Unit of Measure: when true, dimension inputs use meters and density uses kg/m³ (stored internally as ft and lb/cu ft). */
+    let unitOfMeasureIsMetric = false;
+    let lastInputUnitSyncKey = null;
+
+    const LB_PER_SHORT_TON = 2000;
+    const LB_PER_KG = 2.20462262185;
+    const LB_PER_METRIC_TON = 2204.62262185;
+    /** US liquid gallons per cubic foot. */
+    const US_GAL_PER_CU_FT = 7.48051948;
+    /** Liters per cubic foot. */
+    const LITER_PER_CU_FT = 28.316846592;
+    /** Winchester US bushel volume (ft³ per bushel). */
+    const CU_FT_PER_US_BUSHEL = 1.244456084;
+    /** International foot (same as normalizeLengthInputToCanonicalFt). */
+    const M_PER_FT = 0.3048;
+
+    /** MenuMeasureViewDetails.c row3 / SensorData list: distance from stored feet string. */
+    function formatDistanceFromFeetStr(feetStr) {
+        const ft = parseFloat(feetStr);
+        if (isNaN(ft)) return '';
+        if (isMetricUnits()) {
+            const m = ft * M_PER_FT;
+            return `${m.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} m`;
+        }
+        return `${ft.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ft`;
+    }
+
+    /** Detail row2: percent only when weight calcs off; percent + height when on (matches firmware two-line layout). */
+    function measureViewDetailSecondLine(segment) {
+        const pct = `${parseFloat(segment.percent).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
+        if (!weightCalculationsEnabled) {
+            return `${pct} \u25C0`;
+        }
+        return `${pct}  ${formatDistanceFromFeetStr(segment.feet)} \u25C0`;
+    }
+
+    function measureViewCapacitySecondLine(capSeg) {
+        if (!weightCalculationsEnabled) {
+            return `100.0% \u25C0`;
+        }
+        return `100.0%  ${formatDistanceFromFeetStr(capSeg.feet)} \u25C0`;
+    }
+
+    /**
+     * Detail row3: weight off → height only. Weight on → row3 is weight if format is Percent, else volume/weight per format
+     * (MenuMeasureViewDetails.c switch on measurement_format).
+     */
+    function formatMeasureDetailThirdLine(segment, productDensityStr) {
+        if (!weightCalculationsEnabled) {
+            return formatDistanceFromFeetStr(segment.feet);
+        }
+        if (measurementFormat === 'Percent') {
+            return formatMeasuredWeightLine(segment.weight);
+        }
+        return formatMeasureViewLine(segment, productDensityStr);
+    }
+
+    function formatMeasuredWeightDisplay(lb) {
+        const w = parseFloat(lb);
+        if (isNaN(w)) return { num: String(lb), suffix: 'lb' };
+        let val;
+        let suffix;
+        switch (measurementFormat) {
+            case 'Pound': val = w; suffix = 'lb'; break;
+            case 'Ton': val = w / LB_PER_SHORT_TON; suffix = 'ton'; break;
+            case 'Kilogram': val = w / LB_PER_KG; suffix = 'kg'; break;
+            case 'Metric Ton': val = w / LB_PER_METRIC_TON; suffix = 'MT'; break;
+            default: val = w; suffix = 'lb';
+        }
+        const num = val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        return { num, suffix };
+    }
+
+    function formatMeasuredWeightLine(lb) {
+        const { num, suffix } = formatMeasuredWeightDisplay(lb);
+        return `${num} ${suffix}`;
+    }
+
+    /**
+     * Formats the measured value for the current Measurement Format using product/headroom/capacity segment and lb/cu ft density.
+     * Volume-based formats derive cu ft from weight ÷ density. UOM matches Settings_SetUomStr (ft/m, cu ft/cu m).
+     */
+    function formatMeasureViewLine(segment, productDensityStr) {
+        const density = parseFloat(productDensityStr) || 20;
+        const lb = parseFloat(segment.weight);
+        const cuFt = !isNaN(lb) && density > 0 ? lb / density : 0;
+        const cuM = cuFt * Math.pow(M_PER_FT, 3);
+
+        switch (measurementFormat) {
+            case 'Percent':
+                return `${parseFloat(segment.percent).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
+            case 'Height':
+                return formatDistanceFromFeetStr(segment.feet);
+            case 'Cubic Unit':
+                if (isMetricUnits()) {
+                    return `${cuM.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} cu m`;
+                }
+                return `${cuFt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} cu ft`;
+            case 'US Gallon': {
+                const gal = cuFt * US_GAL_PER_CU_FT;
+                return `${gal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} gal`;
+            }
+            case 'US Bushel': {
+                const bu = cuFt / CU_FT_PER_US_BUSHEL;
+                return `${bu.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} bu`;
+            }
+            case 'Liter': {
+                const L = isMetricUnits() ? cuM * 1000 : cuFt * LITER_PER_CU_FT;
+                return `${L.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} L`;
+            }
+            case 'Pound':
+            case 'Ton':
+            case 'Kilogram':
+            case 'Metric Ton':
+                return formatMeasuredWeightLine(segment.weight);
+            default:
+                return formatMeasuredWeightLine(segment.weight);
+        }
+    }
+    const FT_PER_M = 1 / M_PER_FT;
+    /** lb/ft³ to kg/m³ */
+    const LB_PER_CUFT_TO_KG_PER_M3 = 16.0184633736;
+
+    const LENGTH_INPUT_STATES = new Set([
+        'CONFIG_BODY_HEIGHT',
+        'CONFIG_VESSEL_HEIGHT_SIMPLE',
+        'CONFIG_BODY_RADIUS',
+        'CONFIG_HOPPER_HEIGHT',
+        'CONFIG_OUTLET_RADIUS',
+        'CONFIG_SENSOR_OFFSET',
+        'CONFIG_SMARTBOB_MAX_DROP_INPUT',
+        'SETUP_SMARTBOB_MAX_DROP_INPUT',
+        'SETUP_SENSOR_OFFSET'
+    ]);
+    const DENSITY_INPUT_STATES = new Set(['SETUP_PRODUCT_DENSITY', 'CONFIG_PRODUCT_DENSITY']);
+
+    function isMetricUnits() {
+        return unitOfMeasureIsMetric;
+    }
+
+    function formatCanonicalFtForState(stateKey, ft) {
+        const abs = Math.abs(ft);
+        switch (stateKey) {
+            case 'CONFIG_BODY_HEIGHT':
+            case 'CONFIG_VESSEL_HEIGHT_SIMPLE':
+            case 'CONFIG_HOPPER_HEIGHT':
+                return abs.toFixed(2).padStart(6, '0');
+            case 'CONFIG_BODY_RADIUS':
+            case 'CONFIG_OUTLET_RADIUS':
+            case 'CONFIG_SMARTBOB_MAX_DROP_INPUT':
+            case 'SETUP_SMARTBOB_MAX_DROP_INPUT':
+            case 'SETUP_SENSOR_OFFSET':
+                return abs.toFixed(2).padStart(5, '0');
+            case 'CONFIG_SENSOR_OFFSET': {
+                const sign = ft < 0 ? '-' : '+';
+                return sign + abs.toFixed(2).padStart(5, '0');
+            }
+            default:
+                return abs.toFixed(2).padStart(5, '0');
+        }
+    }
+
+    function parseCanonicalFtString(stateKey, str) {
+        const s = String(str).trim();
+        let ft = parseFloat(s.replace(/[^0-9.+-]/g, '')) || 0;
+        if (stateKey === 'CONFIG_SENSOR_OFFSET') {
+            if (s.includes('-')) ft = -Math.abs(ft);
+            else if (s.includes('+')) ft = Math.abs(ft);
+        }
+        return ft;
+    }
+
+    function normalizeLengthInputToCanonicalFt(stateKey) {
+        if (!LENGTH_INPUT_STATES.has(stateKey)) return;
+        const m = menuData[stateKey];
+        const s = String(m.value);
+        let raw = parseFloat(s.replace(/[^0-9.+-]/g, '')) || 0;
+        let ft;
+        if (isMetricUnits()) {
+            ft = raw * FT_PER_M;
+        } else {
+            ft = raw;
+        }
+        if (stateKey === 'CONFIG_SENSOR_OFFSET') {
+            if (s.includes('-')) ft = -Math.abs(ft);
+            else if (s.includes('+')) ft = Math.abs(ft);
+        }
+        m.value = formatCanonicalFtForState(stateKey, ft);
+    }
+
+    function applyLengthDisplayFromCanonical(stateKey) {
+        if (!LENGTH_INPUT_STATES.has(stateKey)) return;
+        const m = menuData[stateKey];
+        const ft = parseCanonicalFtString(stateKey, m.value);
+        if (!isMetricUnits()) {
+            m.value = formatCanonicalFtForState(stateKey, ft);
+            return;
+        }
+        const meters = ft * M_PER_FT;
+        if (stateKey === 'CONFIG_SENSOR_OFFSET') {
+            const sign = ft < 0 ? '-' : '+';
+            m.value = sign + Math.abs(meters).toFixed(2).padStart(5, '0');
+        } else if (stateKey === 'CONFIG_BODY_HEIGHT' || stateKey === 'CONFIG_VESSEL_HEIGHT_SIMPLE' || stateKey === 'CONFIG_HOPPER_HEIGHT') {
+            m.value = Math.abs(meters).toFixed(2).padStart(6, '0');
+        } else {
+            m.value = Math.abs(meters).toFixed(2).padStart(5, '0');
+        }
+    }
+
+    function normalizeDensityInputToCanonicalLbPerCuft(stateKey) {
+        if (!DENSITY_INPUT_STATES.has(stateKey)) return;
+        const m = menuData[stateKey];
+        const raw = parseFloat(String(m.value).replace(/[^0-9.+-]/g, '')) || 0;
+        const lbPerCuFt = isMetricUnits() ? raw / LB_PER_CUFT_TO_KG_PER_M3 : raw;
+        m.value = lbPerCuFt.toFixed(2).padStart(5, '0');
+    }
+
+    function applyDensityDisplayFromCanonical(stateKey) {
+        if (!DENSITY_INPUT_STATES.has(stateKey)) return;
+        const m = menuData[stateKey];
+        const lb = parseFloat(m.value);
+        if (isNaN(lb)) return;
+        if (!isMetricUnits()) {
+            m.value = lb.toFixed(2).padStart(5, '0');
+            return;
+        }
+        const kg = lb * LB_PER_CUFT_TO_KG_PER_M3;
+        m.value = kg.toFixed(2).padStart(5, '0');
+    }
+
+    function syncInputDisplayForUnitIfNeeded() {
+        if (!LENGTH_INPUT_STATES.has(currentState) && !DENSITY_INPUT_STATES.has(currentState)) {
+            lastInputUnitSyncKey = null;
+            return;
+        }
+        const key = currentState + '|' + (unitOfMeasureIsMetric ? 'm' : 'us');
+        if (lastInputUnitSyncKey === key) return;
+        if (LENGTH_INPUT_STATES.has(currentState)) {
+            applyLengthDisplayFromCanonical(currentState);
+        } else {
+            applyDensityDisplayFromCanonical(currentState);
+        }
+        lastInputUnitSyncKey = key;
+    }
+
+    function normalizeDimensionAndDensityInputsForCurrentState() {
+        if (LENGTH_INPUT_STATES.has(currentState)) {
+            normalizeLengthInputToCanonicalFt(currentState);
+        } else if (DENSITY_INPUT_STATES.has(currentState)) {
+            normalizeDensityInputToCanonicalLbPerCuft(currentState);
+        }
+    }
+
+    function getInputUnitLabelForState(state) {
+        if (DENSITY_INPUT_STATES.has(state)) {
+            return isMetricUnits() ? 'in kg/m³:' : 'in lb/cu ft:';
+        }
+        if (LENGTH_INPUT_STATES.has(state)) {
+            return isMetricUnits() ? 'in meters:' : 'in feet:';
+        }
+        return menuData[state] ? menuData[state].unit : '';
+    }
+
+    function ensureIoAssignmentSelectionValid() {
+        if (currentState !== 'SETUP_IO_ASSIGNMENT') return;
+        const m = menuData['SETUP_IO_ASSIGNMENT'];
+        const items = typeof m.items === 'function' ? m.items() : m.items;
+        if (!items.length || items[0] === 'No sensors enabled') return;
+        if (!ioAssignmentSelectedSensor || !items.includes(ioAssignmentSelectedSensor)) {
+            ioAssignmentSelectedSensor = items[0];
+        }
+        if (selectedIndex >= items.length) selectedIndex = Math.max(0, items.length - 1);
+        if (selectedIndex < 0) selectedIndex = 0;
+    }
     
     // Measurement data storage per sensor
     let measurementData = {}; // Format: { '001': { product: {...}, headroom: {...}, capacity: {...} } }
@@ -2413,17 +2889,18 @@
     function initializeMeasurementData(sensorNum) {
         if (!measurementData[sensorNum]) {
             // Default values based on vessel config
-            const bodyHeight = parseFloat(vesselConfig.bodyHeight) || 20.0;
-            const hopperHeight = parseFloat(vesselConfig.hopperHeight) || 6.0;
+            const cfg = getVesselConfigForSensor(sensorNum);
+            const bodyHeight = parseFloat(cfg.bodyHeight) || 20.0;
+            const hopperHeight = parseFloat(cfg.hopperHeight) || 6.0;
             const totalHeight = bodyHeight + hopperHeight;
             const headroom = 2.59; // Default headroom
             const productHeight = totalHeight - headroom;
             const productPercent = (productHeight / totalHeight) * 100;
             const headroomPercent = (headroom / totalHeight) * 100;
-            const density = parseFloat(vesselConfig.productDensity) || 20.0;
+            const density = parseFloat(cfg.productDensity) || 20.0;
             
             // Calculate volumes and weights (simplified circular vessel calculation)
-            const radius = parseFloat(vesselConfig.bodyRadius) || 1.0;
+            const radius = parseFloat(cfg.bodyRadius) || 1.0;
             const productVolume = Math.PI * radius * radius * productHeight;
             const headroomVolume = Math.PI * radius * radius * headroom;
             const totalVolume = Math.PI * radius * radius * totalHeight;
@@ -2477,13 +2954,14 @@
         
         measurementTimeout = setTimeout(() => {
             const existingData = measurementData[sensorNum];
+            const cfg = getVesselConfigForSensor(sensorNum);
             
             // Calculate capacity from vessel config (stays constant)
-            const bodyHeight = parseFloat(vesselConfig.bodyHeight) || 20.0;
-            const hopperHeight = parseFloat(vesselConfig.hopperHeight) || 6.0;
+            const bodyHeight = parseFloat(cfg.bodyHeight) || 20.0;
+            const hopperHeight = parseFloat(cfg.hopperHeight) || 6.0;
             const totalHeight = bodyHeight + hopperHeight;
-            const density = parseFloat(vesselConfig.productDensity) || 20.0;
-            const radius = parseFloat(vesselConfig.bodyRadius) || 1.0;
+            const density = parseFloat(cfg.productDensity) || 20.0;
+            const radius = parseFloat(cfg.bodyRadius) || 1.0;
             const totalVolume = Math.PI * radius * radius * totalHeight;
             const capacityFeet = totalHeight;
             const capacityWeight = totalVolume * density;
@@ -2543,11 +3021,12 @@
     
     /** Compute and store measurement for one sensor (shared with measure-all sequence). */
     function applyMeasurementForSensor(sensorNum) {
-        const bodyHeight = parseFloat(vesselConfig.bodyHeight) || 20.0;
-        const hopperHeight = parseFloat(vesselConfig.hopperHeight) || 6.0;
+        const cfg = getVesselConfigForSensor(sensorNum);
+        const bodyHeight = parseFloat(cfg.bodyHeight) || 20.0;
+        const hopperHeight = parseFloat(cfg.hopperHeight) || 6.0;
         const totalHeight = bodyHeight + hopperHeight;
-        const density = parseFloat(vesselConfig.productDensity) || 20.0;
-        const radius = parseFloat(vesselConfig.bodyRadius) || 1.0;
+        const density = parseFloat(cfg.productDensity) || 20.0;
+        const radius = parseFloat(cfg.bodyRadius) || 1.0;
         const totalVolume = Math.PI * radius * radius * totalHeight;
         const capacityFeet = totalHeight;
         const existingData = measurementData[sensorNum];
@@ -2687,8 +3166,8 @@
     }
     
     // Track if we're in vessel configuration flow
-    const vesselConfigStates = ['CONFIG_VESSEL_SHAPE', 'CONFIG_BODY_HEIGHT', 'CONFIG_BODY_RADIUS', 
-                                'CONFIG_HOPPER_PRESENT', 'CONFIG_HOPPER_HEIGHT', 'CONFIG_OUTLET_RADIUS', 'CONFIG_SENSOR_OFFSET', 'CONFIG_PRODUCT_DENSITY', 
+    const vesselConfigStates = ['CONFIG_VESSEL_SHAPE', 'CONFIG_VESSEL_HEIGHT_SIMPLE', 'CONFIG_BODY_HEIGHT', 'CONFIG_BODY_RADIUS',
+                                'CONFIG_HOPPER_PRESENT', 'CONFIG_HOPPER_HEIGHT', 'CONFIG_OUTLET_RADIUS', 'CONFIG_SENSOR_OFFSET', 'CONFIG_PRODUCT_DENSITY',
                                 'CONFIG_SMARTBOB_MAX_DROP', 'CONFIG_SMARTBOB_MAX_DROP_INPUT'];
 
     /** Guide only: MEASURE_VIEW_PROD needs sensors or list shows "No sensors enabled" and Measure All never appears. */
@@ -2700,6 +3179,9 @@
     // --- RENDER FUNCTION ---
     function renderScreen() {
         ensureTutorialSensorsOnMeasureView();
+        if (currentState === 'SETUP_MEASUREMENT_FORMAT') {
+            clampMeasurementFormatToWeightMode();
+        }
 
         // Reset previousSelectedIndex and previousViewportOffset if state changed
         if (currentState !== previousState) {
@@ -2714,6 +3196,8 @@
             console.error('Menu not found for state:', currentState);
             return;
         }
+        syncInputDisplayForUnitIfNeeded();
+        ensureIoAssignmentSelectionValid();
         let html = '';
         let title = '';
         let itemsToShow = [];
@@ -2744,11 +3228,13 @@
             // Get proper screen title from context
             if (currentState === 'MAIN_MENU') title = 'MAIN MENU';
             if (currentState === 'SETUP') title = 'SETUP';
-            if (currentState.startsWith('MEASURE_VIEW')) title = 'MEASURE/VIEW Prod'; 
+            if (currentState.startsWith('MEASURE_VIEW')) {
+                title = measurementType === 'Headroom' ? 'MEASURE/VIEW Hdrm' : 'MEASURE/VIEW Prod';
+            }
 
             // Special handling for "No sensors enabled" message - render as info screen
             if (menuItems.length > 0 && menuItems[0] === 'No sensors enabled') {
-                title = 'MEASURE/VIEW Prod';
+                title = measurementType === 'Headroom' ? 'MEASURE/VIEW Hdrm' : 'MEASURE/VIEW Prod';
                 const displayCount = Math.min(ITEMS_PER_SCREEN, menuItems.length);
                 for (let i = 0; i < displayCount; i++) {
                     html += `<div class="menu-item">${menuItems[i]}</div>`;
@@ -2831,7 +3317,22 @@
             // Special title for Auto Add/Remove warning
             if (currentState === 'SETUP_AUTO_ADD_REMOVE_WARNING') {
                 title = 'Rescan for new and removed sensors?';
-            } 
+            }
+            if (currentState === 'SETUP_4_20MA_ERROR') {
+                title = '4-20mA ERROR';
+            }
+            if (currentState === 'SETUP_4_20MA_OUTPUT') {
+                title = '4-20mA OUTPUT';
+            }
+            if (currentState === 'SETUP_SB485_PROTOCOL') {
+                title = 'SB-485 PROTOCOL';
+            }
+            if (currentState === 'SETUP_SB485_TERMINATION') {
+                title = 'SB-485 TERMINATION';
+            }
+            if (currentState === 'SETUP_SENSOR_TYPE') {
+                title = 'SENSOR TYPE';
+            }
             
             // Calculate which items to show (only 3 at a time)
             const totalItems = selectMenuItems.length;
@@ -2907,6 +3408,12 @@
 
         } else if (menu.type === 'input') {
             title = menu.label;
+            const unitLine =
+                LENGTH_INPUT_STATES.has(currentState) || DENSITY_INPUT_STATES.has(currentState)
+                    ? getInputUnitLabelForState(currentState)
+                    : currentState === 'SETUP_INTERVAL_TIMER_TIME'
+                        ? (selectedDevice === 'C100-R' ? 'as MM:SS:' : 'as HH:MM:')
+                        : menu.unit;
             const val = menu.value.split('');
             let valueHtml = val.map((digit, index) => {
                 if (digit === '.' || digit === ':') return digit;
@@ -2916,7 +3423,7 @@
             }).join('');
 
             html = `
-                <div class="menu-item">Enter ${menu.unit}</div>
+                <div class="menu-item">Enter ${unitLine}</div>
                 <div class="input-value">${valueHtml}</div>
                 <div class="menu-item"><small>\u25C0/\u25B6: Cursor &nbsp; \u25B2/\u25BC: Digit</small></div>
             `;
@@ -3068,7 +3575,7 @@
         { state: 'CONFIG_HOPPER_HEIGHT', title: 'Hopper Height', message: 'Enter the hopper/cone height, then press ✓.', action: 'select', selector: '.input-value' },
         { state: 'CONFIG_OUTLET_RADIUS', title: 'Outlet Radius', message: 'Enter the outlet radius at the hopper/cone discharge, then press ✓.', action: 'select', selector: '.input-value' },
         { state: 'CONFIG_SENSOR_OFFSET', title: 'Sensor Offset', message: 'The sensor offset is typically 0. If the sensor is 3 feet inside the silo. Set the number to +03.00. If raised by 3 feet, change the + to - and set it to -03.00. Press ✓ to continue.', action: 'select', selector: '.input-value' },
-        { state: 'CONFIG_PRODUCT_DENSITY', title: 'Product Density', message: 'Enter the material/product density amount in pounds per cubic foot. For the most accurate number, measure a 1X1 cubic box with material in it, then press ✓.', action: 'select', selector: '.input-value' },
+        { state: 'CONFIG_PRODUCT_DENSITY', title: 'Product Density', message: 'Enter product density in lb/cu ft (U.S.) or kg/m³ (Metric), per Unit of Measure under Setup. For the most accurate number, measure a 1×1 cube with material in it, then press ✓.', action: 'select', selector: '.input-value' },
         { state: 'CONFIG_SMARTBOB_MAX_DROP', title: 'SmartBob Max Drop', message: 'This is the distance in feet your Smartbob is allowed to drop. Usually set to vessel height or top of cone. Press the up arrow to select "Enabled".', action: 'up', targetIndex: 0, skipWhen: () => selectedDevice === 'C100-R' },
         { state: 'CONFIG_SMARTBOB_MAX_DROP', title: 'SmartBob Max Drop', message: 'Press ✓ to confirm Enabled.', action: 'select', targetIndex: 0, skipWhen: () => selectedDevice === 'C100-R' },
         { state: 'CONFIG_SMARTBOB_MAX_DROP_INPUT', title: 'Max Drop Value', message: 'This is the distance in feet your Smartbob is allowed to drop. Usually set to vessel height or top of cone. Enter the value, then press ✓.', action: 'select', selector: '.input-value', skipWhen: () => selectedDevice === 'C100-R' },
@@ -3076,8 +3583,8 @@
         { state: 'SETUP', title: 'Return to Main Menu', message: 'Press X to return to the Main Menu.', action: 'back', target: '#screen' },
         { state: 'MAIN_MENU', title: 'Move to Measure/View', message: 'Press the up arrow to highlight "Measure/View".', action: 'up', targetIndex: 0 },
         { state: 'MAIN_MENU', title: 'Measure/View', message: 'Press ✓ to open Measure/View.', action: 'select', targetIndex: 0 },
-        { state: 'MEASURE_VIEW_PROD', title: 'Measure All', message: 'Press ✓ on "Measure All" to measure all sensor addresses. Wait for each to show its weight in lb.', action: 'select', targetIndex: 0 },
-        { state: 'MEASURE_VIEW_PROD', title: 'Wait for Measurements', message: 'Wait for the measurements to complete. Each address will show its weight (e.g. 916.25 lb) when ready.', action: 'wait', target: '#screen', advanceWhen: () => currentState === 'MEASURE_VIEW_PROD' && !measureAllInProgress },
+        { state: 'MEASURE_VIEW_PROD', title: 'Measure All', message: 'Press ✓ on "Measure All" to measure all sensor addresses. Wait for each to show its value (format is set under Setup → Measurement Format).', action: 'select', targetIndex: 0 },
+        { state: 'MEASURE_VIEW_PROD', title: 'Wait for Measurements', message: 'Wait for the measurements to complete. Each address will show its value when ready.', action: 'wait', target: '#screen', advanceWhen: () => currentState === 'MEASURE_VIEW_PROD' && !measureAllInProgress },
         { state: 'MEASURE_VIEW_PROD', title: 'Select an Address', message: 'Press the down arrow to select an address (001, 004, etc.) to view its measurement types.', action: 'down', targetIndex: 1 },
         { state: 'MEASURE_VIEW_PROD', title: 'Open Address Details', message: 'Press ✓ to open this sensor\'s detail view. Use ▶ to move through Product, Capacity, and Headroom.', action: 'select', targetIndex: 1 },
         { state: 'MEASURE_VIEW_PRODUCT_DETAIL', title: 'Product Level', message: 'Product represents how much material is in the bin (the fill). Press ▶ to view Capacity.', action: 'right', keyTarget: 'right' },
@@ -3789,12 +4296,19 @@
             smartBobMaxDropEnabled: 'Disabled',
             smartBobMaxDrop: '02.50'
         };
+        globalVesselCanonical = cloneVesselConfig(vesselConfig);
 
         enabledSensors = [];
         intervalTimerAssignedSensors = [];
+        ioAssignmentSelectedSensor = null;
         accessCodeEnabled = false;
         accessCodeValue = '0000';
         measurementType = 'Product';
+        fourTwentyMaOutputSource = 'Product';
+        fourTwentyMaErrorIndex = 1;
+        measurementFormat = 'Percent';
+        unitOfMeasureIsMetric = false;
+        lastInputUnitSyncKey = null;
         measurementData = {};
         currentDetailSensor = '001';
         isMeasuring = false;
@@ -3810,6 +4324,10 @@
         selectedDevice = null;
         document.body.classList.remove('device-variant-radar');
 
+        vesselConfigBySensor = {};
+        vesselConfigEditScope = 'all';
+        weightCalculationsEnabled = false;
+
         menuData['SETUP_INTERVAL_TIMER_TIME'].value = '04:00';
         menuData['SETUP_PRODUCT_DENSITY'].value = '038.00';
         menuData['SETUP_SMARTBOB_MAX_DROP_INPUT'].value = '02.50';
@@ -3817,6 +4335,7 @@
         menuData['SETUP_ACCESS_CODE_INPUT'].value = '####';
         menuData['ACCESS_CODE_ENTRY'].value = '####';
         menuData['CONFIG_BODY_HEIGHT'].value = '020.00';
+        menuData['CONFIG_VESSEL_HEIGHT_SIMPLE'].value = '020.00';
         menuData['CONFIG_BODY_RADIUS'].value = '15.00';
         menuData['CONFIG_HOPPER_HEIGHT'].value = '06.00';
         menuData['CONFIG_OUTLET_RADIUS'].value = '01.00';
@@ -3831,8 +4350,6 @@
         menuData['SETUP_SB485_PROTOCOL'].checked = 0;
         menuData['SETUP_SB485_TERMINATION'].checked = 0;
         menuData['SETUP_INTERVAL_TIMER'].checked = 1;
-        menuData['SETUP_UNIT_OF_MEASURE'].checked = 0;
-        menuData['SETUP_WEIGHT_CALCULATIONS'].checked = 1;
         menuData['SETUP_SMARTBOB_MAX_DROP'].checked = 1;
         menuData['SETUP_LANGUAGE'].checked = 0;
     }
@@ -4196,6 +4713,24 @@
             return;
         }
 
+        /**
+         * Interval timer assign: Back should return to the main Setup list on "Interval Timer",
+         * not to the HH:MM time entry (that makes the flow feel out of order). Reset history so
+         * Back from Setup still goes to Main Menu.
+         */
+        if (direction === 'back' && currentState === 'SETUP_INTERVAL_TIMER_ASSIGN') {
+            stateIndexMap[currentState] = selectedIndex;
+            previousViewportOffset = -1;
+            currentState = 'SETUP';
+            const setupItems = typeof menuData['SETUP'].items === 'function' ? menuData['SETUP'].items() : menuData['SETUP'].items;
+            selectedIndex = setupItems.indexOf('Interval Timer');
+            if (selectedIndex < 0) selectedIndex = 0;
+            history = ['MAIN_MENU'];
+            renderScreen();
+            updateTutorialUI();
+            return;
+        }
+
         if (menu.type === 'nav' || menu.type === 'select') {
             // Handle dynamic menu items (functions that return arrays)
             const items = typeof menu.items === 'function' ? menu.items() : menu.items;
@@ -4282,6 +4817,11 @@
                                     }
                                 }
                             }
+                        } else if (currentState === 'SETUP_IO_ASSIGNMENT') {
+                            if (enabledSensors.length === 0 || items[0] === 'No sensors enabled') {
+                                return;
+                            }
+                            ioAssignmentSelectedSensor = items[selectedIndex];
                         } else {
                             // For other toggle menus, handle checked as array
                             if (typeof menu.checked === 'function') {
@@ -4331,7 +4871,33 @@
                         if (currentState === 'SETUP_MEASUREMENT_TYPE') {
                             measurementType = selectedValue;
                         }
-                        
+                        if (currentState === 'SETUP_MEASUREMENT_FORMAT') {
+                            measurementFormat = selectedValue;
+                        }
+                        if (currentState === 'SETUP_4_20MA_OUTPUT') {
+                            fourTwentyMaOutputSource = selectedValue;
+                        }
+                        if (currentState === 'SETUP_4_20MA_ERROR') {
+                            fourTwentyMaErrorIndex = selectedIndex;
+                        }
+                        if (currentState === 'SETUP_UNIT_OF_MEASURE') {
+                            unitOfMeasureIsMetric = (selectedValue === 'Metric (kg, m)');
+                            lastInputUnitSyncKey = null;
+                        }
+                        if (currentState === 'SETUP_WEIGHT_CALCULATIONS') {
+                            const enabling = (selectedValue === 'Enabled');
+                            weightCalculationsEnabled = enabling;
+                            if (enabling) {
+                                measurementFormat = unitOfMeasureIsMetric ? 'Kilogram' : 'Pound';
+                            } else {
+                                const idx = MEASUREMENT_FORMAT_OPTIONS.indexOf(measurementFormat);
+                                if (idx >= 2) {
+                                    measurementFormat = 'Height';
+                                }
+                            }
+                            clampMeasurementFormatToWeightMode();
+                        }
+
                         // Handle other select menus
                         {
                             // Determine next state based on selection value (e.g., Weight Calc Enabled/Disabled)
@@ -4350,6 +4916,9 @@
                         }
                         
                         if (nextState) {
+                            if (nextState === 'SETUP_VESSEL_SETUP' && vesselConfigStates.includes(currentState)) {
+                                finalizeVesselConfigSessionToVesselSetup({ completedSetAll: vesselConfigEditScope === 'all' });
+                            }
                             // Stop Auto Add/Remove scanning if leaving that menu
                             if (currentState === 'SETUP_AUTO_ADD_REMOVE') {
                                 stopAutoAddRemoveScanning();
@@ -4365,6 +4934,8 @@
                             // If completing vessel config and returning to SETUP_VESSEL_SETUP, set history to just SETUP
                             if (nextState === 'SETUP_VESSEL_SETUP' && vesselConfigStates.includes(currentState)) {
                                 history = ['SETUP']; // Set history to SETUP so back button goes directly to Setup menu
+                            } else if (nextState === 'SETUP' && SETUP_SELECT_RETURN_RESET_HISTORY.has(currentState)) {
+                                history = ['MAIN_MENU'];
                             } else if (vesselConfigStates.includes(nextState) && !vesselConfigStates.includes(currentState)) {
                                 history = [currentState]; // Keep only the entry point
                             } else {
@@ -4392,15 +4963,37 @@
                                 } else if (nextState === 'SETUP_SENSOR_TYPE') {
                                     selectedIndex = 0; // NCR-80/GWR-2000 (default checked)
                                 } else if (nextState === 'SETUP_SB485_PROTOCOL') {
-                                    selectedIndex = 0; // Protocol A
+                                    selectedIndex = 0; // A
                                 } else if (nextState === 'SETUP_SB485_TERMINATION') {
-                                    selectedIndex = 0; // IN
+                                    selectedIndex = 0; // In
+                                } else if (nextState === 'SETUP_4_20MA_ERROR') {
+                                    selectedIndex = fourTwentyMaErrorIndex;
                                 } else if (nextState === 'SETUP_ACCESS_CODE') {
                                     // Initialize based on accessCodeEnabled (Off = 1, On/Set = 0)
                                     selectedIndex = accessCodeEnabled ? 0 : 1;
                                 } else if (nextState === 'SETUP_MEASUREMENT_TYPE') {
                                     // Initialize based on current measurementType (Headroom = 0, Product = 1)
                                     selectedIndex = measurementType === 'Product' ? 1 : 0;
+                                } else if (nextState === 'SETUP_MEASUREMENT_FORMAT') {
+                                    clampMeasurementFormatToWeightMode();
+                                    const fmtOpts = getMeasurementFormatOptions();
+                                    selectedIndex = fmtOpts.indexOf(measurementFormat);
+                                    if (selectedIndex < 0) selectedIndex = 0;
+                                } else if (nextState === 'SETUP_UNIT_OF_MEASURE') {
+                                    selectedIndex = unitOfMeasureIsMetric ? 1 : 0;
+                                } else if (nextState === 'SETUP_IO_ASSIGNMENT') {
+                                    const m = menuData['SETUP_IO_ASSIGNMENT'];
+                                    const arr = typeof m.items === 'function' ? m.items() : m.items;
+                                    if (arr.length && arr[0] !== 'No sensors enabled') {
+                                        if (!ioAssignmentSelectedSensor || !arr.includes(ioAssignmentSelectedSensor)) {
+                                            ioAssignmentSelectedSensor = arr[0];
+                                        }
+                                        selectedIndex = arr.indexOf(ioAssignmentSelectedSensor);
+                                    } else {
+                                        selectedIndex = 0;
+                                    }
+                                } else if (nextState === 'SETUP_4_20MA_OUTPUT') {
+                                    selectedIndex = fourTwentyMaOutputSource === 'Product' ? 1 : 0;
                                 } else {
                                     selectedIndex = stateIndexMap[nextState] || 0;
                                 }
@@ -4413,11 +5006,7 @@
                                 return;
                             }
                         } else {
-                             // Save current state's selectedIndex before going back
-                             stateIndexMap[currentState] = selectedIndex;
-                             currentState = history.pop() || 'MAIN_MENU';
-                             // Restore selectedIndex for the previous state, or default to 0
-                             selectedIndex = stateIndexMap[currentState] || 0;
+                            // Select with no nextState — stay on this screen (do not pop history; avoids spurious back / repeated menus).
                         }
                     }
                 } else if (menu.type === 'nav') {
@@ -4440,11 +5029,20 @@
                             }
                         }
                     }
-                    // Handle dynamic sensor selection in Vessel Setup
-                    else if (currentState === 'SETUP_VESSEL_SETUP' && /^\d{3}$/.test(selectedItem)) {
-                        // Selected item is a sensor ID (3 digits), route to vessel config
-                        nextState = 'CONFIG_VESSEL_SHAPE';
-                    } else {
+                    // Vessel Setup: Set All uses global vesselConfig; per-sensor loads/saves only that address.
+                    else if (currentState === 'SETUP_VESSEL_SETUP') {
+                        if (selectedItem === 'Set All') {
+                            vesselConfigEditScope = 'all';
+                            Object.assign(vesselConfig, cloneVesselConfig(globalVesselCanonical));
+                            applyVesselConfigToMenuData(vesselConfig);
+                            nextState = weightCalculationsEnabled ? 'CONFIG_VESSEL_SHAPE' : 'CONFIG_VESSEL_HEIGHT_SIMPLE';
+                        } else if (/^\d{3}$/.test(selectedItem)) {
+                            vesselConfigEditScope = selectedItem;
+                            loadVesselConfigIntoWorkingState(selectedItem);
+                            nextState = weightCalculationsEnabled ? 'CONFIG_VESSEL_SHAPE' : 'CONFIG_VESSEL_HEIGHT_SIMPLE';
+                        }
+                    }
+                    if (!nextState) {
                         // Handle function-based nextStateMap entries
                         const nextStateMapEntry = nextStateMap[currentState];
                         if (nextStateMapEntry) {
@@ -4484,6 +5082,26 @@
                         } else if (nextState === 'SETUP_MEASUREMENT_TYPE') {
                             // Initialize based on current measurementType (Headroom = 0, Product = 1)
                             selectedIndex = measurementType === 'Product' ? 1 : 0;
+                        } else if (nextState === 'SETUP_MEASUREMENT_FORMAT') {
+                            clampMeasurementFormatToWeightMode();
+                            const fmtOpts = getMeasurementFormatOptions();
+                            selectedIndex = fmtOpts.indexOf(measurementFormat);
+                            if (selectedIndex < 0) selectedIndex = 0;
+                        } else if (nextState === 'SETUP_UNIT_OF_MEASURE') {
+                            selectedIndex = unitOfMeasureIsMetric ? 1 : 0;
+                        } else if (nextState === 'SETUP_IO_ASSIGNMENT') {
+                            const m = menuData['SETUP_IO_ASSIGNMENT'];
+                            const arr = typeof m.items === 'function' ? m.items() : m.items;
+                            if (arr.length && arr[0] !== 'No sensors enabled') {
+                                if (!ioAssignmentSelectedSensor || !arr.includes(ioAssignmentSelectedSensor)) {
+                                    ioAssignmentSelectedSensor = arr[0];
+                                }
+                                selectedIndex = arr.indexOf(ioAssignmentSelectedSensor);
+                            } else {
+                                selectedIndex = 0;
+                            }
+                        } else if (nextState === 'SETUP_4_20MA_OUTPUT') {
+                            selectedIndex = fourTwentyMaOutputSource === 'Product' ? 1 : 0;
                         } else {
                             selectedIndex = stateIndexMap[nextState] || 0;
                         }
@@ -4566,10 +5184,20 @@
                     renderScreen();
                     return;
                 }
+                if (currentState === 'SETUP_PRODUCT_DENSITY') {
+                    normalizeDimensionAndDensityInputsForCurrentState();
+                    stateIndexMap[currentState] = selectedIndex;
+                    currentState = history.pop() || 'SETUP';
+                    selectedIndex = stateIndexMap[currentState] || 0;
+                    inputCursorPos = 0;
+                    renderScreen();
+                    return;
+                }
                 // Handle back button for input type when in vessel config
                 if (vesselConfigStates.includes(currentState)) {
+                    normalizeDimensionAndDensityInputsForCurrentState();
                     // Save current input value before leaving
-                    if (currentState === 'CONFIG_BODY_HEIGHT') {
+                    if (currentState === 'CONFIG_BODY_HEIGHT' || currentState === 'CONFIG_VESSEL_HEIGHT_SIMPLE') {
                         vesselConfig.bodyHeight = menu.value;
                     } else if (currentState === 'CONFIG_BODY_RADIUS') {
                         vesselConfig.bodyRadius = menu.value;
@@ -4584,6 +5212,7 @@
                     } else if (currentState === 'CONFIG_SMARTBOB_MAX_DROP_INPUT') {
                         vesselConfig.smartBobMaxDrop = menu.value;
                     }
+                    finalizeVesselConfigSessionToVesselSetup({ completedSetAll: false });
                     // Return to vessel setup selection
                     currentState = 'SETUP_VESSEL_SETUP';
                     selectedIndex = 0;
@@ -4633,8 +5262,10 @@
                      accessCodeEnabled = true;
                  }
                  
+                 normalizeDimensionAndDensityInputsForCurrentState();
+
                  // Save vessel configuration input values
-                 if (currentState === 'CONFIG_BODY_HEIGHT') {
+                 if (currentState === 'CONFIG_BODY_HEIGHT' || currentState === 'CONFIG_VESSEL_HEIGHT_SIMPLE') {
                      vesselConfig.bodyHeight = menu.value;
                  } else if (currentState === 'CONFIG_BODY_RADIUS') {
                      vesselConfig.bodyRadius = menu.value;
@@ -4655,7 +5286,19 @@
                  if (currentState === 'CONFIG_PRODUCT_DENSITY' && selectedDevice === 'C100-R') {
                      nextState = 'SETUP_VESSEL_SETUP';
                  }
+                 if (currentState === 'CONFIG_SENSOR_OFFSET' && !weightCalculationsEnabled) {
+                     if (selectedDevice === 'C100-R') {
+                         nextState = 'SETUP_VESSEL_SETUP';
+                     } else {
+                         const pc = menuData['SETUP_SB485_PROTOCOL'].checked;
+                         const protoIdx = typeof pc === 'function' ? pc()[0] : pc;
+                         nextState = protoIdx === 0 ? 'CONFIG_SMARTBOB_MAX_DROP' : 'SETUP_VESSEL_SETUP';
+                     }
+                 }
                  if (nextState) {
+                    if (nextState === 'SETUP_VESSEL_SETUP' && vesselConfigStates.includes(currentState)) {
+                        finalizeVesselConfigSessionToVesselSetup({ completedSetAll: vesselConfigEditScope === 'all' });
+                    }
                     // If completing access code setup, don't add SETUP_ACCESS_CODE_INPUT to history
                     // This prevents going back to the input screen after the code is saved
                     if (currentState === 'SETUP_ACCESS_CODE_INPUT' && nextState === 'SETUP') {
@@ -4723,9 +5366,11 @@
                     } else if (currentState === 'SETUP_SENSOR_TYPE') {
                         selectedIndex = 0; // NCR-80/GWR-2000 (default checked)
                     } else if (currentState === 'SETUP_SB485_PROTOCOL') {
-                        selectedIndex = 0; // Protocol A
+                        selectedIndex = 0; // A
                     } else if (currentState === 'SETUP_SB485_TERMINATION') {
-                        selectedIndex = 0; // IN
+                        selectedIndex = 0; // In
+                    } else if (currentState === 'SETUP_4_20MA_ERROR') {
+                        selectedIndex = fourTwentyMaErrorIndex;
                     } else {
                         selectedIndex = stateIndexMap[currentState] || 0;
                     }
@@ -4748,6 +5393,8 @@
                         smartBobMaxDropEnabled: 'Disabled',
                         smartBobMaxDrop: '02.50'
                     };
+                    globalVesselCanonical = cloneVesselConfig(vesselConfig);
+                    vesselConfigBySensor = {};
                     // Set history to SETUP so back button goes to Setup (not warning)
                     history = ['SETUP'];
                     currentState = 'SETUP_AUTO_ADD_REMOVE';
@@ -4794,6 +5441,7 @@
                 } else if (menu.type === 'select' && currentState === 'CONFIG_SMARTBOB_MAX_DROP') {
                     vesselConfig.smartBobMaxDropEnabled = menu.items[menu.checked] || vesselConfig.smartBobMaxDropEnabled;
                 }
+                finalizeVesselConfigSessionToVesselSetup({ completedSetAll: false });
                 // Return to vessel setup selection
                 currentState = 'SETUP_VESSEL_SETUP';
                 selectedIndex = 0;
@@ -4809,9 +5457,11 @@
                 } else if (currentState === 'SETUP_SENSOR_TYPE') {
                     selectedIndex = 0; // NCR-80/GWR-2000 (default checked)
                 } else if (currentState === 'SETUP_SB485_PROTOCOL') {
-                    selectedIndex = 0; // Protocol A
+                    selectedIndex = 0; // A
                 } else if (currentState === 'SETUP_SB485_TERMINATION') {
-                    selectedIndex = 0; // IN
+                    selectedIndex = 0; // In
+                } else if (currentState === 'SETUP_4_20MA_ERROR') {
+                    selectedIndex = fourTwentyMaErrorIndex;
                 } else {
                     selectedIndex = stateIndexMap[currentState] || 0;
                 }
