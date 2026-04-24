@@ -2083,7 +2083,8 @@
         'SETUP_IO_ASSIGNMENT',
         'SETUP_SB485_PROTOCOL',
         'SETUP_SB485_TERMINATION',
-        'SETUP_C50_SETUP'
+        'SETUP_C50_SETUP',
+        'SETUP_LANGUAGE'
     ]);
 
     /** Setup → Measurement Format when weight calcs enabled (MenuMeasurementFormat.c / Settings.h enum order). */
@@ -2516,7 +2517,14 @@
         'SETUP_ACCESS_CODE': { type: 'select', items: ['On/Set', 'Off'], checked: function() { return accessCodeEnabled ? [0] : [1]; } },
         'SETUP_ACCESS_CODE_INPUT': { type: 'input', label: 'ACCESS CODE', unit: '4 digits:', value: '####', next: 'SETUP' },
         'ACCESS_CODE_ENTRY': { type: 'input', label: 'ACCESS CODE', unit: 'Enter code:', value: '####', next: null },
-        'SETUP_LANGUAGE': { type: 'select', items: ['English', 'Español'], checked: 0 },
+        'SETUP_LANGUAGE': {
+            type: 'select',
+            items: ['English', 'Español'],
+            checked: function () {
+                return [setupLanguageIndex];
+            },
+            next: 'SETUP'
+        },
         'SETUP_INFO_ABOUT': {
             type: 'info',
             items: function setupInfoAboutItems() {
@@ -2719,6 +2727,176 @@
     
     // Measurement type storage
     let measurementType = 'Product'; // Default to Product
+
+    /** Setup → Language/Idioma (MenuLanguage.c: OK archives then returns to Setup after timeout). */
+    let setupLanguageIndex = 0;
+
+    /**
+     * LCD text for Spanish (LangSpanish.c / MenuLanguage). Navigation and state machines stay English;
+     * only display strings are translated so nextStateMap and comparisons keep working.
+     */
+    const UI_EN_TO_ES = {
+        'MAIN MENU': 'MENÚ PRINCIPAL',
+        'Measure/View': 'Medir/Ver',
+        'Setup': 'Configuración',
+        'MEASURE/VIEW Prod': 'MEDIR/VER Producto',
+        'MEASURE/VIEW Hdrm': 'MEDIR/VER Restante',
+        'MEASURE/VIEW DETAILS': 'MIDE/VER DETALLE',
+        'Measure All': 'Mide Todo',
+        'SETUP': 'CONFIGURACIÓN',
+        'Sensor Type': 'Tipo de sensor',
+        'SB-485 Protocol': 'SB-485 Protocolo',
+        'SB-485 Termination': 'SB-485 Terminación',
+        'Auto Add/Remove': 'Aumentar/Quitar Auto',
+        'Add/Remove': 'Aumentar/Quitar',
+        'Unit of Measure': 'Unidade de Medida',
+        'Weight Calculations': 'Calculaciones de Peso',
+        'Vessel Setup': 'Config del Buque',
+        'C-50 Setup': 'Config C-50',
+        'I/O Assignment': 'I/O Cesión',
+        '4-20mA Output': '4-20mA Salida',
+        '4-20mA Error': '4-20mA Error',
+        'Interval Timer': 'Temporizador',
+        'Measurement Format': 'Formato de Medición',
+        'Measurement Type': 'Tipo de Medida',
+        'Access Code': 'Código de Acceso',
+        'Language/Idioma': 'Language/Idioma',
+        'Info/About': 'Información',
+        'INTERVAL TIMER': 'TEMPORIZADOR',
+        'On/Set': 'Encender/Configurar',
+        'Off': 'Apagar',
+        'TIMER ASSIGNMENT': 'TEMPORIZADOR CESIÓN',
+        'Assign All': 'Asigne Todos',
+        'Unassign All': 'No Asigne a Todos',
+        'ADD/REMOVE': 'AUMENTAR/QUITAR',
+        'AUTO ADD/REMOVE': 'Aumentar/Quitar Auto',
+        'Rescan for new and': 'Rescan para los',
+        'removed sensors?': 'sensores nuevos y eliminados?',
+        'Press X to stop.': 'Presione X para detener.',
+        'Finished': 'Finalizado',
+        'VESSEL SETUP': 'CONFIG de BUQUE',
+        'Set All': 'Configurar Todas',
+        'VESSEL SHAPE': 'FORMA de BUQUE',
+        'VESSEL HEIGHT': 'ALTURA del BUQUE',
+        'VESSEL HEIGHT SIMPLE': 'ALTURA del BUQUE',
+        'BODY HEIGHT': 'ALTURA del CONTENIDO',
+        'BODY RADIUS': 'RADIO del CONTENIDO',
+        'HOPPER PRESENT': 'TOLVA está ACTUAL',
+        'HOPPER HEIGHT': 'La ALTURA de la TOLVA',
+        'OUTLET RADIUS': 'RADIO DE LA SALIDA',
+        'SENSOR OFFSET': 'OFFSET SENSORE',
+        'PRODUCT DENSITY': 'DENSIDAD de PRODUCTO',
+        'SMARTBOB MAX DROP': 'MAXIMA CAIDA SmartBob',
+        'Circular': 'Circular',
+        'Rectangular': 'Rectangular',
+        'Yes': 'Sí',
+        'No': 'No',
+        'U.S. (lb, ft)': 'U.S. (lb, ft)',
+        'Metric (kg, m)': 'Métrico (kg, m)',
+        'Enabled': 'Habilitar',
+        'Disabled': 'Desabilitar',
+        'Enabled/Rescan': 'Habilitar/Rescan ',
+        'Headroom': 'Espacio Restante',
+        'Product': 'Producto',
+        'Percent': 'Por ciento',
+        'Height': 'Altura',
+        'Cubic Unit': 'Unidade Cúbica',
+        'US Gallon': 'U.S. Galone',
+        'US Bushel': 'U.S. Bushel',
+        'Liter': 'Litro',
+        'Pound': 'Libra',
+        'Ton': 'U.S. Ton',
+        'Kilogram': 'Kilogramo',
+        'Metric Ton': 'Toneladas Métricas',
+        '2 mA': '2 mA',
+        '3.5 mA': '3.5 mA',
+        '22 mA': '22 mA',
+        'SB-485 PROTOCOL': 'SB-485 PROTOCOLO',
+        'SB-485 TERMINATION': 'SB-485 TERMINACIÓN',
+        'In': 'Adentro',
+        'Out': 'Afuera',
+        'A': 'A',
+        'B': 'B',
+        'SENSOR TYPE': 'TIPO de MEDIDA',
+        'NCR-80/GWR-2000': 'NCR-80/GWR-2000',
+        'SmartSonic': 'SmartSonic',
+        '4-20mA OUTPUT': '4-20mA SALIDA',
+        '4-20mA ERROR': '4-20mA ERROR',
+        'WEIGHT CALCULATIONS': 'Calculaciones de Peso',
+        'UNIT OF MEASURE': 'UNIDADE de MEDIDA',
+        'MEASUREMENT FORMAT': 'FORMATO de MEDICIÓN',
+        'MEASUREMENT TYPE': 'TIPO de MEDIDA',
+        'ACCESS CODE': 'CÓDIGO de ACCESO',
+        'LANGUAGE / IDIOMA': 'LANGUAGE / IDIOMA',
+        'English': 'English',
+        'Español': 'Español',
+        'C-50 SETUP': 'CONFIG C-50',
+        'EXPANSION I/O': 'I/O CESIÓN',
+        'Unassigned': 'No Cesión',
+        'INTERVAL TIMER ASSIGN': 'TEMPORIZADOR CESIÓN',
+        'ADD REMOVE': 'AUMENTAR/QUITAR',
+        'IO ASSIGNMENT': 'I/O Cesión',
+        'SMARTBOB MAX DROP': 'MAXIMA CAIDA SmartBob',
+        'INTERVAL TIMER TIME': 'TEMPORIZADOR',
+        'Rescan for new and removed sensors?': '\u00BFRescan para sensores nuevos y eliminados?',
+        'INFO / ABOUT': 'INFORMACIÓN',
+        'BinMaster C-100': 'BinMaster C-100',
+        'BinMaster C-100-R': 'BinMaster C-100-R',
+        'SmartBob Console': 'SmartBob Consola',
+        'Modbus Console': 'Consola Modbus',
+        'Press any key...': 'Aprete cualquier tecla...',
+        'No sensors enabled': 'No sensores habilitados',
+        'No sensors enabled.': 'No sensores habilitados.',
+        'Go to Add/Remove': 'Ir a Aumentar/Quitar',
+        'under the Setup menu.': 'bajo el menú Configuración.',
+        'Use Add/Remove under Setup.': 'Use Aumentar/Quitar en Configuración.',
+        'Pending...': 'Pendiente...',
+        'Measuring...': 'Midiendo...',
+        'Retracted': 'Retraído',
+        'No data.': 'No datos.',
+        'No Data': 'No datos',
+        'Measuring': 'Midiendo',
+        'Product of': 'Producto de',
+        'Headroom of': 'Espacio restante de',
+        'Capacity of': 'Capacidad de',
+        'No C-50 consoles found.': 'No se ha detectado C-50 consolas.',
+        'Check wiring and power.': 'Cheque las coneciones.',
+        'Enter code:': 'Entrar en 4 dígitos:',
+        '4 digits:': '4 dígitos:',
+        'as HH:MM:': 'como HH:MM:',
+        'as MM:SS:': 'como MM:SS:',
+        'in lb/cu ft:': 'en lb/pie³:',
+        'in feet:': 'en pies:',
+        'in meters:': 'en metros:',
+        'in kg/m³:': 'en kg/m³:'
+    };
+
+    function uiDisplay(text) {
+        if (text == null || setupLanguageIndex !== 1) return text;
+        const s = String(text);
+        if (UI_EN_TO_ES[s]) return UI_EN_TO_ES[s];
+        const mAddr = s.match(/^(\d{3}): (.+)$/);
+        if (mAddr) {
+            const tail = UI_EN_TO_ES[mAddr[2]] || mAddr[2];
+            return mAddr[1] + ': ' + tail;
+        }
+        let m = s.match(/^Product of (\d{3}):$/);
+        if (m) return 'Producto de ' + m[1] + ':';
+        m = s.match(/^Headroom of (\d{3}):$/);
+        if (m) return 'Espacio restante de ' + m[1] + ':';
+        m = s.match(/^Capacity of (\d{3}):$/);
+        if (m) return 'Capacidad de ' + m[1] + ':';
+        m = s.match(/^Scanning (\d{3})\.\.\.$/);
+        if (m) return 'Escaneando ' + m[1] + '...';
+        m = s.match(/^Scanning (\d+) of (\d+)\.\.\.$/);
+        if (m) return 'Escaneando ' + m[1] + ' de ' + m[2] + '...';
+        m = s.match(/^Found (\d+)(\.)?$/);
+        if (m) return 'Encontro ' + m[1] + (m[2] || '');
+        if (/Cursor/.test(s) && /Digit/.test(s)) {
+            return '\u25C0/\u25B6: Cursor   \u25B2/\u25BC: D\u00EDgitos';
+        }
+        return s;
+    }
 
     /** 4–20 mA output source: Headroom or Product (Setup → 4-20mA Output). */
     let fourTwentyMaOutputSource = 'Product';
@@ -3357,7 +3535,7 @@
         if (menu.type === 'welcome') {
             // Welcome screen - left-aligned text, show all 4 items
             html = menuItems.map((item, index) => {
-                return `<div class="menu-item" style="text-align: left;">${item}</div>`;
+                return `<div class="menu-item" style="text-align: left;">${uiDisplay(item)}</div>`;
             }).join('');
 
         } else if (menu.type === 'nav') {
@@ -3374,7 +3552,7 @@
                 title = measurementType === 'Headroom' ? 'MEASURE/VIEW Hdrm' : 'MEASURE/VIEW Prod';
                 const displayCount = Math.min(ITEMS_PER_SCREEN, menuItems.length);
                 for (let i = 0; i < displayCount; i++) {
-                    html += `<div class="menu-item">${menuItems[i]}</div>`;
+                    html += `<div class="menu-item">${uiDisplay(menuItems[i])}</div>`;
                 }
             } else {
                 // Calculate which items to show (only 3 at a time)
@@ -3420,26 +3598,12 @@
                     }
                 }
 
-                const hasMoreAbove = viewportOffset > 0;
-                const hasMoreBelow = viewportOffset + ITEMS_PER_SCREEN < totalItems;
-                
                 // Store viewport offset for next render (for nav menus)
                 previousViewportOffset = viewportOffset;
                 
-                html = itemsToShow.map(({ item, index }, localRow) => {
+                html = itemsToShow.map(({ item, index }) => {
                     const isSelected = index === selectedIndex ? 'selected' : '';
-                    let scrollIndicator = '';
-
-                    // Up arrow on first visible row if there are items above
-                    if (hasMoreAbove && localRow === 0) {
-                        scrollIndicator = ' \u25B4';
-                    }
-                    // Down arrow on last visible row if there are items below
-                    if (hasMoreBelow && localRow === itemsToShow.length - 1) {
-                        scrollIndicator = ' \u25BE';
-                    }
-
-                    return `<div class="menu-item ${isSelected}" data-menu-index="${index}" data-state="${currentState}">${item}${scrollIndicator}</div>`;
+                    return `<div class="menu-item ${isSelected}" data-menu-index="${index}" data-state="${currentState}">${uiDisplay(item)}</div>`;
                 }).join('');
             }
 
@@ -3476,7 +3640,10 @@
             if (currentState === 'SETUP_SENSOR_TYPE') {
                 title = 'SENSOR TYPE';
             }
-            
+            if (currentState === 'SETUP_LANGUAGE') {
+                title = 'LANGUAGE / IDIOMA';
+            }
+
             // Calculate which items to show (only 3 at a time)
             const totalItems = selectMenuItems.length;
             if (totalItems <= ITEMS_PER_SCREEN) {
@@ -3514,9 +3681,6 @@
                 }
             }
 
-            const hasMoreAbove = viewportOffset > 0;
-            const hasMoreBelow = viewportOffset + ITEMS_PER_SCREEN < totalItems;
-            
             // Store viewport offset for next render (for select menus)
             previousViewportOffset = viewportOffset;
             
@@ -3530,23 +3694,14 @@
                 checkedIndices = [menu.checked];
             }
             
-            html = itemsToShow.map(({ item, index }, localRow) => {
+            html = itemsToShow.map(({ item, index }) => {
                 const isSelected = index === selectedIndex ? 'selected' : '';
                 // Checkmark shows on checked items
                 let isChecked = '  ';
                 if (checkedIndices.includes(index)) {
                     isChecked = '\u2714 ';
-                } 
-                let scrollIndicator = '';
-
-                if (hasMoreAbove && localRow === 0) {
-                    scrollIndicator = ' \u25B4';
                 }
-                if (hasMoreBelow && localRow === itemsToShow.length - 1) {
-                    scrollIndicator = ' \u25BE';
-                }
-
-                return `<div class="menu-item ${isSelected}" data-menu-index="${index}" data-state="${currentState}">${isChecked}${item}${scrollIndicator}</div>`;
+                return `<div class="menu-item ${isSelected}" data-menu-index="${index}" data-state="${currentState}">${isChecked}${uiDisplay(item)}</div>`;
             }).join('');
 
         } else if (menu.type === 'input') {
@@ -3557,6 +3712,7 @@
                     : currentState === 'SETUP_INTERVAL_TIMER_TIME'
                         ? (selectedDevice === 'C100-R' ? 'as MM:SS:' : 'as HH:MM:')
                         : menu.unit;
+            const enterPrefix = setupLanguageIndex === 1 ? 'Entre ' : 'Enter ';
             const val = menu.value.split('');
             let valueHtml = val.map((digit, index) => {
                 if (digit === '.' || digit === ':') return digit;
@@ -3566,9 +3722,9 @@
             }).join('');
 
             html = `
-                <div class="menu-item">Enter ${unitLine}</div>
+                <div class="menu-item">${enterPrefix}${uiDisplay(unitLine)}</div>
                 <div class="input-value">${valueHtml}</div>
-                <div class="menu-item"><small>\u25C0/\u25B6: Cursor &nbsp; \u25B2/\u25BC: Digit</small></div>
+                <div class="menu-item"><small>${uiDisplay('\u25C0/\u25B6: Cursor   \u25B2/\u25BC: Digit')}</small></div>
             `;
             if (menu.value[inputCursorPos] === '.' || menu.value[inputCursorPos] === ':') {
                 inputCursorPos = Math.min(menu.value.length - 1, inputCursorPos + 1);
@@ -3581,7 +3737,7 @@
              const infoItems = infoMenuItems.slice(1);
              const displayCount = Math.min(ITEMS_PER_SCREEN, infoItems.length);
              for (let i = 0; i < displayCount; i++) {
-                html += `<div class="menu-item">${infoItems[i]}</div>`;
+                html += `<div class="menu-item">${uiDisplay(infoItems[i])}</div>`;
             }
         } else if (menu.type === 'detail') {
              title = menu.label;
@@ -3591,7 +3747,7 @@
              const detailItems = typeof menu.items === 'function' ? menu.items() : menu.items;
              const displayCount = Math.min(ITEMS_PER_SCREEN, detailItems.length);
              for (let i = 0; i < displayCount; i++) {
-                html += `<div class="menu-item">${detailItems[i]}</div>`;
+                html += `<div class="menu-item">${uiDisplay(detailItems[i])}</div>`;
             }
         }
 
@@ -3603,7 +3759,7 @@
             `;
         } else {
             screenElement.innerHTML = `
-                <div class="menu-title">${title}</div>
+                <div class="menu-title">${uiDisplay(title)}</div>
                 <div class="menu-items-container">
                     <div class="menu-items-viewport">${html}</div>
                 </div>
@@ -4308,7 +4464,7 @@
         const menuItems = typeof menu.items === 'function' ? menu.items() : menu.items;
         if (!menuItems || !menuItems.length) return;
         const html = menuItems.map((item) => (
-            `<div class="menu-item" style="text-align: left;">${item}</div>`
+            `<div class="menu-item" style="text-align: left;">${uiDisplay(item)}</div>`
         )).join('');
         miniScreen.innerHTML = `<div class="menu-items-container"><div class="menu-items-viewport">${html}</div></div>`;
     }
@@ -4496,7 +4652,7 @@
         menuData['SETUP_SB485_TERMINATION'].checked = 0;
         menuData['SETUP_INTERVAL_TIMER'].checked = 1;
         menuData['SETUP_SMARTBOB_MAX_DROP'].checked = 1;
-        menuData['SETUP_LANGUAGE'].checked = 0;
+        setupLanguageIndex = 0;
     }
 
     function hideSessionOverlaysAndTutorialChrome() {
@@ -5001,8 +5157,8 @@
                             }
                         } 
                     } else {
-                        // For SETUP_ACCESS_CODE, don't set menu.checked since it's a function
-                        if (currentState !== 'SETUP_ACCESS_CODE') {
+                        // For menus with checked as a function, persist via dedicated state (don't overwrite .checked).
+                        if (currentState !== 'SETUP_ACCESS_CODE' && currentState !== 'SETUP_LANGUAGE') {
                             menu.checked = selectedIndex;
                         }
                         let selectedValue = items[selectedIndex];
@@ -5074,6 +5230,9 @@
                                 }
                             }
                             clampMeasurementFormatToWeightMode();
+                        }
+                        if (currentState === 'SETUP_LANGUAGE') {
+                            setupLanguageIndex = selectedIndex;
                         }
 
                         // Handle other select menus
@@ -5186,6 +5345,8 @@
                                     }
                                 } else if (nextState === 'SETUP_4_20MA_OUTPUT') {
                                     selectedIndex = fourTwentyMaOutputSource === 'Product' ? 1 : 0;
+                                } else if (nextState === 'SETUP_LANGUAGE') {
+                                    selectedIndex = setupLanguageIndex;
                                 } else {
                                     selectedIndex = stateIndexMap[nextState] || 0;
                                 }
@@ -5294,6 +5455,8 @@
                             }
                         } else if (nextState === 'SETUP_4_20MA_OUTPUT') {
                             selectedIndex = fourTwentyMaOutputSource === 'Product' ? 1 : 0;
+                        } else if (nextState === 'SETUP_LANGUAGE') {
+                            selectedIndex = setupLanguageIndex;
                         } else {
                             selectedIndex = stateIndexMap[nextState] || 0;
                         }
