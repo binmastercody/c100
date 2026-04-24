@@ -1944,16 +1944,106 @@
     /** When true, the guided tutorial does not run (sandbox / agent mode). */
     let freePlayMode = false;
 
-    /** C100-R uses Modbus (247 addresses); C100-SB uses SmartBob addressing (120). */
-    function getAutoAddRemoveScanLimit() {
-        return selectedDevice === 'C100-R' ? 247 : 120;
+    /**
+     * Matches NUM_SENSORS_SUPPORTED in Common.h (C-100 v304 + C-100-R v204): same for SmartBob and radar.
+     * Modbus may use addresses up to 247 (see firmware Modbus.h); Add/Remove and Auto Add/Remove only
+     * sweep this many slots (MenuAutoAddRemove.c: addr >= NUM_SENSORS_SUPPORTED).
+     */
+    const NUM_SENSORS_SUPPORTED = 120;
+
+    function getNumSensorsSupported() {
+        return NUM_SENSORS_SUPPORTED;
     }
-    /** C100-R scans more addresses — use a shorter interval so the full sweep stays fast. */
+
+    function getAutoAddRemoveScanLimit() {
+        return NUM_SENSORS_SUPPORTED;
+    }
+
+    /** MenuC50Setup.c: scan up to NUM_C50_SUPPORTED consoles (Common.h = 5). */
+    const C50_SIM_NUM_CONSOLES = 5;
+
+    let c50SetupEnabled = false;
+    let c50Scanning = false;
+    let c50ScanInterval = null;
+    let c50ScanStep = 0;
+    let c50ScanFound = 0;
+    let c50SimEnabledCount = 0;
+    /** Expansion outputs: MenuExpanIoAssignment.c format "%d : %X : %X". */
+    let c50SimPorts = [];
+    let expanIoAssignSensor = null;
+    /** sensorId (e.g. '001') -> port label or absent = unassigned */
+    let expanIoBySensor = {};
+
+    function isC50ExpansionMode() {
+        return c50SetupEnabled && c50SimEnabledCount > 0 && c50SimPorts.length > 0;
+    }
+
+    function stopC50Scan() {
+        c50Scanning = false;
+        if (c50ScanInterval) {
+            clearInterval(c50ScanInterval);
+            c50ScanInterval = null;
+        }
+    }
+
+    function disableC50Expansion() {
+        c50SetupEnabled = false;
+        c50SimEnabledCount = 0;
+        c50SimPorts = [];
+        expanIoBySensor = {};
+        expanIoAssignSensor = null;
+        stopC50Scan();
+    }
+
+    function startC50Scan() {
+        stopC50Scan();
+        c50Scanning = true;
+        c50ScanStep = 1;
+        c50ScanFound = 1;
+        stateIndexMap['SETUP_C50_SETUP'] = selectedIndex;
+        history.push('SETUP_C50_SETUP');
+        currentState = 'SETUP_C50_SCANNING';
+        renderScreen();
+        c50ScanInterval = setInterval(() => {
+            c50ScanStep++;
+            renderScreen();
+            if (c50ScanStep >= C50_SIM_NUM_CONSOLES) {
+                stopC50Scan();
+                completeC50Scan();
+            }
+        }, 280);
+    }
+
+    function completeC50Scan() {
+        c50Scanning = false;
+        if (c50ScanFound > 0) {
+            c50SetupEnabled = true;
+            c50SimEnabledCount = c50ScanFound;
+            c50SimPorts = [];
+            for (let p = 0; p < 4; p++) {
+                c50SimPorts.push('1 : 0 : ' + p);
+            }
+            currentState = 'SETUP';
+            const setupItems = typeof menuData['SETUP'].items === 'function' ? menuData['SETUP'].items() : menuData['SETUP'].items;
+            selectedIndex = setupItems.indexOf('I/O Assignment');
+            if (selectedIndex < 0) selectedIndex = 0;
+            history = ['MAIN_MENU'];
+        } else {
+            c50SetupEnabled = false;
+            c50SimEnabledCount = 0;
+            c50SimPorts = [];
+            currentState = 'SETUP_C50_NOT_FOUND';
+        }
+        renderScreen();
+        if (typeof updateTutorialUI === 'function') updateTutorialUI();
+    }
+    /** Auto Add/Remove per-address tick (emulator; kept short for both products). */
     function getAutoAddRemoveScanIntervalMs() {
-        return selectedDevice === 'C100-R' ? 22 : 80;
+        return 22;
     }
 
     function selectDevice(deviceType) {
+        disableC50Expansion();
         selectedDevice = deviceType;
         document.body.classList.toggle('device-variant-radar', deviceType === 'C100-R');
 
@@ -1992,7 +2082,8 @@
         'SETUP_SENSOR_TYPE',
         'SETUP_IO_ASSIGNMENT',
         'SETUP_SB485_PROTOCOL',
-        'SETUP_SB485_TERMINATION'
+        'SETUP_SB485_TERMINATION',
+        'SETUP_C50_SETUP'
     ]);
 
     /** Setup → Measurement Format when weight calcs enabled (MenuMeasurementFormat.c / Settings.h enum order). */
@@ -2224,9 +2315,9 @@
         'SETUP_ADD_REMOVE': { 
             type: 'select', 
             items: function() {
-                // Generate sensor list from 001 to 120
+                const n = getNumSensorsSupported();
                 const sensors = [];
-                for (let i = 1; i <= 120; i++) {
+                for (let i = 1; i <= n; i++) {
                     sensors.push(String(i).padStart(3, '0'));
                 }
                 return sensors;
@@ -2320,6 +2411,7 @@
             },
             next: 'SETUP'
         },
+        /** MenuMeasurementType.c: row1 Headroom, row2 Product; enum 0 = headroom, 1 = product. */
         'SETUP_MEASUREMENT_TYPE': { type: 'select', items: ['Headroom', 'Product'], checked: function() { return measurementType === 'Product' ? [1] : [0]; }, next: 'SETUP' },
         'SETUP_MEASUREMENT_FORMAT': {
             type: 'select',
@@ -2349,12 +2441,55 @@
         'SETUP_4_20MA_ERROR': {
             type: 'select',
             items: function setup420ErrorItems() {
-                return ['3.5 mA', '22 mA'];
+                return isC50ExpansionMode() ? ['2 mA', '22 mA'] : ['3.5 mA', '22 mA'];
             },
             checked: function () {
                 return [fourTwentyMaErrorIndex];
             },
             next: 'SETUP'
+        },
+        /** MenuC50Setup.c — scan NUM_C50_SUPPORTED consoles; Enabled/Rescan vs Disabled. */
+        'SETUP_C50_SETUP': {
+            type: 'select',
+            items: function () {
+                return c50SetupEnabled ? ['Enabled/Rescan', 'Disabled'] : ['Enabled', 'Disabled'];
+            },
+            checked: function () {
+                return [c50SetupEnabled ? 0 : 1];
+            },
+            next: 'SETUP'
+        },
+        'SETUP_C50_NO_SENSORS': {
+            type: 'info',
+            items: ['C-50 SETUP', 'No sensors enabled.', 'Use Add/Remove under Setup.', '']
+        },
+        'SETUP_C50_SCANNING': {
+            type: 'info',
+            items: function () {
+                return [
+                    'C-50 SETUP',
+                    'Scanning ' + Math.min(c50ScanStep, C50_SIM_NUM_CONSOLES) + ' of ' + C50_SIM_NUM_CONSOLES + '...',
+                    'Found ' + c50ScanFound + '.'
+                ];
+            }
+        },
+        'SETUP_C50_NOT_FOUND': {
+            type: 'info',
+            items: ['C-50 SETUP', 'No C-50 consoles found.', 'Check wiring and power.', '']
+        },
+        /** MenuExpanIoAssignment.c — Unassigned + "console : slot : port" rows. */
+        'SETUP_EXPAN_IO_ASSIGNMENT': {
+            type: 'select',
+            items: function () {
+                return ['Unassigned'].concat(c50SimPorts);
+            },
+            checked: function () {
+                const ports = ['Unassigned'].concat(c50SimPorts);
+                const cur = expanIoAssignSensor ? expanIoBySensor[expanIoAssignSensor] : null;
+                const i = cur ? ports.indexOf(cur) : 0;
+                return [i >= 0 ? i : 0];
+            },
+            next: 'SETUP_IO_ASSIGNMENT'
         },
         'SETUP_PRODUCT_DENSITY': { type: 'input', label: 'PRODUCT DENSITY', unit: 'in lb/cu ft:', value: '038.00', next: 'SETUP' }, // Back to Setup after input
         'SETUP_VESSEL_SETUP': { type: 'nav', items: function() { 
@@ -2444,7 +2579,9 @@
             'Unit of Measure': 'SETUP_UNIT_OF_MEASURE',
             'Weight Calculations': 'SETUP_WEIGHT_CALCULATIONS',
             'Vessel Setup': 'SETUP_VESSEL_SETUP',
-            'C-50 Setup': null,
+            'C-50 Setup': function setupC50SetupNext() {
+                return enabledSensors.length === 0 ? 'SETUP_C50_NO_SENSORS' : 'SETUP_C50_SETUP';
+            },
             'I/O Assignment': 'SETUP_IO_ASSIGNMENT',
             '4-20mA Output': 'SETUP_4_20MA_OUTPUT',
             '4-20mA Error': 'SETUP_4_20MA_ERROR',
@@ -2659,7 +2796,7 @@
             case 'Pound': val = w; suffix = 'lb'; break;
             case 'Ton': val = w / LB_PER_SHORT_TON; suffix = 'ton'; break;
             case 'Kilogram': val = w / LB_PER_KG; suffix = 'kg'; break;
-            case 'Metric Ton': val = w / LB_PER_METRIC_TON; suffix = 'MT'; break;
+            case 'Metric Ton': val = w / LB_PER_METRIC_TON; suffix = 't'; break;
             default: val = w; suffix = 'lb';
         }
         const num = val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -3150,7 +3287,7 @@
     // Function to simulate checking if a sensor address exists
     // In real implementation, this would check actual hardware
     function checkSensorAddress(sensorNumber) {
-        // Demo: always find 3 sensors (001, 004, 009) whether scanning 120 or 247 addresses
+        // Demo: always find 3 sensors (001, 004, 009) over NUM_SENSORS_SUPPORTED scan
         if (sensorNumber === 1 || sensorNumber === 4 || sensorNumber === 9) return true;
         return false;
     }
@@ -3320,6 +3457,12 @@
             }
             if (currentState === 'SETUP_4_20MA_ERROR') {
                 title = '4-20mA ERROR';
+            }
+            if (currentState === 'SETUP_C50_SETUP') {
+                title = 'C-50 SETUP';
+            }
+            if (currentState === 'SETUP_EXPAN_IO_ASSIGNMENT') {
+                title = 'EXPANSION I/O';
             }
             if (currentState === 'SETUP_4_20MA_OUTPUT') {
                 title = '4-20mA OUTPUT';
@@ -3555,7 +3698,7 @@
         { state: 'SETUP', title: 'Move to Auto Add/Remove', message: 'Press the down arrow to highlight the next option.', action: 'down', targetIndex: 1 },
         { state: 'SETUP', title: 'Move to Auto Add/Remove', message: 'Press the down arrow again to highlight "Auto Add/Remove".', action: 'down', targetIndex: 2 },
         { state: 'SETUP', title: 'Auto Add/Remove', message: 'Press ✓ to start the scan.', action: 'select', targetIndex: 2 },
-        // Require scan to have finished (sensor > 120), not just !scanning — before startAutoAddRemoveScanning(),
+        // Require scan to have finished (past NUM_SENSORS_SUPPORTED), not just !scanning — before startAutoAddRemoveScanning(),
         // scanning is still false for one render; the extra maybeAutoAdvanceTutorial() after pending would skip
         // this step early and allow back while the scan is running.
         { state: 'SETUP_AUTO_ADD_REMOVE', title: 'Scan for Sensors', message: 'Wait for the scan to finish. When it says "Finished," we will continue.', action: 'wait', target: '#screen', advanceWhen: () => currentState === 'SETUP_AUTO_ADD_REMOVE' && !autoAddRemoveScanning && autoAddRemoveCurrentSensor > getAutoAddRemoveScanLimit() },
@@ -4328,6 +4471,8 @@
         vesselConfigEditScope = 'all';
         weightCalculationsEnabled = false;
 
+        disableC50Expansion();
+
         menuData['SETUP_INTERVAL_TIMER_TIME'].value = '04:00';
         menuData['SETUP_PRODUCT_DENSITY'].value = '038.00';
         menuData['SETUP_SMARTBOB_MAX_DROP_INPUT'].value = '02.50';
@@ -4822,6 +4967,19 @@
                                 return;
                             }
                             ioAssignmentSelectedSensor = items[selectedIndex];
+                            if (isC50ExpansionMode()) {
+                                expanIoAssignSensor = ioAssignmentSelectedSensor;
+                                stateIndexMap['SETUP_IO_ASSIGNMENT'] = selectedIndex;
+                                history.push('SETUP_IO_ASSIGNMENT');
+                                currentState = 'SETUP_EXPAN_IO_ASSIGNMENT';
+                                const ports = ['Unassigned'].concat(c50SimPorts);
+                                const cur = expanIoBySensor[expanIoAssignSensor];
+                                selectedIndex = cur ? ports.indexOf(cur) : 0;
+                                if (selectedIndex < 0) selectedIndex = 0;
+                                renderScreen();
+                                updateTutorialUI();
+                                return;
+                            }
                         } else {
                             // For other toggle menus, handle checked as array
                             if (typeof menu.checked === 'function') {
@@ -4848,7 +5006,19 @@
                             menu.checked = selectedIndex;
                         }
                         let selectedValue = items[selectedIndex];
-                        
+
+                        if (currentState === 'SETUP_C50_SETUP') {
+                            if (selectedValue === 'Enabled' || selectedValue === 'Enabled/Rescan') {
+                                startC50Scan();
+                                renderScreen();
+                                updateTutorialUI();
+                                return;
+                            }
+                            if (selectedValue === 'Disabled') {
+                                disableC50Expansion();
+                            }
+                        }
+
                         // Handle access code disable (On/Set navigates to input screen)
                         if (currentState === 'SETUP_ACCESS_CODE') {
                             if (selectedValue === 'Off') {
@@ -4879,6 +5049,14 @@
                         }
                         if (currentState === 'SETUP_4_20MA_ERROR') {
                             fourTwentyMaErrorIndex = selectedIndex;
+                        }
+                        if (currentState === 'SETUP_EXPAN_IO_ASSIGNMENT') {
+                            const v = items[selectedIndex];
+                            if (v === 'Unassigned') {
+                                delete expanIoBySensor[expanIoAssignSensor];
+                            } else {
+                                expanIoBySensor[expanIoAssignSensor] = v;
+                            }
                         }
                         if (currentState === 'SETUP_UNIT_OF_MEASURE') {
                             unitOfMeasureIsMetric = (selectedValue === 'Metric (kg, m)');
@@ -4916,6 +5094,20 @@
                         }
                         
                         if (nextState) {
+                            if (nextState === 'SETUP_IO_ASSIGNMENT' && currentState === 'SETUP_EXPAN_IO_ASSIGNMENT') {
+                                stateIndexMap['SETUP_EXPAN_IO_ASSIGNMENT'] = selectedIndex;
+                                currentState = 'SETUP_IO_ASSIGNMENT';
+                                const mIo = menuData['SETUP_IO_ASSIGNMENT'];
+                                const arrIo = typeof mIo.items === 'function' ? mIo.items() : mIo.items;
+                                const savedIo = stateIndexMap['SETUP_IO_ASSIGNMENT'];
+                                selectedIndex = savedIo != null ? savedIo : 0;
+                                if (ioAssignmentSelectedSensor && arrIo.includes(ioAssignmentSelectedSensor)) {
+                                    selectedIndex = arrIo.indexOf(ioAssignmentSelectedSensor);
+                                }
+                                renderScreen();
+                                updateTutorialUI();
+                                return;
+                            }
                             if (nextState === 'SETUP_VESSEL_SETUP' && vesselConfigStates.includes(currentState)) {
                                 finalizeVesselConfigSessionToVesselSetup({ completedSetAll: vesselConfigEditScope === 'all' });
                             }
@@ -5356,6 +5548,10 @@
                     // Go back to Setup
                     currentState = 'SETUP';
                     selectedIndex = menuData['SETUP'].items.indexOf('Auto Add/Remove');
+                } else if (currentState === 'SETUP_C50_SCANNING') {
+                    stopC50Scan();
+                    currentState = 'SETUP_C50_SETUP';
+                    selectedIndex = stateIndexMap['SETUP_C50_SETUP'] != null ? stateIndexMap['SETUP_C50_SETUP'] : 0;
                 } else {
                     // Save current state's selectedIndex before going back
                     stateIndexMap[currentState] = selectedIndex;
@@ -5409,7 +5605,10 @@
                 else if (currentState === 'SETUP_AUTO_ADD_REMOVE') {
                     // Do nothing - only back button works
                     return;
-                } 
+                }
+                else if (currentState === 'SETUP_C50_SCANNING') {
+                    return;
+                }
                 // Handle measurement trigger on detail screens
                 else if (menu.type === 'detail') {
                     // Trigger measurement for the current sensor
